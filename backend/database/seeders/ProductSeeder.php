@@ -1,0 +1,258 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ProductSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('products')->truncate();
+        $categories = DB::table('categories')->pluck('id', 'name');
+        $products = [
+            // 經典系列
+            [
+                'name' => '黃金經典豬肉鬆',
+                'category_id' => $categories['經典系列'],
+                'price_large' => 340,
+                'price_small' => 170,
+                'unit' => '包',
+                'description' => '經典風味豬肉鬆，口感香Q，適合全家共享。',
+                'image' => '/images/products/golden-classic-pork-jerky.jpg',
+            ],
+            [
+                'name' => '海苔芝麻豬肉鬆',
+                'category_id' => $categories['經典系列'],
+                'price_large' => 340,
+                'price_small' => 170,
+                'unit' => '包',
+                'description' => '嚴選豬肉鬆搭配香脆海苔與芝麻，鹹香酥脆、口感層次豐富，是經典不敗的美味首選。',
+                'image' => '/images/products/seaweed-classic-pork-jerky.jpg',
+            ],
+            [
+                'name' => '豬肉脯',
+                'category_id' => $categories['經典系列'],
+                'price_large' => 350,
+                'price_small' => 175,
+                'unit' => '包',
+                'description' => '傳統豬肉脯，香氣四溢，入口即化。',
+                'image' => '/images/products/pork-floss.jpg',
+            ],
+            [
+                'name' => '五香豬肉條',
+                'category_id' => $categories['經典系列'],
+                'price_large' => 440,
+                'price_small' => 220,
+                'unit' => '包',
+                'description' => '五香調味，鹹香適中，越吃越涮嘴。',
+                'image' => '/images/products/five-spice-pork-jerky.jpg',
+            ],
+            [
+                'name' => '五香豬肉絲',
+                'category_id' => $categories['經典系列'],
+                'price_large' => 440,
+                'price_small' => 220,
+                'unit' => '包',
+                'description' => '精選豬後腿肉，搭配五香秘製配方，鹹香甘甜、越嚼越香，每一口都喚醒兒時記憶。',
+                'image' => '/images/products/five-spice-pork-jerky-dry.jpg',
+            ],
+            // 肉乾系列
+            [
+                'name' => '蜜汁原味豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 420,
+                'price_small' => 210,
+                'unit' => '包',
+                'description' => '特製蜜汁醃製，甜鹹適中，肉質鮮嫩有嚼勁。',
+                'image' => '/images/products/honey-jerky.jpg',
+            ],
+            [
+                'name' => '黑胡椒豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 420,
+                'price_small' => 210,
+                'unit' => '包',
+                'description' => '黑胡椒香氣濃郁，微辣開胃，適合下酒。',
+                'image' => '/images/products/black-pepper-jerky.jpg',
+            ],
+            [
+                'name' => '泰式檸檬豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 520,
+                'price_small' => 260,
+                'unit' => '包',
+                'description' => '泰式檸檬風味，酸甜開胃，清爽不膩。',
+                'image' => '/images/products/thai-lemon-jerky.jpg',
+            ],
+            [
+                'name' => '杏仁厚片豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 500,
+                'price_small' => 250,
+                'unit' => '包',
+                'description' => '厚切豬肉乾搭配杏仁片，口感豐富。',
+                'image' => '/images/products/almond-thick-jerky.jpg',
+            ],
+            [
+                'name' => '杏仁脆片豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 600,
+                'price_small' => 300,
+                'unit' => '包',
+                'description' => '酥脆杏仁片與豬肉乾完美結合，香脆可口。',
+                'image' => '/images/products/almond-crispy-jerky.jpg',
+            ],
+            [
+                'name' => '原味薄片豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 600,
+                'price_small' => 300,
+                'unit' => '包',
+                'description' => '薄片設計，原味呈現，入口即化。',
+                'image' => '/images/products/original-thin-jerky.jpg',
+            ],
+            [
+                'name' => '黑胡椒薄片豬肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 660,
+                'price_small' => 330,
+                'unit' => '包',
+                'description' => '黑胡椒薄片，香辣夠味，越吃越涮嘴。',
+                'image' => '/images/products/black-pepper-thin-jerky.jpg',
+            ],
+            [
+                'name' => '黑胡椒牛肉乾',
+                'category_id' => $categories['肉乾系列'],
+                'price_large' => 660,
+                'price_small' => 330,
+                'unit' => '包',
+                'description' => '嚴選牛肉，黑胡椒調味，香氣十足。',
+                'image' => '/images/products/black-pepper-beef-jerky.jpg',
+            ],
+            // 海鮮系列
+            [
+                'name' => '旗魚鬆',
+                'category_id' => $categories['海鮮系列'],
+                'price_large' => 380,
+                'price_small' => 180,
+                'unit' => '包',
+                'description' => '旗魚鬆，細緻綿密，入口即化。',
+                'image' => '/images/products/sailfish-floss.jpg',
+            ],
+            [
+                'name' => '旗魚脯',
+                'category_id' => $categories['海鮮系列'],
+                'price_large' => 380,
+                'price_small' => 180,
+                'unit' => '包',
+                'description' => '旗魚脯，鮮美可口，營養豐富。',
+                'image' => '/images/products/sailfish-jerky.jpg',
+            ],
+            [
+                'name' => '原味魷魚絲',
+                'category_id' => $categories['海鮮系列'],
+                'price_large' => 660,
+                'price_small' => 330,
+                'unit' => '包',
+                'description' => '原味魷魚絲，Q彈有嚼勁，海味十足。',
+                'image' => '/images/products/original-squid-strips.jpg',
+            ],
+            [
+                'name' => '碳烤魷魚絲',
+                'category_id' => $categories['海鮮系列'],
+                'price_large' => 660,
+                'price_small' => 330,
+                'unit' => '包',
+                'description' => '碳烤風味，香氣撲鼻，越嚼越香。',
+                'image' => '/images/products/grilled-squid-strips.jpg',
+            ],
+            [
+                'name' => '魷魚片',
+                'category_id' => $categories['海鮮系列'],
+                'price_large' => 660,
+                'price_small' => 330,
+                'unit' => '包',
+                'description' => '魷魚片，厚實彈牙，鮮味十足。',
+                'image' => '/images/products/squid-slices.jpg',
+            ],
+            // 休閒系列
+            [
+                'name' => '雲林黑金剛花生',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '嚴選雲林黑金剛花生，顆粒飽滿，香脆可口。',
+                'image' => '/images/products/peanut-black.jpg',
+            ],
+            [
+                'name' => '雲林九號花生',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '雲林九號花生，香氣濃郁，口感細膩。',
+                'image' => '/images/products/peanut-no9.jpg',
+            ],
+            [
+                'name' => '焦糖葵瓜子',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '焦糖包裹葵瓜子，甜而不膩，越吃越香。',
+                'image' => '/images/products/caramel-sunflower.jpg',
+            ],
+            [
+                'name' => '桂圓紅棗葵瓜子',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '桂圓紅棗風味，葵瓜子新體驗。',
+                'image' => '/images/products/longan-jujube-sunflower.jpg',
+            ],
+            [
+                'name' => '原味牛軋糖',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '經典原味牛軋糖，香濃不黏牙。',
+                'image' => '/images/products/nougat-original.jpg',
+            ],
+            [
+                'name' => '咖啡牛軋糖',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '咖啡風味牛軋糖，香氣濃郁。',
+                'image' => '/images/products/nougat-coffee.jpg',
+            ],
+            [
+                'name' => '蔓越莓牛軋糖',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '蔓越莓果乾搭配牛軋糖，酸甜好滋味。',
+                'image' => '/images/products/nougat-cranberry.jpg',
+            ],
+            [
+                'name' => '抹茶牛軋糖',
+                'category_id' => $categories['休閒系列'],
+                'price_large' => null,
+                'price_small' => null,
+                'unit' => '包',
+                'description' => '抹茶風味牛軋糖，清新回甘。',
+                'image' => '/images/products/nougat-matcha.jpg',
+            ],
+        ];
+        foreach ($products as $product) {
+            DB::table('products')->insert($product);
+        }
+    }
+} 

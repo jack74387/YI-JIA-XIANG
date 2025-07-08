@@ -1,0 +1,6 @@
+{
+    "require": {
+        "spatie/laravel-permission": "^6.20",
+        "intervention/image": "^3.11"
+    }
+}
