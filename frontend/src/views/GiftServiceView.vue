@@ -12,7 +12,14 @@
       </label>
       <textarea v-if="card" v-model="cardMessage" placeholder="請輸入祝福內容（限50字）" maxlength="50"></textarea>
     </div>
-    <button class="submit-btn" @click="submit">送出加值服務</button>
+    <button class="submit-btn flex items-center justify-center" @click="submit">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 3.13V7M8 3.13V7"/><path d="M3 7l9 6 9-6"/></svg>
+      送出加值服務
+    </button>
+    <button class="btn-sub mt-2 flex items-center mx-auto" type="button">
+      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 8h16"/><path d="M8 4v4"/></svg>
+      查看禮盒包裝範例
+    </button>
     <div v-if="submitted" class="success-msg">已成功加入加值服務！</div>
   </div>
 </template>
@@ -82,6 +89,24 @@ textarea {
 textarea:focus {
   border: 1.5px solid #b8860b;
 }
+.btn-sub {
+  background: #fff;
+  color: #a67c00;
+  border: 1.5px solid #e0c68a;
+  border-radius: 2em;
+  padding: 0.6em 1.6em;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #e0c68a22;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+}
+.btn-sub:hover {
+  background: #ffe9b2;
+  color: #b8860b;
+  transform: scale(1.04);
+}
 .submit-btn {
   width: 100%;
   margin-top: 1.2rem;
@@ -95,6 +120,9 @@ textarea:focus {
   box-shadow: 0 2px 8px #e0c68a22;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .submit-btn:hover {
   background: linear-gradient(90deg, #ffe9b2 0%, #f7d08a 100%);

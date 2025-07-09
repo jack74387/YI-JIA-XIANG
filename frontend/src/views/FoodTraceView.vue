@@ -3,8 +3,15 @@
     <h1>食品履歷查詢</h1>
     <div class="search-bar">
       <input v-model="query" placeholder="輸入商品名稱或編號" />
-      <button @click="search">查詢</button>
+      <button @click="search" class="flex items-center">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        查詢
+      </button>
     </div>
+    <button class="btn-main flex items-center mt-3 mx-auto">
+      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8z"/></svg>
+      掃描 QR Code 查詢
+    </button>
     <div v-if="result" class="trace-result">
       <h2>{{ result.name }}</h2>
       <ul>
@@ -95,6 +102,24 @@ function search() {
   color: #fff;
   transform: scale(1.04);
   box-shadow: 0 4px 16px #e0c68a44;
+}
+.btn-main {
+  background: #b8860b;
+  color: #fff;
+  border-radius: 2em;
+  padding: 0.6em 1.6em;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #e0c68a22;
+  border: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+}
+.btn-main:hover {
+  background: #a67c00;
+  color: #fffbe8;
+  transform: scale(1.04);
 }
 .trace-result {
   background: #f9f6f1;

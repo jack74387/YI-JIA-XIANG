@@ -181,8 +181,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '雲林黑金剛花生',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '嚴選雲林黑金剛花生，顆粒飽滿，香脆可口。',
                 'image' => '/images/products/peanut-black.jpg',
@@ -190,8 +190,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '雲林九號花生',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '雲林九號花生，香氣濃郁，口感細膩。',
                 'image' => '/images/products/peanut-no9.jpg',
@@ -199,8 +199,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '焦糖葵瓜子',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 200,
+                'price_small' => 100,
                 'unit' => '包',
                 'description' => '焦糖包裹葵瓜子，甜而不膩，越吃越香。',
                 'image' => '/images/products/caramel-sunflower.jpg',
@@ -208,8 +208,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '桂圓紅棗葵瓜子',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 200,
+                'price_small' => 100,
                 'unit' => '包',
                 'description' => '桂圓紅棗風味，葵瓜子新體驗。',
                 'image' => '/images/products/longan-jujube-sunflower.jpg',
@@ -217,8 +217,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '原味牛軋糖',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '經典原味牛軋糖，香濃不黏牙。',
                 'image' => '/images/products/nougat-original.jpg',
@@ -226,8 +226,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '咖啡牛軋糖',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '咖啡風味牛軋糖，香氣濃郁。',
                 'image' => '/images/products/nougat-coffee.jpg',
@@ -235,8 +235,8 @@ class ProductSeeder extends Seeder
             [
                 'name' => '蔓越莓牛軋糖',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '蔓越莓果乾搭配牛軋糖，酸甜好滋味。',
                 'image' => '/images/products/nougat-cranberry.jpg',
@@ -244,14 +244,47 @@ class ProductSeeder extends Seeder
             [
                 'name' => '抹茶牛軋糖',
                 'category_id' => $categories['休閒系列'],
-                'price_large' => null,
-                'price_small' => null,
+                'price_large' => 0,
+                'price_small' => 0,
                 'unit' => '包',
                 'description' => '抹茶風味牛軋糖，清新回甘。',
                 'image' => '/images/products/nougat-matcha.jpg',
             ],
         ];
-        foreach ($products as $product) {
+        foreach ($products as $i => $product) {
+            // 自動填入不同 hot/views
+            $product['hot'] = rand(10, 100);
+            $product['views'] = rand(100, 1000);
+            // 若 price_large/price_small 為 null，自動給一個合理值
+            if (!isset($product['price_large']) || $product['price_large'] === null) {
+                $product['price_large'] = rand(200, 800);
+            }
+            if (!isset($product['price_small']) || $product['price_small'] === null) {
+                $product['price_small'] = rand(100, 400);
+            }
+            // 補齊商品詳細頁所需欄位
+            $product['subtitle'] = $product['subtitle'] ?? '嚴選食材，職人手作';
+            $product['rating'] = $product['rating'] ?? round(rand(40, 50) / 10, 1); // 4.0~5.0
+            $product['rating_count'] = $product['rating_count'] ?? rand(10, 200);
+            $product['sold_count'] = $product['sold_count'] ?? rand(50, 500);
+            $product['stock'] = $product['stock'] ?? rand(10, 200);
+            $mainImage = $product['image'];
+            $product['images'] = json_encode([
+                $mainImage,
+                '/images/products/sample1.jpg',
+                '/images/products/sample2.jpg',
+            ]);
+            $product['spec'] = $product['spec'] ?? '成分：豬肉、糖、鹽、醬油、香料。\n保存期限：180天。\n產地：台灣。';
+            $product['tags'] = json_encode(['人氣', '熱銷', '經典']);
+            $product['recommend_ids'] = json_encode([rand(1, 10), rand(11, 20)]);
+            $product['delivery'] = json_encode(['宅配', '超商取貨', '門市自取']);
+            $product['payment'] = json_encode(['信用卡', '貨到付款', 'LINE Pay']);
+            $product['origin_price'] = $product['origin_price'] ?? ($product['price_large'] + 30);
+            $product['weight'] = $product['weight'] ?? '250g';
+            $product['share_links'] = json_encode([
+                'facebook' => 'https://facebook.com/sharer/sharer.php?u=https://yourshop.com/product/'.$i,
+                'line' => 'https://social-plugins.line.me/lineit/share?url=https://yourshop.com/product/'.$i,
+            ]);
             DB::table('products')->insert($product);
         }
     }

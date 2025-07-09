@@ -1,73 +1,36 @@
 <template>
-  <div class="product-detail" v-if="product">
-    <img :src="product.primary_image?.image_path || `https://placehold.co/320x320?text=${product.name}`" :alt="product.name" />
-    <div class="info">
-      <h1>{{ product.name }}</h1>
-      <p>{{ product.short_description || product.description }}</p>
-      <div class="specs">{{ product.specs }}</div>
-      <div class="price">NT$ {{ product.final_price }}</div>
-      <button class="add-cart">加入購物車</button>
+  <div class="product-detail flex flex-col md:flex-row gap-8">
+    <!-- 左側圖片區 -->
+    <ProductImageGallery :images="product.images || []" :weight="product.weight || ''" />
+    <!-- 右側資訊區 -->
+    <div class="flex-1">
+      <ProductInfo :product="product || {}" @add-to-cart="addToCart" @buy-now="buyNow" />
     </div>
   </div>
+  <ProductTabs :product="product || {}" />
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useProductsStore } from '../stores/products'
+import axios from 'axios'
+import ProductImageGallery from '../components/ProductImageGallery.vue'
+import ProductInfo from '../components/ProductInfo.vue'
+import ProductTabs from '../components/ProductTabs.vue'
 
+const product = ref<any>({})
 const route = useRoute()
-const store = useProductsStore()
-const id = Number(route.params.id)
 
-onMounted(() => {
-  store.fetchProduct(id)
+onMounted(async () => {
+  const id = route.params.id
+  const res = await axios.get(`/api/v1/products/${id}`)
+  product.value = res.data.product
 })
 
-const product = computed(() => store.product)
+function addToCart() { /* ... */ }
+function buyNow() { /* ... */ }
 </script>
 
 <style scoped>
-.product-detail {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 900px;
-  margin: 2rem auto;
-  background: #fff8e1;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px #e0c68a44;
-  padding: 2rem;
-}
-.product-detail img {
-  width: 320px;
-  height: 320px;
-  object-fit: cover;
-  border-radius: 1rem;
-}
-.info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.price {
-  color: #b8860b;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 1rem 0;
-}
-.add-cart {
-  background: #b8860b;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.75rem 2rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.add-cart:hover {
-  background: #a0761a;
-}
+.product-detail { margin: 2rem auto; max-width: 1100px; }
 </style>

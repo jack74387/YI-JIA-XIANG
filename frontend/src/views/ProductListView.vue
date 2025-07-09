@@ -7,26 +7,42 @@
         <div v-if="loading" class="loading">載入中...</div>
         <div v-else-if="filteredProducts.length === 0" class="empty">查無商品</div>
         <div v-else :class="['products', view]">
-          <ProductCard v-for="p in filteredProducts" :key="p.id" :product="p" @add-to-cart="addToCart" />
+          <ProductCard
+            v-for="p in filteredProducts"
+            :key="p.id"
+            :product="p"
+            @add-to-cart="openAddToCart(p)"
+            @click-img="goToDetail(p.id)"
+            @click-title="goToDetail(p.id)"
+          />
         </div>
       </div>
     </div>
     <SocialFloatingButtons />
+    <ProductAddToCartModal
+      :show="showAddToCart"
+      :product="selectedProduct"
+      @close="showAddToCart = false"
+      @added="onAddedToCart"
+    />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useProductsStore } from '../stores/products'
 import { useCategoriesStore } from '../stores/categories'
 import { useCartStore } from '../stores/cart'
 import CategorySidebar from '../components/CategorySidebar.vue'
 import ProductListToolbar from '../components/ProductListToolbar.vue'
 import ProductCard from '../components/ProductCard.vue'
+import ProductAddToCartModal from '../components/ProductAddToCartModal.vue'
 import SocialFloatingButtons from '../components/SocialFloatingButtons.vue'
 
 const productsStore = useProductsStore()
 const categoriesStore = useCategoriesStore()
 const cartStore = useCartStore()
+const router = useRouter()
 
 const selectedCategory = ref<number|null>(null)
 const search = ref('')
@@ -65,8 +81,27 @@ function onSort(val: string) {
 function onChangeView(val: string) {
   view.value = val
 }
+
+// 彈窗加入購物車
+const showAddToCart = ref(false)
+const selectedProduct = ref<any>(null)
+function openAddToCart(product: any) {
+  selectedProduct.value = {
+    id: product.id,
+    name: product.name,
+    price: product.price_large || product.price,
+    image: product.image
+  }
+  showAddToCart.value = true
+}
+function onAddedToCart() {
+  cartStore.fetchCart()
+}
+function goToDetail(id: number) {
+  router.push(`/product/${id}`)
+}
 function addToCart(product: any) {
-  cartStore.addToCart(product, 1)
+  openAddToCart(product)
 }
 onMounted(() => {
   productsStore.fetchProducts()

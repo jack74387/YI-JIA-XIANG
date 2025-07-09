@@ -18,7 +18,7 @@ class ProductController extends Controller
 
         // 分類過濾
         if ($category = $request->input('category_id')) {
-            $query->where('category', $category);
+            $query->where('category_id', $category);
         }
 
         // 排序
@@ -38,10 +38,12 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('category')->findOrFail($id);
+        $data = $product->toArray();
+        $data['category_name'] = $product->category ? $product->category->name : null;
         return response()->json([
             'success' => true,
-            'data' => $product
+            'product' => $data
         ]);
     }
 } 

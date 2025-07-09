@@ -1,20 +1,21 @@
 <template>
   <div class="home-hero">
     <div class="hero-bg">
-      <img class="logo" src="https://via.placeholder.com/120x120?text=LOGO" alt="品牌LOGO" />
-      <h1 class="main-title">一佳香 YI JIA XIANG</h1>
-      <p class="subtitle">來自台東的陽光風味，封存半甲子的思念。</p>
-      <div class="cta-row">
-        <router-link to="/register" class="cta-btn">立即註冊</router-link>
-        <router-link to="/login" class="cta-btn secondary">會員登入</router-link>
+      <div class="brand-header">
+        <img class="logo" src="/images/logo.jpg" alt="品牌LOGO" />
+        <div class="brand-title">
+          <span class="brand-ch">一佳香</span>
+          <span class="brand-en">YI JIA XIANG</span>
+        </div>
       </div>
+      <p class="subtitle">來自台東的陽光風味，封存半甲子的思念。</p>
     </div>
     <div class="brand-story">
       <h2>品牌故事</h2>
-      <p>一佳香，來自台東的陽光風味，封存半甲子的思念。，堅持選用台灣優質豬肉，結合古法與創新，帶給您最純粹的美味與溫度。</p>
+      <p>一佳香，來自台東的陽光風味，封存半甲子的思念。堅持選用台灣優質豬肉，結合古法與創新，帶給您最純粹的美味與溫度。</p>
     </div>
     <div class="main-visual">
-      <img src="https://via.placeholder.com/900x320?text=主視覺大圖" alt="主視覺" />
+      <img src="/images/main-visual.jpg" alt="主視覺" />
     </div>
     <div class="featured-products">
       <h2>精選商品</h2>
@@ -29,6 +30,7 @@
     </div>
   </div>
 </template>
+
 <style scoped>
 .home-hero {
   background: #f9f6f1;
@@ -39,53 +41,52 @@
   background: linear-gradient(120deg, #f9f6f1 60%, #ede3d0 100%);
   border-radius: 0 0 48px 48px;
   box-shadow: 0 4px 32px #e2d6c2;
-  padding: 48px 0 32px 0;
+  padding: 32px 0 24px 0;
   text-align: center;
+  margin-bottom: 0;
+}
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .logo {
   border-radius: 50%;
   box-shadow: 0 2px 8px #e2d6c2;
-  margin-bottom: 18px;
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  margin-bottom: 0;
 }
-.main-title {
-  font-size: 2.2em;
+.brand-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2px;
+}
+.brand-ch {
+  font-size: 2.5rem;
+  font-weight: 900;
   color: #b85c38;
-  font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: 2px;
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', '黑體-繁', sans-serif;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+.brand-en {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #b85c38;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 .subtitle {
   color: #a67c52;
-  font-size: 1.15em;
-  margin-bottom: 18px;
-}
-.cta-row {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  margin-bottom: 12px;
-}
-.cta-btn {
-  background: #b85c38;
-  color: #fff;
-  border-radius: 2em;
-  padding: 0.7em 2.2em;
-  font-size: 1.1em;
-  font-weight: 700;
-  box-shadow: 0 2px 8px #e2d6c2;
-  text-decoration: none;
-  transition: background .2s, transform .2s;
-  display: inline-block;
-}
-.cta-btn.secondary {
-  background: #ede3d0;
-  color: #b85c38;
-  border: 2px solid #b85c38;
-}
-.cta-btn:hover {
-  background: #a67c52;
-  color: #fffbe8;
-  transform: scale(1.07);
+  font-size: 1.08em;
+  margin-bottom: 16px;
 }
 .brand-story {
   max-width: 700px;
@@ -106,7 +107,7 @@
   font-size: 1.08em;
 }
 .main-visual {
-  margin: 38px auto 0 auto;
+  margin: 48px auto 0 auto;
   max-width: 900px;
   text-align: center;
 }
@@ -172,5 +173,6 @@
 @media (max-width: 900px) {
   .product-list { flex-direction: column; gap: 18px; }
   .main-visual img { max-width: 100%; }
+  .logo { width: 60px; height: 60px; }
 }
 </style> 

@@ -1,42 +1,66 @@
 <?php
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Product;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    // 取得購物車
+    public function index()
     {
-        // 假資料，實際應查詢資料庫
-        $cart = [
-            ['id' => 1, 'name' => '蜜汁原味豬肉乾', 'qty' => 2, 'price' => 340],
-            ['id' => 2, 'name' => '杏仁厚片豬肉乾', 'qty' => 1, 'price' => 250],
-        ];
-        return response()->json(['success' => true, 'cart' => $cart]);
-    }
-    public function add(Request $request)
-    {
-        $data = $request->validate([
-            'product_id' => 'required|integer',
-            'qty' => 'required|integer|min:1',
+        $user = Auth::user();
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $items = $cart->items()->with('product')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $items
         ]);
-        // 實際應寫入資料庫
-        return response()->json(['success' => true, 'message' => '已加入購物車', 'data' => $data]);
     }
-    public function update(Request $request)
+
+    // 加入購物車
+    public function store(Request $request)
     {
-        $data = $request->validate([
-            'product_id' => 'required|integer',
-            'qty' => 'required|integer|min:1',
+        $user = Auth::user();
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
         ]);
-        // 實際應更新資料庫
-        return response()->json(['success' => true, 'message' => '購物車已更新', 'data' => $data]);
+        $item = $cart->items()->where('product_id', $validated['product_id'])->first();
+        if ($item) {
+            $item->quantity += $validated['quantity'];
+            $item->save();
+        } else {
+            $item = $cart->items()->create($validated);
+        }
+        return response()->json(['success' => true, 'item' => $item->load('product')]);
     }
-    public function remove(Request $request)
+
+    // 更新購物車數量
+    public function update(Request $request, $id)
     {
-        $data = $request->validate([
-            'product_id' => 'required|integer',
+        $user = Auth::user();
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $item = $cart->items()->where('id', $id)->firstOrFail();
+        $validated = $request->validate([
+            'quantity' => 'required|integer|min:1',
         ]);
-        // 實際應刪除資料庫
-        return response()->json(['success' => true, 'message' => '已移除商品', 'data' => $data]);
+        $item->quantity = $validated['quantity'];
+        $item->save();
+        return response()->json(['success' => true, 'item' => $item->load('product')]);
+    }
+
+    // 刪除購物車項目
+    public function destroy($id)
+    {
+        $user = Auth::user();
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $item = $cart->items()->where('id', $id)->firstOrFail();
+        $item->delete();
+        return response()->json(['success' => true]);
     }
 } 

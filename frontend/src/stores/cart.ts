@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia'
-import type { Product } from './products'
 import axios from 'axios'
 
 const API_BASE = 'http://127.0.0.1:8000';
 
 export interface CartItem {
   id: number
+  product_id: number
   name: string
   price: number
   quantity: number
   image?: string
+  product?: any
 }
 
 export const useCartStore = defineStore('cart', {
@@ -18,18 +19,29 @@ export const useCartStore = defineStore('cart', {
     loading: false,
     error: null as string | null,
   }),
+  getters: {
+    itemCount: (state) => {
+      return state.items.reduce((total, item) => total + item.quantity, 0)
+    },
+    totalPrice: (state) => {
+      return state.items.reduce((total, item) => total + (item.price * item.quantity), 0)
+    }
+  },
   actions: {
     async fetchCart() {
       this.loading = true
       try {
         const res = await axios.get(`${API_BASE}/api/v1/cart`)
         if (res.data.success) {
-          this.items = res.data.cart.map((item: any) => ({
+          // 後端回傳 data: [ { id, product_id, quantity, product: {...} } ]
+          this.items = res.data.data.map((item: any) => ({
             id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.qty,
-            image: item.image || undefined
+            product_id: item.product_id,
+            name: item.product?.name || '',
+            price: item.product?.final_price || 0,
+            quantity: item.quantity,
+            image: item.product?.primary_image?.image_path,
+            product: item.product
           }))
         }
       } catch (e) {
@@ -38,40 +50,31 @@ export const useCartStore = defineStore('cart', {
         this.loading = false
       }
     },
-    async addToCart(product: any, quantity = 1) {
+    async addToCart(productId: number, quantity = 1) {
       try {
-        const res = await axios.post(`${API_BASE}/api/v1/cart/add`, {
-          product_id: product.id,
-          qty: quantity
+        await axios.post(`${API_BASE}/api/v1/cart`, {
+          product_id: productId,
+          quantity
         })
-        if (res.data.success) {
-          await this.fetchCart()
-        }
+        await this.fetchCart()
       } catch (e) {
         this.error = '加入購物車失敗'
       }
     },
-    async updateQuantity(productId: number, quantity: number) {
+    async updateQuantity(cartItemId: number, quantity: number) {
       try {
-        const res = await axios.put(`${API_BASE}/api/v1/cart/update`, {
-          product_id: productId,
-          qty: quantity
+        await axios.put(`${API_BASE}/api/v1/cart/${cartItemId}`, {
+          quantity
         })
-        if (res.data.success) {
-          await this.fetchCart()
-        }
+        await this.fetchCart()
       } catch (e) {
         this.error = '更新數量失敗'
       }
     },
-    async removeFromCart(productId: number) {
+    async removeFromCart(cartItemId: number) {
       try {
-        const res = await axios.delete(`${API_BASE}/api/v1/cart/remove`, {
-          data: { product_id: productId }
-        })
-        if (res.data.success) {
-          await this.fetchCart()
-        }
+        await axios.delete(`${API_BASE}/api/v1/cart/${cartItemId}`)
+        await this.fetchCart()
       } catch (e) {
         this.error = '移除商品失敗'
       }

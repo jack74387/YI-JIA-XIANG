@@ -10,39 +10,180 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-        return response()->json(['success' => true, 'user' => $user]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '驗證失敗',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'message' => '註冊成功',
+                'user' => $user,
+                'token' => $token
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '註冊失敗，請稍後再試'
+            ], 500);
+        }
     }
+
     public function login(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
-        if (!Auth::attempt($data)) {
-            return response()->json(['success' => false, 'message' => '帳號或密碼錯誤'], 401);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的電子郵件和密碼',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'success' => false,
+                'message' => '帳號或密碼錯誤'
+            ], 401);
+        }
+
         $user = Auth::user();
-        return response()->json(['success' => true, 'user' => $user]);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => '登入成功',
+            'user' => $user,
+            'token' => $token
+        ]);
     }
+
+    public function logout(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => '登出成功'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '登出失敗'
+            ], 500);
+        }
+    }
+
+    public function user(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'user' => $request->user()
+        ]);
+    }
+
     public function lineLogin(Request $request)
     {
-        // 假設已驗證 LINE token，這裡僅回傳成功
-        return response()->json(['success' => true, 'message' => 'LINE 登入成功']);
+        $validator = Validator::make($request->all(), [
+            'line_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的 LINE 登入憑證',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // 這裡應該實作 LINE 登入驗證邏輯
+        // 目前僅回傳成功訊息作為範例
+        return response()->json([
+            'success' => true,
+            'message' => 'LINE 登入成功'
+        ]);
     }
+
     public function forgotPassword(Request $request)
     {
-        $data = $request->validate(['email' => 'required|email']);
-        // 實際應寄送重設信件，這裡僅回傳成功
-        return response()->json(['success' => true, 'message' => '已寄送重設密碼連結']);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的電子郵件地址',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // 這裡應該實作密碼重設邏輯
+            // 目前僅回傳成功訊息作為範例
+            return response()->json([
+                'success' => true,
+                'message' => '已寄送重設密碼連結到您的電子郵件'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '發送失敗，請稍後再試'
+            ], 500);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的重設資訊',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // 這裡應該實作密碼重設邏輯
+            // 目前僅回傳成功訊息作為範例
+            return response()->json([
+                'success' => true,
+                'message' => '密碼重設成功'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '密碼重設失敗，請稍後再試'
+            ], 500);
+        }
     }
 } 

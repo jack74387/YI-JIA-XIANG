@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         DB::table('coupons')->truncate(); // 這行會清空資料表
         $this->call([
+            UserSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
             CouponSeeder::class,

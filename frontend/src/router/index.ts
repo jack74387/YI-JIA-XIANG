@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
+import ProductDetailView from '../views/ProductDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +22,12 @@ const router = createRouter({
       component: () => import('../views/ProductDetailView.vue')
     },
     {
+      path: '/product/:id',
+      name: 'ProductDetail',
+      component: ProductDetailView,
+      props: true
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue')
@@ -37,12 +45,14 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue')
+      component: () => import('../views/LoginView.vue'),
+      meta: { requiresGuest: true }
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/RegisterView.vue')
+      component: () => import('../views/RegisterView.vue'),
+      meta: { requiresGuest: true }
     },
     {
       path: '/profile',
@@ -118,7 +128,8 @@ const router = createRouter({
     {
       path: '/forgot-password',
       name: 'forgot-password',
-      component: () => import('../views/ForgotPasswordView.vue')
+      component: () => import('../views/ForgotPasswordView.vue'),
+      meta: { requiresGuest: true }
     },
     {
       path: '/order-detail/:id',
@@ -133,6 +144,30 @@ const router = createRouter({
       meta: { requiresAuth: true }
     }
   ]
+})
+
+// 路由守衛
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  // 初始化認證狀態
+  if (!authStore.isAuthenticated) {
+    authStore.initAuth()
+  }
+  
+  // 檢查是否需要認證
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next('/login')
+    return
+  }
+  
+  // 檢查是否需要訪客身份（已登入用戶不能訪問）
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    next('/')
+    return
+  }
+  
+  next()
 })
 
 export default router 
