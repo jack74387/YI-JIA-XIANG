@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useAuthStore } from './auth'
 
 const API_BASE = 'http://127.0.0.1:8000';
 
@@ -11,6 +12,7 @@ export interface CartItem {
   quantity: number
   image?: string
   product?: any
+  spec?: string
 }
 
 export const useCartStore = defineStore('cart', {
@@ -33,28 +35,32 @@ export const useCartStore = defineStore('cart', {
       try {
         const res = await axios.get(`${API_BASE}/api/v1/cart`)
         if (res.data.success) {
-          // 後端回傳 data: [ { id, product_id, quantity, product: {...} } ]
+          // 後端回傳 data: [ { id, product_id, quantity, product: {...}, spec, price } ]
           this.items = res.data.data.map((item: any) => ({
             id: item.id,
             product_id: item.product_id,
-            name: item.product?.name || '',
-            price: item.product?.final_price || 0,
+            name: item.name || item.product?.name || '',
+            price: item.price || item.product?.final_price || 0,
             quantity: item.quantity,
-            image: item.product?.primary_image?.image_path,
+            spec: item.spec,
+            image: item.image || item.product?.primary_image?.image_path,
             product: item.product
           }))
         }
       } catch (e) {
         this.error = '無法取得購物車資料'
+        // 如果無法取得購物車資料，清空本地購物車
+        this.items = []
       } finally {
         this.loading = false
       }
     },
-    async addToCart(productId: number, quantity = 1) {
+    async addToCart(productId: number, quantity = 1, spec?: string) {
       try {
         await axios.post(`${API_BASE}/api/v1/cart`, {
           product_id: productId,
-          quantity
+          quantity,
+          spec
         })
         await this.fetchCart()
       } catch (e) {
@@ -82,5 +88,17 @@ export const useCartStore = defineStore('cart', {
     clearCart() {
       this.items = []
     },
+    // 監聽認證狀態變化
+    handleAuthChange() {
+      const authStore = useAuthStore()
+      
+      if (authStore.isAuthenticated) {
+        // 用戶登入，載入購物車
+        this.fetchCart()
+      } else {
+        // 用戶登出，清空購物車
+        this.clearCart()
+      }
+    }
   },
 }) 

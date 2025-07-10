@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAdminAuthStore } from '@/stores/adminAuth'
 import HomeView from '../views/HomeView.vue'
 import ProductDetailView from '../views/ProductDetailView.vue'
 
@@ -132,9 +133,9 @@ const router = createRouter({
       meta: { requiresGuest: true }
     },
     {
-      path: '/order-detail/:id',
+      path: '/orders/:id',
       name: 'order-detail',
-      component: () => import('../views/OrderDetailView.vue'),
+      component: () => import('../views/OrderConfirmationView.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -142,31 +143,67 @@ const router = createRouter({
       name: 'member-center',
       component: () => import('../views/MemberCenterView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/login',
+      name: 'admin-login',
+      component: () => import('../admin/AdminLogin.vue')
+    },
+    {
+      path: '/admin',
+      name: 'admin-dashboard',
+      component: () => import('../admin/AdminDashboard.vue')
+    },
+    {
+      path: '/admin/products',
+      name: 'admin-products',
+      component: () => import('../admin/AdminProducts.vue')
+    },
+    {
+      path: '/admin/orders',
+      name: 'admin-orders',
+      component: () => import('../admin/AdminOrders.vue')
+    },
+    {
+      path: '/admin/members',
+      name: 'admin-members',
+      component: () => import('../admin/AdminMembers.vue')
+    },
+    {
+      path: '/admin/coupons',
+      name: 'admin-coupons',
+      component: () => import('../admin/AdminCoupons.vue')
     }
   ]
 })
 
 // 路由守衛
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-  
-  // 初始化認證狀態
-  if (!authStore.isAuthenticated) {
-    authStore.initAuth()
+  if (to.path.startsWith('/admin')) {
+    const adminAuthStore = useAdminAuthStore()
+    if (!adminAuthStore.isAuthenticated) {
+      await adminAuthStore.initAuth()
+    }
+    if (!adminAuthStore.isAuthenticated && to.path !== '/admin/login') {
+      next('/admin/login')
+      return
+    }
+    next()
+    return
   }
-  
-  // 檢查是否需要認證
+  // 前台驗證
+  const authStore = useAuthStore()
+  if (!authStore.isAuthenticated) {
+    await authStore.initAuth()
+  }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
     return
   }
-  
-  // 檢查是否需要訪客身份（已登入用戶不能訪問）
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
     next('/')
     return
   }
-  
   next()
 })
 

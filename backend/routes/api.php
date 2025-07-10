@@ -8,6 +8,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\MemberController;
 
 // 測試路由
 Route::get('/test', function () {
@@ -26,6 +27,7 @@ Route::prefix('v1')->group(function () {
     // 認證相關路由
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/admin-login', [AuthController::class, 'adminLogin']);
     Route::post('/auth/line-login', [AuthController::class, 'lineLogin']);
     Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
@@ -44,12 +46,25 @@ Route::prefix('v1')->group(function () {
 
         // 訂單相關
         Route::post('/orders', [OrderController::class, 'store']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::get('/user/orders', [OrderController::class, 'userOrders']);
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+        Route::middleware(['auth:sanctum', 'admin'])->get('/orders', [OrderController::class, 'adminIndex']);
+
+        // 會員中心相關
+        Route::prefix('member')->group(function () {
+            Route::get('/profile', [MemberController::class, 'profile']);
+            Route::put('/profile', [MemberController::class, 'updateProfile']);
+            Route::put('/password', [MemberController::class, 'changePassword']);
+            Route::post('/avatar', [MemberController::class, 'uploadAvatar']);
+            Route::get('/statistics', [MemberController::class, 'statistics']);
+            Route::get('/orders', [MemberController::class, 'orders']);
+            Route::get('/points/history', [MemberController::class, 'pointHistory']);
+            Route::delete('/account', [MemberController::class, 'deleteAccount']);
+        });
     
         // 優惠券相關
-    Route::get('/coupons', [CouponController::class, 'index']);
+        Route::get('/coupons', [CouponController::class, 'index']);
         Route::post('/coupons/redeem', [CouponController::class, 'redeem']);
     
         // 點數相關

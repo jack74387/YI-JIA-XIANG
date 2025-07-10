@@ -186,4 +186,26 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function adminLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = \App\Models\User::where('email', $credentials['email'])->where('is_admin', true)->first();
+
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['success' => false, 'message' => '帳號或密碼錯誤'], 401);
+        }
+
+        $token = $user->createToken('admin-token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
 } 

@@ -38,6 +38,7 @@ const props = defineProps<{
     name: string
     price: number
     image?: string
+    spec?: string // Added spec to product type
   }
 }>()
 const emit = defineEmits(['close', 'added'])
@@ -59,7 +60,7 @@ function decrease() {
 
 async function addToCart() {
   loading.value = true
-  await cartStore.addToCart(props.product.id, quantity.value)
+  await cartStore.addToCart(props.product.id, quantity.value, props.product.spec)
   loading.value = false
   emit('added')
   emit('close')

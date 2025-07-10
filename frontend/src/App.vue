@@ -1,12 +1,12 @@
 <template>
   <div id="app">
-    <Navigation />
+    <Navigation v-if="!isAdminRoute" />
 
     <main class="min-h-screen">
       <router-view />
     </main>
 
-    <footer class="bg-gray-800 text-white py-8">
+    <footer v-if="!isAdminRoute" class="bg-gray-800 text-white py-8">
       <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -51,11 +51,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navigation from '@/components/Navigation.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const route = useRoute()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
 onMounted(() => {
   // 初始化認證狀態

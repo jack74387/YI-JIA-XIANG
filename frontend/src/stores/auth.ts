@@ -9,6 +9,19 @@ interface User {
   email_verified_at?: string
   created_at: string
   updated_at: string
+  phone?: string
+  address?: string
+  birthday?: string
+  gender?: string
+  points?: number
+  member_level?: string
+  avatar?: string
+  avatar_url?: string
+  email_notifications?: boolean
+  last_login_at?: string
+  line_user_id?: string
+  facebook_user_id?: string
+  google_user_id?: string
 }
 
 interface LoginForm {
@@ -37,7 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // 初始化認證狀態
-  const initAuth = () => {
+  const initAuth = async () => {
     const savedToken = localStorage.getItem('auth_token')
     const savedUser = localStorage.getItem('auth_user')
     
@@ -46,6 +59,11 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = JSON.parse(savedUser)
       // 設定 axios 預設 headers
       axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
+      
+      // 通知購物車 store 用戶已登入
+      const { useCartStore } = await import('./cart')
+      const cartStore = useCartStore()
+      cartStore.handleAuthChange()
     }
   }
 
@@ -69,6 +87,11 @@ export const useAuthStore = defineStore('auth', () => {
         
         // 設定 axios 預設 headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+        
+        // 通知購物車 store 用戶已登入
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.handleAuthChange()
         
         return { success: true }
       } else {
@@ -108,6 +131,11 @@ export const useAuthStore = defineStore('auth', () => {
         // 設定 axios 預設 headers
         axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
         
+        // 通知購物車 store 用戶已登入
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.handleAuthChange()
+        
         return { success: true }
       } else {
         error.value = response.data.message || '註冊失敗'
@@ -142,6 +170,11 @@ export const useAuthStore = defineStore('auth', () => {
       // 即使後端登出失敗，也要清除前端狀態
       console.warn('後端登出失敗，但已清除前端狀態:', err.message)
     } finally {
+      // 通知購物車 store 用戶已登出
+      const { useCartStore } = await import('./cart')
+      const cartStore = useCartStore()
+      cartStore.handleAuthChange()
+      
       // 清除前端狀態
       user.value = null
       token.value = null

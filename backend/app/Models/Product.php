@@ -28,4 +28,16 @@ class Product extends Model
     {
         return $this->belongsTo(\App\Models\Category::class);
     }
+
+    public function getPrimaryImageAttribute()
+    {
+        if (is_array($this->images) && count($this->images) > 0) {
+            return (object)[
+                'image_path' => $this->images[0]['image_path'] ?? $this->images[0] ?? $this->image
+            ];
+        }
+        return (object)[
+            'image_path' => $this->image
+        ];
+    }
 } 

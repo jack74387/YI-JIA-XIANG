@@ -135,6 +135,13 @@
               >
                 我的優惠券
               </router-link>
+              <router-link
+                to="/member-center"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                @click="closeUserMenu"
+              >
+                會員中心
+              </router-link>
               <div class="border-t border-gray-100"></div>
               <button
                 @click="handleLogout"
@@ -253,6 +260,14 @@
             @click="isMobileMenuOpen = false"
           >
             我的訂單
+          </router-link>
+          <router-link
+            v-if="authStore.isAuthenticated"
+            to="/member-center"
+            class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+            @click="isMobileMenuOpen = false"
+          >
+            會員中心
           </router-link>
           <button
             v-if="authStore.isAuthenticated"

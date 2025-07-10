@@ -181,8 +181,8 @@ function getSpecPrice(product: any, spec: string) {
   return product.price_small
 }
 function getSpecLabel(spec: string) {
-  if (spec === 'large') return '一斤裝'
-  if (spec === 'small') return '半斤裝'
+  if (spec === 'large') return '600g'
+  if (spec === 'small') return '300g'
   return ''
 }
 function selectSpec(product: any, spec: string) {
@@ -289,6 +289,7 @@ const openAddToCart = (product: any) => {
     id: product.id,
     name: product.name + '（' + getSpecLabel(spec) + '）',
     price,
+    spec,
     image: product.primary_image?.image_path // Assuming product.image is the primary image path
   }
   showAddToCart.value = true

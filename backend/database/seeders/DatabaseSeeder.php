@@ -14,7 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('coupons')->truncate(); // 這行會清空資料表
+        DB::table('users')->truncate();
+        DB::table('coupons')->truncate();
+
+        // 建立 admin
+        \App\Models\User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'admin',
+                'password' => bcrypt('123'),
+                'is_admin' => 1,
+            ]
+        );
+
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
