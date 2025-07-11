@@ -404,8 +404,16 @@ const loadMemberData = async () => {
 const fetchCoupons = async () => {
   loadingCoupons.value = true
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/coupons')
-    coupons.value = res.data.data?.data || res.data.data || []
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/coupons/user')
+    if (res.data.success) {
+      // 只顯示可用的優惠券
+      coupons.value = res.data.data.available.map((item: any) => ({
+        ...item.coupon,
+        redeemed: false
+      }))
+    }
+  } catch (e: any) {
+    console.error('獲取優惠券失敗:', e)
   } finally {
     loadingCoupons.value = false
   }

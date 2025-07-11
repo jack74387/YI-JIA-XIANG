@@ -155,8 +155,14 @@ class OrderController extends Controller
     {
         // 僅限管理員
         $user = Auth::user();
-        if (!$user || !$user->is_admin) {
-            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        
+        // 調試資訊
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => '未認證'], 401);
+        }
+        
+        if (!$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無管理員權限'], 403);
         }
         $query = Order::with(['user', 'items.product'])->orderBy('created_at', 'desc');
         // 搜尋條件：訂單編號、會員名稱
@@ -172,12 +178,117 @@ class OrderController extends Controller
                   });
             });
         }
+        // 狀態篩選
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
         $perPage = $request->input('per_page', 12);
         $orders = $query->paginate($perPage);
         return response()->json([
             'success' => true,
             'data' => $orders
         ]);
+    }
+
+    // 管理員查詢訂單詳情
+    public function adminShow($id)
+    {
+        $user = Auth::user();
+        // if (!$user || !$user->is_admin) {
+        //     return response()->json(['success' => false, 'message' => '無權限'], 403);
+        // }
+        $order = Order::with(['user', 'items.product'])->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'order' => $this->formatOrder($order)
+        ]);
+    }
+
+    // 管理員更新訂單狀態
+    public function adminUpdateStatus(Request $request, $id)
+    {
+        $user = Auth::user();
+        // if (!$user || !$user->is_admin) {
+        //     return response()->json(['success' => false, 'message' => '無權限'], 403);
+        // }
+        $order = Order::findOrFail($id);
+        $validated = $request->validate([
+            'status' => 'required|string|in:pending,processing,shipped,delivered,cancelled'
+        ]);
+        $order->update(['status' => $validated['status']]);
+        return response()->json([
+            'success' => true,
+            'message' => '訂單狀態更新成功',
+            'order' => $this->formatOrder($order)
+        ]);
+    }
+
+    // 匯出訂單
+    public function exportOrders(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+
+        $query = Order::with(['user', 'items.product'])->orderBy('created_at', 'desc');
+        
+        // 搜尋條件
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('id', $search)
+                  ->orWhere('order_number', 'like', "%$search%")
+                  ->orWhereHas('user', function($uq) use ($search) {
+                      $uq->where('name', 'like', "%$search%")
+                         ->orWhere('email', 'like', "%$search%")
+                         ->orWhere('phone', 'like', "%$search%");
+                  });
+            });
+        }
+        
+        // 狀態篩選
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->get();
+
+        // 生成 CSV 內容
+        $csvContent = '';
+        
+        // 添加 BOM 以支援中文
+        $csvContent .= chr(0xEF).chr(0xBB).chr(0xBF);
+        
+        // CSV 標題
+        $csvContent .= "訂單編號,會員姓名,會員Email,收件人姓名,收件人電話,收件地址,配送方式,付款方式,訂單狀態,訂單金額,建立時間,商品明細\n";
+
+        foreach ($orders as $order) {
+            $items = $order->items->map(function($item) {
+                return $item->product->name . ' (' . $this->getSpecText($item->spec) . ') x' . $item->quantity;
+            })->implode('; ');
+
+            $csvContent .= sprintf(
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                $order->id,
+                $order->user->name ?? '',
+                $order->user->email ?? '',
+                $order->recipient_name,
+                $order->recipient_phone,
+                $order->shipping_address,
+                $order->shipping_method,
+                $order->payment_method,
+                $this->getStatusText($order->status),
+                $order->total,
+                $order->created_at->format('Y-m-d H:i:s'),
+                $items
+            );
+        }
+
+        $filename = 'orders_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     // 根據規格取得價格
@@ -211,6 +322,12 @@ class OrderController extends Controller
             'note' => $order->note,
             'created_at' => $order->created_at,
             'updated_at' => $order->updated_at,
+            'user' => $order->user ? [
+                'id' => $order->user->id,
+                'name' => $order->user->name,
+                'email' => $order->user->email,
+                'phone' => $order->user->phone,
+            ] : null,
             'items' => $order->items->map(function($item) {
                 return [
                     'id' => $item->id,

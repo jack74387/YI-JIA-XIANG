@@ -220,25 +220,44 @@ function getSpecLabel(spec: string | undefined) {
 }
 
 // 優惠券資料
-const coupons = ref([])
+const coupons = ref<any[]>([])
 const selectedCouponId = ref('')
 const discount = ref(0)
 
 const fetchCoupons = async () => {
   const res = await axios.get('http://127.0.0.1:8000/api/v1/coupons')
-  coupons.value = (res.data.data?.data || res.data.data || []).filter(c => c.active)
+  coupons.value = (res.data.data?.data || res.data.data || []).filter((c: any) => c.is_active)
 }
 
-const applyCoupon = () => {
-  const coupon = coupons.value.find(c => c.id == selectedCouponId.value)
-  if (!coupon) {
+const applyCoupon = async () => {
+  if (!selectedCouponId.value) {
     discount.value = 0
     return
   }
-  if (coupon.type === 'percent') {
-    discount.value = Math.round(cart.totalPrice * coupon.value / 100)
-  } else {
-    discount.value = coupon.value
+  
+  try {
+    const coupon = coupons.value.find(c => c.id == selectedCouponId.value)
+    if (!coupon) {
+      discount.value = 0
+      return
+    }
+    
+    const response = await axios.post('http://127.0.0.1:8000/api/v1/coupons/validate', {
+      code: coupon.code,
+      order_amount: cart.totalPrice
+    })
+    
+    if (response.data.success) {
+      discount.value = response.data.discount
+      alert('優惠券已套用！')
+    } else {
+      alert('優惠券驗證失敗：' + response.data.message)
+      discount.value = 0
+    }
+  } catch (error: any) {
+    console.error('優惠券驗證失敗:', error)
+    alert('優惠券驗證失敗：' + (error.response?.data?.message || error.message))
+    discount.value = 0
   }
 }
 

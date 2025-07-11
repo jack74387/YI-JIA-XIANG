@@ -14,7 +14,20 @@
         <span v-if="product.has_discount" class="old">NT${{ product.original_price }}</span>
       </div>
       <div class="actions">
-        <button class="cart" @click="$emit('add-to-cart', product)"><i class="icon-cart"></i></button>
+        <button 
+          v-if="product.can_add_to_cart !== false" 
+          class="cart" 
+          @click="$emit('add-to-cart', product)"
+        >
+          <i class="icon-cart"></i>
+        </button>
+        <button 
+          v-else 
+          class="cart disabled" 
+          title="此商品僅供參考，無法加入購物車"
+        >
+          <i class="icon-info"></i>
+        </button>
         <button class="fav" @click="toggleFav"><i :class="isFav ? 'icon-heart-fill' : 'icon-heart'" /></button>
         <button class="share" @click="showShare = !showShare"><i class="icon-share" /></button>
         <div v-if="showShare" class="share-popup">
@@ -143,6 +156,15 @@ function toggleFav() { isFav.value = !isFav.value }
 .actions button:hover {
   background: #f3e2c7;
   transform: scale(1.12);
+}
+.actions button.disabled {
+  background: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+.actions button.disabled:hover {
+  background: #f0f0f0;
+  transform: none;
 }
 .share-popup {
   position: absolute;

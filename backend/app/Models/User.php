@@ -33,6 +33,8 @@ class User extends Authenticatable
         'line_user_id',
         'facebook_user_id',
         'google_user_id',
+        'is_admin',
+        'last_login_at',
     ];
 
     /**

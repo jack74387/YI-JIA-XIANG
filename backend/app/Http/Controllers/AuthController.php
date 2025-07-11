@@ -208,4 +208,32 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+
+    /**
+     * 管理員修改密碼
+     */
+    public function changeAdminPassword(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $validator = \Validator::make($request->all(), [
+            'old_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '驗證失敗',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        if (!\Hash::check($request->old_password, $user->password)) {
+            return response()->json(['success' => false, 'message' => '舊密碼錯誤'], 400);
+        }
+        $user->password = \Hash::make($request->password);
+        $user->save();
+        return response()->json(['success' => true, 'message' => '密碼修改成功']);
+    }
 } 

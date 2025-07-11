@@ -15,6 +15,7 @@ class PointTransaction extends Model
         'type',
         'description',
         'order_id',
+        'admin_id',
         'expires_at',
     ];
 
@@ -39,6 +40,14 @@ class PointTransaction extends Model
     }
 
     /**
+     * 關聯管理員
+     */
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    /**
      * 取得類型顯示名稱
      */
     public function getTypeNameAttribute()
@@ -47,6 +56,7 @@ class PointTransaction extends Model
             'earn' => '獲得',
             'spend' => '使用',
             'expire' => '過期',
+            'adjust' => '調整',
         ];
 
         return $types[$this->type] ?? '未知';

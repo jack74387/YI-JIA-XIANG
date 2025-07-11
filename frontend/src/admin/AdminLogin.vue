@@ -16,12 +16,14 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useAdminAuthStore } from '@/stores/adminAuth'
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
 const router = useRouter()
+const adminAuthStore = useAdminAuthStore()
 
 const login = async () => {
   loading.value = true
@@ -32,7 +34,8 @@ const login = async () => {
       password: password.value
     })
     if (res.data.success) {
-      localStorage.setItem('admin_token', res.data.token)
+      // 使用 store 設置認證
+      adminAuthStore.setAuth(res.data.token, res.data.user)
       // 跳轉到後台首頁
       router.push('/admin')
     } else {

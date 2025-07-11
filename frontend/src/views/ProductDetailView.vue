@@ -1,7 +1,12 @@
 <template>
   <div class="product-detail flex flex-col md:flex-row gap-8">
     <!-- 左側圖片區 -->
-    <ProductImageGallery :images="product.images || []" :weight="product.weight || ''" />
+    <div class="relative">
+      <ProductImageGallery :images="product.images || []" :weight="product.weight || ''" :status="product.status || ''" />
+      <div v-if="product.status === 'notification'" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
+        <span class="text-lg font-bold bg-black bg-opacity-60 text-white px-6 py-2 rounded">貨到通知</span>
+      </div>
+    </div>
     <!-- 右側資訊區 -->
     <div class="flex-1">
       <ProductInfo :product="product || {}" @add-to-cart="addToCart" @buy-now="buyNow" />

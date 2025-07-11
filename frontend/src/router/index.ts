@@ -173,6 +173,16 @@ const router = createRouter({
       path: '/admin/coupons',
       name: 'admin-coupons',
       component: () => import('../admin/AdminCoupons.vue')
+    },
+    {
+      path: '/admin/admins',
+      name: 'admin-admins',
+      component: () => import('../admin/AdminAdmins.vue')
+    },
+    {
+      path: '/admin/operation-logs',
+      name: 'admin-operation-logs',
+      component: () => import('../admin/AdminOperationLogs.vue')
     }
   ]
 })

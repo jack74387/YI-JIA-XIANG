@@ -64,7 +64,11 @@
                 :src="product.primary_image?.image_path || '/images/placeholder.jpg'"
                 :alt="product.name"
                 class="w-full h-48 object-cover rounded-t-lg mx-auto"
+                :class="product.status === 'notification' ? 'brightness-75 grayscale' : ''"
               />
+              <div v-if="product.status === 'notification'" class="absolute inset-0 flex items-center justify-center z-10">
+                <span class="text-base font-bold bg-black bg-opacity-60 text-white px-4 py-1.5 rounded">貨到通知</span>
+              </div>
               <div v-if="product.has_discount" class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">
                 -{{ product.discount_percentage }}%
               </div>
@@ -422,5 +426,11 @@ onMounted(() => {
 .icon-btn-small {
   width: 30px;
   height: 30px;
+}
+.brightness-75 {
+  filter: brightness(0.75);
+}
+.grayscale {
+  filter: grayscale(1);
 }
 </style> 

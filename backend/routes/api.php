@@ -49,7 +49,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::get('/user/orders', [OrderController::class, 'userOrders']);
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
-        Route::middleware(['auth:sanctum', 'admin'])->get('/orders', [OrderController::class, 'adminIndex']);
+        // Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->get('/orders', [OrderController::class, 'adminIndex']);
 
         // 會員中心相關
         Route::prefix('member')->group(function () {
@@ -66,11 +66,58 @@ Route::prefix('v1')->group(function () {
         // 優惠券相關
         Route::get('/coupons', [CouponController::class, 'index']);
         Route::post('/coupons/redeem', [CouponController::class, 'redeem']);
+        Route::post('/coupons/validate', [CouponController::class, 'validate']);
+        Route::get('/coupons/user', [CouponController::class, 'userCoupons']);
+        Route::get('/coupons/claimable', [CouponController::class, 'claimableCoupons']);
+        Route::post('/coupons/claim', [CouponController::class, 'claim']);
     
         // 點數相關
         Route::get('/points', [\App\Http\Controllers\PointController::class, 'index']);
         Route::post('/points/earn', [\App\Http\Controllers\PointController::class, 'earn']);
         Route::post('/points/spend', [\App\Http\Controllers\PointController::class, 'spend']);
+
+        // 管理員專用
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::put('/auth/admin/password', [AuthController::class, 'changeAdminPassword']);
+            // 多管理員帳號管理 CRUD
+            Route::get('/admins', [\App\Http\Controllers\AdminController::class, 'index']);
+            Route::post('/admins', [\App\Http\Controllers\AdminController::class, 'store']);
+            Route::put('/admins/{id}', [\App\Http\Controllers\AdminController::class, 'update']);
+            Route::delete('/admins/{id}', [\App\Http\Controllers\AdminController::class, 'destroy']);
+            Route::get('/operation-logs', [\App\Http\Controllers\AdminController::class, 'operationLogs']);
+            Route::delete('/operation-logs/{id}', [\App\Http\Controllers\AdminController::class, 'operationLogDestroy']);
+            // 後台訂單管理
+            Route::get('/admin/orders', [\App\Http\Controllers\OrderController::class, 'adminIndex']);
+            Route::get('/admin/orders/export', [\App\Http\Controllers\OrderController::class, 'exportOrders']);
+            Route::get('/admin/orders/{id}', [\App\Http\Controllers\OrderController::class, 'adminShow']);
+            Route::put('/admin/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'adminUpdateStatus']);
+            
+            // 後台會員管理
+            Route::get('/admin/members', [\App\Http\Controllers\AdminController::class, 'adminMembers']);
+            Route::get('/admin/members/export', [\App\Http\Controllers\AdminController::class, 'exportMembers']);
+            Route::get('/admin/members/{id}', [\App\Http\Controllers\AdminController::class, 'adminMemberShow']);
+            Route::put('/admin/members/{id}', [\App\Http\Controllers\AdminController::class, 'adminMemberUpdate']);
+            Route::post('/admin/members/{id}/points', [\App\Http\Controllers\AdminController::class, 'adminMemberAdjustPoints']);
+            
+            // 後台儀錶板
+            Route::get('/admin/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard']);
+            
+            // 後台產品管理
+            Route::get('/admin/products', [\App\Http\Controllers\AdminController::class, 'adminProducts']);
+            Route::get('/admin/products/export', [\App\Http\Controllers\AdminController::class, 'exportProducts']);
+            Route::get('/admin/products/{id}', [\App\Http\Controllers\AdminController::class, 'adminProductShow']);
+            Route::post('/admin/products', [\App\Http\Controllers\AdminController::class, 'adminProductStore']);
+            Route::put('/admin/products/{id}', [\App\Http\Controllers\AdminController::class, 'adminProductUpdate']);
+            Route::delete('/admin/products/{id}', [\App\Http\Controllers\AdminController::class, 'adminProductDestroy']);
+            
+            // 後台優惠券管理
+            Route::get('/admin/coupons', [\App\Http\Controllers\AdminController::class, 'adminCoupons']);
+            Route::get('/admin/coupons/export', [\App\Http\Controllers\AdminController::class, 'exportCoupons']);
+            Route::get('/admin/coupons/{id}', [\App\Http\Controllers\AdminController::class, 'adminCouponShow']);
+            Route::post('/admin/coupons', [\App\Http\Controllers\AdminController::class, 'adminCouponStore']);
+            Route::put('/admin/coupons/{id}', [\App\Http\Controllers\AdminController::class, 'adminCouponUpdate']);
+            Route::delete('/admin/coupons/{id}', [\App\Http\Controllers\AdminController::class, 'adminCouponDestroy']);
+        });
     });
 
     // 其他公開路由

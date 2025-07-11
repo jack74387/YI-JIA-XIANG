@@ -18,6 +18,10 @@
               <th class="py-2">代碼</th>
               <th class="py-2">折扣類型</th>
               <th class="py-2">折扣值</th>
+              <th class="py-2">最低消費</th>
+              <th class="py-2">使用限制</th>
+              <th class="py-2">已使用</th>
+              <th class="py-2">剩餘</th>
               <th class="py-2">有效期限</th>
               <th class="py-2">狀態</th>
               <th class="py-2">操作</th>
@@ -29,10 +33,18 @@
               <td class="py-2">{{ coupon.code }}</td>
               <td class="py-2">{{ coupon.type === 'percent' ? '百分比' : '金額' }}</td>
               <td class="py-2">{{ coupon.type === 'percent' ? coupon.value + '%' : 'NT$' + coupon.value }}</td>
-              <td class="py-2">{{ coupon.expired_at ? coupon.expired_at.slice(0, 10) : '-' }}</td>
+              <td class="py-2">{{ coupon.min_order ? 'NT$' + coupon.min_order : '無限制' }}</td>
+              <td class="py-2">{{ coupon.usage_limit || '無限制' }}</td>
+              <td class="py-2">{{ coupon.used_count || 0 }}</td>
               <td class="py-2">
-                <button :class="coupon.active ? 'text-green-600' : 'text-gray-400'" @click="toggleStatus(coupon)">
-                  {{ coupon.active ? '啟用' : '停用' }}
+                <span :class="getRemainingClass(coupon)">
+                  {{ getRemainingText(coupon) }}
+                </span>
+              </td>
+              <td class="py-2">{{ coupon.expires_at ? coupon.expires_at.slice(0, 10) : '-' }}</td>
+              <td class="py-2">
+                <button :class="coupon.is_active ? 'text-green-600' : 'text-gray-400'" @click="toggleStatus(coupon)">
+                  {{ coupon.is_active ? '啟用' : '停用' }}
                 </button>
               </td>
               <td class="py-2">
@@ -72,7 +84,7 @@
             <div class="mb-3">
               <label class="block mb-1 text-sm">折扣類型</label>
               <select v-model="form.type" class="input-sm" required>
-                <option value="amount">金額</option>
+                <option value="fixed">固定金額</option>
                 <option value="percent">百分比</option>
               </select>
             </div>
@@ -81,8 +93,20 @@
               <input v-model="form.value" type="number" class="input-sm" required />
             </div>
             <div class="mb-3">
+              <label class="block mb-1 text-sm">最低訂單金額</label>
+              <input v-model="form.min_order" type="number" class="input-sm" placeholder="0 表示無限制" />
+            </div>
+            <div class="mb-3">
+              <label class="block mb-1 text-sm">使用次數限制</label>
+              <input v-model="form.usage_limit" type="number" class="input-sm" placeholder="0 表示無限制" />
+            </div>
+            <div class="mb-3">
+              <label class="block mb-1 text-sm">描述</label>
+              <textarea v-model="form.description" class="input-sm" rows="3" placeholder="優惠券描述"></textarea>
+            </div>
+            <div class="mb-3">
               <label class="block mb-1 text-sm">有效期限</label>
-              <input v-model="form.expired_at" type="date" class="input-sm" />
+              <input v-model="form.expires_at" type="date" class="input-sm" />
             </div>
             <div class="flex justify-end gap-2 mt-4">
               <button type="button" class="btn-cancel-sm" @click="closeModal">取消</button>
@@ -99,32 +123,59 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import AdminSidebar from './AdminSidebar.vue'
+import { useAdminAuthStore } from '@/stores/adminAuth'
 
+const adminAuth = useAdminAuthStore()
 const coupons = ref<any[]>([])
 const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 12 })
 const totalPages = computed(() => pagination.value.last_page)
 const search = ref('')
 const showModal = ref(false)
 const editingCoupon = ref<any>(null)
-const form = ref({ name: '', code: '', type: 'amount', value: '', expired_at: '', active: true })
+const form = ref({ 
+  name: '', 
+  code: '', 
+  type: 'fixed', 
+  value: '', 
+  min_order: '', 
+  usage_limit: '', 
+  description: '', 
+  expires_at: '', 
+  is_active: true 
+})
 
 const fetchCoupons = async (page = 1) => {
-  let url = `http://127.0.0.1:8000/api/v1/coupons?page=${page}`
-  if (search.value) url += `&search=${encodeURIComponent(search.value)}`
-  const res = await axios.get(url)
-  const pageData = res.data.data
-  coupons.value = pageData.data || []
-  pagination.value = {
-    current_page: pageData.current_page,
-    last_page: pageData.last_page,
-    total: pageData.total,
-    per_page: pageData.per_page
+  try {
+    let url = `http://127.0.0.1:8000/api/v1/admin/coupons?page=${page}`
+    if (search.value) url += `&search=${encodeURIComponent(search.value)}`
+    const res = await axios.get(url)
+    const pageData = res.data.data
+    coupons.value = pageData.data || []
+    pagination.value = {
+      current_page: pageData.current_page,
+      last_page: pageData.last_page,
+      total: pageData.total,
+      per_page: pageData.per_page
+    }
+  } catch (error) {
+    console.error('獲取優惠券失敗:', error)
+    alert('獲取優惠券失敗')
   }
 }
 
 const openAddModal = () => {
   editingCoupon.value = null
-  form.value = { name: '', code: '', type: 'amount', value: '', expired_at: '', active: true }
+  form.value = { 
+    name: '', 
+    code: '', 
+    type: 'fixed', 
+    value: '', 
+    min_order: '', 
+    usage_limit: '', 
+    description: '', 
+    expires_at: '', 
+    is_active: true 
+  }
   showModal.value = true
 }
 
@@ -143,30 +194,79 @@ const submitCoupon = async () => {
     alert('請填寫完整資料')
     return
   }
-  if (editingCoupon.value) {
-    await axios.put(`http://127.0.0.1:8000/api/v1/coupons/${editingCoupon.value.id}`, form.value)
-    alert('優惠券已更新')
-  } else {
-    await axios.post('http://127.0.0.1:8000/api/v1/coupons', form.value)
-    alert('優惠券已新增')
+  try {
+    if (editingCoupon.value) {
+      await axios.put(`http://127.0.0.1:8000/api/v1/admin/coupons/${editingCoupon.value.id}`, form.value)
+      alert('優惠券已更新')
+    } else {
+      await axios.post('http://127.0.0.1:8000/api/v1/admin/coupons', form.value)
+      alert('優惠券已新增')
+    }
+    showModal.value = false
+    await fetchCoupons(pagination.value.current_page)
+  } catch (error: any) {
+    console.error('操作失敗:', error)
+    alert('操作失敗：' + (error.response?.data?.message || error.message))
   }
-  showModal.value = false
-  await fetchCoupons(pagination.value.current_page)
 }
 
 const deleteCoupon = async (id: number) => {
   if (!confirm('確定要刪除這個優惠券嗎？')) return
-  await axios.delete(`http://127.0.0.1:8000/api/v1/coupons/${id}`)
-  alert('優惠券已刪除')
-  await fetchCoupons(pagination.value.current_page)
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/v1/admin/coupons/${id}`)
+    alert('優惠券已刪除')
+    await fetchCoupons(pagination.value.current_page)
+  } catch (error: any) {
+    console.error('刪除失敗:', error)
+    alert('刪除失敗：' + (error.response?.data?.message || error.message))
+  }
 }
 
 const toggleStatus = async (coupon: any) => {
-  await axios.put(`http://127.0.0.1:8000/api/v1/coupons/${coupon.id}`, { ...coupon, active: !coupon.active })
-  await fetchCoupons(pagination.value.current_page)
+  try {
+    await axios.put(`http://127.0.0.1:8000/api/v1/admin/coupons/${coupon.id}`, { 
+      ...coupon, 
+      is_active: !coupon.is_active 
+    })
+    await fetchCoupons(pagination.value.current_page)
+  } catch (error: any) {
+    console.error('狀態更新失敗:', error)
+    alert('狀態更新失敗：' + (error.response?.data?.message || error.message))
+  }
 }
 
-onMounted(() => fetchCoupons(1))
+// 計算剩餘數量文字
+const getRemainingText = (coupon: any) => {
+  if (!coupon.usage_limit) {
+    return '無限制'
+  }
+  const remaining = coupon.usage_limit - (coupon.used_count || 0)
+  return remaining > 0 ? remaining : 0
+}
+
+// 取得剩餘數量的 CSS 類別
+const getRemainingClass = (coupon: any) => {
+  if (!coupon.usage_limit) {
+    return 'text-gray-500'
+  }
+  const remaining = coupon.usage_limit - (coupon.used_count || 0)
+  if (remaining <= 0) {
+    return 'text-red-600 font-semibold'
+  } else if (remaining <= 5) {
+    return 'text-orange-600 font-semibold'
+  } else {
+    return 'text-green-600'
+  }
+}
+
+onMounted(async () => {
+  await adminAuth.initAuth()
+  if (!adminAuth.isAuthenticated) {
+    alert('請先登入管理員帳號')
+    return
+  }
+  fetchCoupons(1)
+})
 </script>
 
 <style scoped>

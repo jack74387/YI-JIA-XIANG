@@ -56,9 +56,15 @@
       <span>重量：{{ currentWeight }}</span>
     </div>
 
-    <div class="flex gap-2 mt-4">
+    <div class="flex gap-2 mt-4" v-if="product.status !== 'notification'">
       <button class="btn-main" @click="addToCart">加入購物車</button>
       <button class="btn-buy" @click="buyNow">立即結帳</button>
+    </div>
+    <div class="flex gap-2 mt-4" v-else>
+      <button class="btn-notify" disabled>貨到通知</button>
+    </div>
+    <div class="mt-2 text-xs text-gray-500" v-if="product.status === 'notification'">
+      此商品目前僅供公告，暫不開放購買
     </div>
     <div class="mt-4 text-xs text-gray-500" v-if="product.id">商品編號：{{ product.id }}</div>
     <div class="mt-2 text-xs text-gray-500" v-if="product.category_name">分類：{{ product.category_name }}</div>
@@ -264,6 +270,10 @@ function buyNow() {
 
 .btn-buy:hover {
   background: #c0392b;
+}
+
+.btn-notify {
+  @apply bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-not-allowed;
 }
 
 .share-btn {

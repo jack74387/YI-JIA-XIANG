@@ -6,7 +6,16 @@
         <h1 class="text-2xl font-bold">訂單管理</h1>
         <div class="flex gap-2 items-center">
           <input v-model="search" @keyup.enter="fetchOrders(1)" type="text" placeholder="搜尋訂單編號/會員..." class="input-sm" />
+          <select v-model="statusFilter" @change="fetchOrders(1)" class="input-sm w-auto">
+            <option value="">全部狀態</option>
+            <option value="pending">待處理</option>
+            <option value="processing">處理中</option>
+            <option value="shipped">已出貨</option>
+            <option value="delivered">已送達</option>
+            <option value="cancelled">已取消</option>
+          </select>
           <button class="btn-admin-sm" @click="fetchOrders(1)">搜尋</button>
+          <button class="btn-admin-sm bg-green-600 hover:bg-green-700" @click="exportOrders">匯出訂單</button>
         </div>
       </div>
       <div class="bg-white rounded shadow p-6">
@@ -23,11 +32,11 @@
           </thead>
           <tbody>
             <tr v-for="order in orders" :key="order.id">
-              <td class="py-2">{{ order.order_number || order.id }}</td>
-              <td class="py-2">{{ order.user?.name || order.user_name || '-' }}</td>
+              <td class="py-2">{{ order.id }}</td>
+              <td class="py-2">{{ order.user?.name || '-' }}</td>
               <td class="py-2">NT${{ order.total }}</td>
               <td class="py-2">
-                <span :class="statusColor(order.status)">{{ order.status_label || order.status }}</span>
+                <span :class="statusColor(order.status)">{{ order.status_text || order.status }}</span>
               </td>
               <td class="py-2">{{ order.created_at ? order.created_at.slice(0, 19).replace('T', ' ') : '-' }}</td>
               <td class="py-2">
@@ -38,15 +47,34 @@
         </table>
         <div v-if="orders.length === 0" class="text-center text-gray-400 py-8">尚無訂單</div>
         <!-- 分頁按鈕 -->
-        <div v-if="pagination.total > pagination.per_page" class="flex justify-center mt-6 gap-2">
+        <div v-if="pagination.last_page > 1" class="flex justify-center mt-6 gap-2">
           <button
-            v-for="page in totalPages"
+            v-if="pagination.current_page > 1"
+            @click="fetchOrders(pagination.current_page - 1)"
+            class="px-3 py-1 rounded bg-gray-100 hover:bg-amber-100"
+          >
+            上一頁
+          </button>
+          <button
+            v-for="page in getPageNumbers()"
             :key="page"
-            @click="fetchOrders(page)"
+            @click="typeof page === 'number' ? fetchOrders(page) : null"
             :class="['px-3 py-1 rounded', page === pagination.current_page ? 'bg-amber-600 text-white' : 'bg-gray-100 hover:bg-amber-100']"
+            :disabled="typeof page !== 'number'"
           >
             {{ page }}
           </button>
+          <button
+            v-if="pagination.current_page < pagination.last_page"
+            @click="fetchOrders(pagination.current_page + 1)"
+            class="px-3 py-1 rounded bg-gray-100 hover:bg-amber-100"
+          >
+            下一頁
+          </button>
+        </div>
+        <!-- 分頁資訊 -->
+        <div class="text-center text-sm text-gray-600 mt-2">
+          共 {{ pagination.total }} 筆訂單，第 {{ pagination.current_page }} 頁，共 {{ pagination.last_page }} 頁
         </div>
       </div>
 
@@ -56,20 +84,20 @@
           <h2 class="text-lg font-bold mb-4">訂單詳情</h2>
           <div v-if="loadingDetail" class="text-center py-8">載入中...</div>
           <div v-else-if="orderDetail">
-            <div class="mb-3"><b>訂單編號：</b>{{ orderDetail.order_number || orderDetail.id }}</div>
-            <div class="mb-3"><b>會員：</b>{{ orderDetail.user?.name || orderDetail.user_name || '-' }}</div>
+            <div class="mb-3"><b>訂單編號：</b>{{ orderDetail.id }}</div>
+            <div class="mb-3"><b>會員：</b>{{ orderDetail.user?.name || '-' }}</div>
             <div class="mb-3"><b>金額：</b>NT${{ orderDetail.total }}</div>
             <div class="mb-3"><b>狀態：</b>
               <select v-model="orderStatus" class="input-sm w-auto">
-                <option value="pending">待付款</option>
-                <option value="paid">已付款</option>
+                <option value="pending">待處理</option>
+                <option value="processing">處理中</option>
                 <option value="shipped">已出貨</option>
-                <option value="completed">已完成</option>
+                <option value="delivered">已送達</option>
                 <option value="cancelled">已取消</option>
               </select>
               <button class="btn-admin-sm ml-2" @click="updateStatus" :disabled="updatingStatus">{{ updatingStatus ? '儲存中...' : '儲存' }}</button>
             </div>
-            <div class="mb-3"><b>收件人：</b>{{ orderDetail.recipient_name }}，{{ orderDetail.recipient_phone }}，{{ orderDetail.recipient_address }}</div>
+            <div class="mb-3"><b>收件人：</b>{{ orderDetail.recipient_name }}，{{ orderDetail.recipient_phone }}，{{ orderDetail.shipping_address }}</div>
             <div class="mb-3"><b>建立時間：</b>{{ orderDetail.created_at ? orderDetail.created_at.slice(0, 19).replace('T', ' ') : '-' }}</div>
             <div class="mb-3"><b>商品明細：</b>
               <table class="w-full text-left border mt-2">
@@ -83,12 +111,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in orderDetail.items || orderDetail.order_items || []" :key="item.id">
-                    <td class="py-1 px-2">{{ item.product_name || item.name }}</td>
-                    <td class="py-1 px-2">{{ item.spec || '-' }}</td>
+                  <tr v-for="item in orderDetail.items || []" :key="item.id">
+                    <td class="py-1 px-2">{{ item.name }}</td>
+                    <td class="py-1 px-2">{{ item.spec_text || item.spec || '-' }}</td>
                     <td class="py-1 px-2">{{ item.quantity }}</td>
                     <td class="py-1 px-2">NT${{ item.price }}</td>
-                    <td class="py-1 px-2">NT${{ item.price * item.quantity }}</td>
+                    <td class="py-1 px-2">NT${{ item.subtotal }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -112,6 +140,44 @@ const orders = ref<any[]>([])
 const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 12 })
 const totalPages = computed(() => pagination.value.last_page)
 const search = ref('')
+const statusFilter = ref('')
+
+// 取得分頁數字
+const getPageNumbers = () => {
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  const pages = []
+  
+  if (last <= 7) {
+    for (let i = 1; i <= last; i++) {
+      pages.push(i)
+    }
+  } else {
+    if (current <= 4) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(last)
+    } else if (current >= last - 3) {
+      pages.push(1)
+      pages.push('...')
+      for (let i = last - 4; i <= last; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      pages.push('...')
+      for (let i = current - 1; i <= current + 1; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(last)
+    }
+  }
+  
+  return pages
+}
 
 const showModal = ref(false)
 const orderDetail = ref<any>(null)
@@ -120,9 +186,11 @@ const orderStatus = ref('')
 const updatingStatus = ref(false)
 
 const fetchOrders = async (page = 1) => {
-  let url = `http://127.0.0.1:8000/api/v1/orders?page=${page}`
+  const token = localStorage.getItem('admin_token')
+  let url = `http://127.0.0.1:8000/api/v1/admin/orders?page=${page}`
   if (search.value) url += `&search=${encodeURIComponent(search.value)}`
-  const res = await axios.get(url)
+  if (statusFilter.value) url += `&status=${encodeURIComponent(statusFilter.value)}`
+  const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
   const pageData = res.data.data
   orders.value = pageData.data || []
   pagination.value = {
@@ -136,9 +204,9 @@ const fetchOrders = async (page = 1) => {
 const statusColor = (status: string) => {
   switch (status) {
     case 'pending': return 'text-gray-500'
-    case 'paid': return 'text-blue-600'
+    case 'processing': return 'text-blue-600'
     case 'shipped': return 'text-amber-600'
-    case 'completed': return 'text-green-600'
+    case 'delivered': return 'text-green-600'
     case 'cancelled': return 'text-red-600'
     default: return 'text-gray-400'
   }
@@ -149,8 +217,9 @@ const viewOrder = async (order: any) => {
   loadingDetail.value = true
   orderDetail.value = null
   try {
-    const res = await axios.get(`http://127.0.0.1:8000/api/v1/orders/${order.id}`)
-    orderDetail.value = res.data.product || res.data.data || res.data.order || res.data
+    const token = localStorage.getItem('admin_token')
+    const res = await axios.get(`http://127.0.0.1:8000/api/v1/admin/orders/${order.id}`, { headers: { Authorization: `Bearer ${token}` } })
+    orderDetail.value = res.data.order
     orderStatus.value = orderDetail.value.status
   } catch (e) {
     orderDetail.value = null
@@ -169,7 +238,8 @@ const updateStatus = async () => {
   if (!orderDetail.value) return
   updatingStatus.value = true
   try {
-    await axios.put(`http://127.0.0.1:8000/api/v1/orders/${orderDetail.value.id}`, { status: orderStatus.value })
+    const token = localStorage.getItem('admin_token')
+    await axios.put(`http://127.0.0.1:8000/api/v1/admin/orders/${orderDetail.value.id}/status`, { status: orderStatus.value }, { headers: { Authorization: `Bearer ${token}` } })
     alert('狀態已更新')
     closeModal()
     await fetchOrders(pagination.value.current_page)
@@ -177,6 +247,42 @@ const updateStatus = async () => {
     alert('狀態更新失敗')
   } finally {
     updatingStatus.value = false
+  }
+}
+
+const exportOrders = async () => {
+  try {
+    const token = localStorage.getItem('admin_token')
+    let url = 'http://127.0.0.1:8000/api/v1/admin/orders/export'
+    const params = new URLSearchParams()
+    if (search.value) params.append('search', search.value)
+    if (statusFilter.value) params.append('status', statusFilter.value)
+    if (params.toString()) url += '?' + params.toString()
+    
+    console.log('Exporting orders from:', url)
+    
+    const response = await axios.get(url, { 
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: 'blob'
+    })
+    
+    console.log('Response received:', response)
+    
+    const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url2 = window.URL.createObjectURL(blob)
+    link.setAttribute('href', url2)
+    link.setAttribute('download', `orders_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    console.log('Export completed successfully')
+  } catch (e: any) {
+    console.error('Export error:', e)
+    console.error('Error response:', e.response)
+    alert('匯出失敗: ' + (e.response?.data?.message || e.message))
   }
 }
 
