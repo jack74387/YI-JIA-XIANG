@@ -1,75 +1,73 @@
-# 一佳香官方網站
+# 一佳香肉脯行｜品牌電商網站
 
-專業的香品製造商官方網站，提供線上購物、會員管理、訂單處理等功能。
+專案為台東在地百年肉製品名店「一佳香」打造旗艦級品牌電商平台，結合線上銷售、會員經營、O2O整合與行銷推廣，協助品牌數位轉型、拓展全台市場。
 
-## 🏗️ 專案架構
+---
+
+## 🏆 專案目標與品牌故事
+
+- **品牌故事**：一佳香肉脯行，傳承數十年台東在地工藝，主打黃金嬰兒豬肉鬆、蜜汁豬肉乾、五香豬肉條等經典產品。
+- **專案目標**：
+  - 建立全台可及的線上銷售通路
+  - 強化品牌形象與顧客信任
+  - 整合會員、金流、物流、行銷、LINE 官方帳號
+  - 支援企業團購、禮盒包裝、食品履歷等加值服務
+
+---
+
+## 🏗️ 架構總覽
 
 ```
-yijiaxiang/
-├── frontend/                 # Vue.js 前端專案
+YI-JIA-XIANG/
+├── frontend/   # Vue 3 + Vite 前端專案
 │   ├── src/
-│   │   ├── components/      # 可重用元件
-│   │   ├── views/          # 頁面元件
-│   │   ├── stores/         # Pinia 狀態管理
-│   │   ├── router/         # Vue Router 路由
-│   │   ├── api/            # API 呼叫
-│   │   └── utils/          # 工具函數
-│   ├── public/             # 靜態資源
-│   └── package.json
-├── backend/                 # Laravel 後端專案
+│   │   ├── components/  # 共用元件
+│   │   ├── views/       # 頁面
+│   │   ├── stores/      # Pinia 狀態管理
+│   │   ├── router/      # Vue Router
+│   │   └── api/         # API 呼叫
+│   └── public/          # 靜態資源
+├── backend/    # Laravel 10 後端專案
 │   ├── app/
-│   │   ├── Http/
-│   │   │   ├── Controllers/ # 控制器
-│   │   │   └── Middleware/  # 中介層
-│   │   ├── Models/         # Eloquent 模型
-│   │   └── Services/       # 業務邏輯服務
-│   ├── database/
-│   │   ├── migrations/     # 資料庫遷移
-│   │   └── seeders/        # 資料填充
-│   ├── routes/             # 路由定義
+│   │   ├── Http/Controllers/ # 控制器
+│   │   ├── Models/           # Eloquent 模型
+│   │   └── Middleware/       # 中介層
+│   ├── database/             # 遷移/填充
+│   ├── routes/               # API 路由
 │   └── composer.json
-├── docs/                   # 專案文件
-├── scripts/                # 部署腳本
+├── docs/        # 專案文件
+├── scripts/     # 部署/啟動腳本
 └── README.md
 ```
 
-## 🚀 快速開始
+- **資料流**：前端 (Vue) 透過 RESTful API 與後端 (Laravel) 溝通，串接 MySQL 資料庫與第三方服務。
+- **第三方整合**：LINE Messaging API、LINE Login、金流（綠界）、物流（黑貓）、標籤機 API。
+
+---
+
+## 🚀 快速啟動
 
 ### 前置需求
+- Node.js 18+
+- PHP 8.1+
+- Composer
+- MySQL 8.0+
 
-- **Node.js** (v18+) - [下載](https://nodejs.org/)
-- **PHP** (v8.1+) - [下載](https://windows.php.net/download/)
-- **Composer** - [下載](https://getcomposer.org/download/)
-- **MySQL** (v8.0+) - [下載](https://dev.mysql.com/downloads/mysql/)
-
-### Windows 環境建置
-
-1. **克隆專案**
-   ```bash
-   git clone <repository-url>
-   cd yijiaxiang
-   ```
-
-2. **執行自動建置腳本**
-   ```powershell
-   .\scripts\setup-windows.ps1
-   ```
-
-3. **啟動開發環境**
-   ```powershell
-   .\scripts\start-dev.ps1
-   ```
+### 一鍵建置（Windows）
+```powershell
+# 於專案根目錄執行
+./scripts/setup-windows.ps1
+./scripts/start-dev.ps1
+```
 
 ### 手動建置
-
-#### 前端設定
+#### 前端
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-#### 後端設定
+#### 後端
 ```bash
 cd backend
 composer install
@@ -79,88 +77,83 @@ php artisan migrate
 php artisan serve
 ```
 
-## 📱 功能特色
+---
 
-### 前端功能
-- ✅ 響應式設計，支援手機、平板、電腦
-- ✅ 商品展示與搜尋
-- ✅ 購物車功能
-- ✅ 會員註冊/登入
-- ✅ 訂單管理
-- ✅ 點數系統
-- ✅ LINE 登入整合
+## ✨ 主要功能
 
-### 後端功能
-- ✅ RESTful API
-- ✅ 會員認證與授權
-- ✅ 商品管理
-- ✅ 訂單處理
-- ✅ 金流整合
-- ✅ 物流整合
-- ✅ 點數系統
-- ✅ 管理後台
+### 前台
+- 響應式商品展示、搜尋、分類
+- 購物車、訪客結帳、會員結帳
+- 多元金流（信用卡、LINE Pay、街口、轉帳）
+- 配送選擇（宅配、到店自取、指定到貨日）
+- 禮盒包裝、代寫卡片
+- 食品履歷查詢（QR Code）
+- LINE Login、社群分享
 
-## 🛠️ 技術棧
+### 會員/行銷
+- 會員註冊/登入（LINE/Facebook/Google/Email）
+- 紅利點數、優惠券、推薦碼
+- 歷史訂單、評論換點數
+- 感謝信、再行銷自動推播
+
+### 後台/管理
+- 商品、訂單、會員、優惠券、點數管理
+- 團購/批發專區、批量下單、專屬價格
+- 出貨標籤自動列印（RP100+ 標籤機）
+- 一鍵社群發佈（FB 粉專）
+- 操作日誌、權限控管
+
+### O2O/LINE 整合
+- 門市據點頁、Google Map
+- 線上訂購、門市取貨
+- LINE 聊天視窗、Chatbot、Notify
+- 分眾推播、好友優惠券
+
+---
+
+## 🛠️ 技術細節
 
 ### 前端
-- **Vue.js 3** - 前端框架
-- **TypeScript** - 型別安全
-- **Vite** - 建置工具
-- **Tailwind CSS** - 樣式框架
-- **Pinia** - 狀態管理
-- **Vue Router** - 路由管理
-- **Axios** - HTTP 客戶端
+- Vue 3, TypeScript, Vite, Pinia, Vue Router, Tailwind CSS, Axios
 
 ### 後端
-- **Laravel 10** - PHP 框架
-- **MySQL** - 資料庫
-- **Laravel Sanctum** - API 認證
-- **Spatie Permission** - 權限管理
-- **Intervention Image** - 圖片處理
+- Laravel 10, MySQL, RESTful API, Sanctum/Session, Spatie Permission, Intervention Image
 
-### 第三方服務
-- **綠界科技** - 金流服務
-- **黑貓宅急便** - 物流服務
-- **LINE Messaging API** - 社群整合
+### 第三方/整合
+- 綠界金流、黑貓物流、LINE Messaging API、LINE Login、RP100+ 標籤機
 
-## 📊 API 文件
-
-啟動後端伺服器後，可透過以下網址查看 API 文件：
+### API 文件
 - Swagger UI: `http://localhost:8000/api/documentation`
 - Postman Collection: `docs/api/postman-collection.json`
 
-## 🔧 開發指南
+---
+
+## 🧑‍💻 開發/部署/測試指引
 
 ### 程式碼規範
-- 使用 ESLint + Prettier 進行程式碼格式化
-- 遵循 PSR-12 PHP 程式碼規範
-- 使用 TypeScript 確保型別安全
+- 前端：ESLint + Prettier
+- 後端：PSR-12 PHP 標準
+- TypeScript 型別安全
 
-### Git 工作流程
-1. 從 `main` 分支建立功能分支
-2. 開發完成後提交 Pull Request
-3. 通過程式碼審查後合併到 `main` 分支
+### Git 流程
+1. 功能分支開發 → Pull Request → Code Review → 合併 main
 
 ### 測試
 ```bash
-# 前端測試
+# 前端
 cd frontend
 npm run test
-
-# 後端測試
+# 後端
 cd backend
 php artisan test
 ```
 
-## 📦 部署
-
-### 生產環境部署
+### 部署
 ```bash
-# 前端建置
+# 前端
 cd frontend
 npm run build
-
-# 後端部署
+# 後端
 cd backend
 composer install --optimize-autoloader --no-dev
 php artisan config:cache
@@ -168,25 +161,20 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-## 🤝 貢獻指南
-
-1. Fork 專案
-2. 建立功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 開啟 Pull Request
-
-## 📄 授權
-
-本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
+---
 
 ## 📞 聯絡資訊
-
-- **公司名稱**: 一佳香
-- **聯絡電話**: (02) 1234-5678
-- **電子郵件**: service@yijiaxiang.com
-- **地址**: 台北市信義區信義路五段7號
+- 公司名稱：一佳香
+- 電話：(02) 1234-5678
+- Email：service@yijiaxiang.com
+- 地址：台東縣台東市中華路一段1號
 
 ---
 
-**一佳香** - 傳承百年工藝，提供優質香品 
+## 📄 授權
+
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE)
+
+---
+
+**一佳香**｜來自台東的陽光風味，封存半甲子的思念。 
