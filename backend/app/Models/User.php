@@ -156,18 +156,18 @@ class User extends Authenticatable
     /**
      * 檢查會員等級升級
      */
-    private function checkLevelUpgrade()
+    public function checkLevelUpgrade()
     {
-        $newLevel = $this->member_level;
-        
-        if ($this->points >= 10000 && $this->member_level !== 'platinum') {
+        // 以累積消費金額為依據（只計算已送達訂單）
+        $totalSpent = $this->orders()->where('status', 'delivered')->sum('total');
+        $newLevel = 'bronze';
+        if ($totalSpent >= 50000) {
             $newLevel = 'platinum';
-        } elseif ($this->points >= 5000 && $this->member_level !== 'gold') {
+        } elseif ($totalSpent >= 20000) {
             $newLevel = 'gold';
-        } elseif ($this->points >= 1000 && $this->member_level !== 'silver') {
+        } elseif ($totalSpent >= 5000) {
             $newLevel = 'silver';
         }
-
         if ($newLevel !== $this->member_level) {
             $this->update(['member_level' => $newLevel]);
         }

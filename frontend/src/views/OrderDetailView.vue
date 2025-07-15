@@ -3,15 +3,20 @@
     <h1>訂單詳情</h1>
     <div class="order-info">
       <div><b>訂單編號：</b>{{ order.id }}</div>
-      <div><b>狀態：</b>{{ order.status }}</div>
-      <div><b>金額：</b>NT$ {{ order.amount }}</div>
+      <div><b>狀態：</b>{{ order.status_text || order.status }}</div>
+      <div><b>原始金額：</b>NT$ {{ order.total?.toLocaleString?.() ?? order.total ?? '-' }}</div>
+      <div v-if="order.discount && order.discount > 0"><b>折扣：</b>-NT${{ order.discount?.toLocaleString?.() ?? order.discount }}</div>
+      <div v-if="order.point_discount && order.point_discount > 0"><b>點數折抵：</b>-NT${{ order.point_discount?.toLocaleString?.() ?? order.point_discount }}</div>
+      <div><b>折抵後金額：</b>NT$ {{ order.final_amount?.toLocaleString?.() ?? order.final_amount ?? order.total }}</div>
     </div>
     <div class="order-items">
       <h2>商品明細</h2>
-      <div v-for="item in order.items" :key="item.id" class="item-row">
+      <div v-for="item in order.items || []" :key="item.id" class="item-row">
         <span>{{ item.name }}</span>
-        <span>x{{ item.qty }}</span>
+        <span>x{{ item.quantity }}</span>
         <span>NT$ {{ item.price }}</span>
+        <span v-if="item.weight">（{{ item.weight }}）</span>
+        <span v-else-if="item.spec_text">（{{ item.spec_text }}）</span>
       </div>
     </div>
     <div class="flex gap-3 mt-6">
@@ -23,16 +28,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 import ServiceNavButtons from '@/components/ServiceNavButtons.vue'
-const order = ref({
-  id: 1001,
-  status: '已完成',
-  amount: 680,
-  items: [
-    { id: 1, name: '蜜汁原味豬肉乾', qty: 2, price: 340 },
-    { id: 2, name: '杏仁厚片豬肉乾', qty: 1, price: 250 },
-  ],
+
+const route = useRoute()
+const order = ref<any>({})
+
+onMounted(async () => {
+  try {
+    const orderId = route.params.id
+    const res = await axios.get(`http://127.0.0.1:8000/api/v1/orders/${orderId}`)
+    if (res.data.success) {
+      order.value = res.data.order
+    }
+  } catch (e) {
+    order.value = { id: '-', status: '查無訂單', items: [] }
+  }
 })
 </script>
 

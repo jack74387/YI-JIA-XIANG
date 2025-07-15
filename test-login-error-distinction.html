@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入錯誤訊息區分測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+        .error-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .error-icon {
+            margin-right: 10px;
+            color: #dc3545;
+        }
+        .error-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #721c24;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .test-buttons {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-button {
+            background-color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .test-button:hover {
+            background-color: #545b62;
+        }
+        .danger-button {
+            background-color: #dc3545;
+        }
+        .danger-button:hover {
+            background-color: #c82333;
+        }
+        .success-button {
+            background-color: #28a745;
+        }
+        .success-button:hover {
+            background-color: #218838;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .test-case {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .test-result {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>登入錯誤訊息區分測試</h1>
+    
+    <div class="container">
+        <h2>模擬登入表單</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="login">帳號</label>
+                <input type="text" id="login" name="login" placeholder="請輸入手機號碼或電子信箱">
+            </div>
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" placeholder="請輸入密碼">
+            </div>
+            <button type="submit">登入</button>
+        </form>
+        
+        <!-- 錯誤訊息顯示區域 -->
+        <div id="errorMessage" class="error">
+            <div class="error-header">
+                <span class="error-icon">⚠️</span>
+                <strong>登入失敗</strong>
+                <button class="error-close" onclick="hideError()">×</button>
+            </div>
+            <div id="errorContent"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>錯誤訊息區分測試</h2>
+        <div class="info-box">
+            <strong>測試說明：</strong>這個頁面測試登入錯誤訊息的區分是否正確。系統應該能夠正確區分"無此帳號"和"密碼錯誤"兩種情況。
+        </div>
+        
+        <div class="test-buttons">
+            <p>點擊以下按鈕測試錯誤訊息的區分：</p>
+            <button class="test-button" onclick="testBackendError('無此帳號，請檢查帳號是否正確')">測試後端：無此帳號</button>
+            <button class="test-button" onclick="testBackendError('密碼錯誤，請重新輸入')">測試後端：密碼錯誤</button>
+            <button class="test-button" onclick="testBackendError('帳號或密碼錯誤')">測試後端：通用錯誤</button>
+            <button class="danger-button" onclick="testFrontendLogic()">測試前端邏輯</button>
+            <button class="success-button" onclick="clearAllErrors()">清除所有錯誤</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>測試案例</h2>
+        
+        <div class="test-case">
+            <h3>測試案例 1：無此帳號</h3>
+            <p><strong>輸入：</strong>帳號：nonexistent，密碼：任意</p>
+            <p><strong>預期結果：</strong>顯示"無此帳號，請檢查帳號是否正確"</p>
+            <button onclick="testCase1()">執行測試</button>
+        </div>
+        
+        <div class="test-case">
+            <h3>測試案例 2：密碼錯誤</h3>
+            <p><strong>輸入：</strong>帳號：existing，密碼：wrongpassword</p>
+            <p><strong>預期結果：</strong>顯示"密碼錯誤，請重新輸入"</p>
+            <button onclick="testCase2()">執行測試</button>
+        </div>
+        
+        <div class="test-case">
+            <h3>測試案例 3：通用錯誤</h3>
+            <p><strong>輸入：</strong>帳號：other，密碼：任意</p>
+            <p><strong>預期結果：</strong>顯示"帳號或密碼錯誤"</p>
+            <button onclick="testCase3()">執行測試</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>前端錯誤處理邏輯</h2>
+        <pre><code>
+// 前端錯誤處理邏輯
+if (errorMsg.includes('無此帳號')) {
+    specificError = '無此帳號，請檢查帳號是否正確'
+} else if (errorMsg.includes('密碼錯誤')) {
+    specificError = '密碼錯誤，請重新輸入'
+} else if (errorMsg.includes('credentials') || errorMsg.includes('認證') || errorMsg.includes('帳號') || errorMsg.includes('密碼')) {
+    if (errorMsg.includes('不存在') || errorMsg.includes('not found') || errorMsg.includes('找不到')) {
+        specificError = '無此帳號，請檢查帳號是否正確'
+    } else {
+        specificError = '密碼錯誤，請重新輸入'
+    }
+} else {
+    specificError = errorMsg
+}
+        </code></pre>
+    </div>
+
+    <script>
+        let hasSubmitted = false; // 追蹤是否已提交過表單
+        
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorContent = document.getElementById('errorContent');
+            
+            errorContent.textContent = message;
+            errorDiv.classList.add('show');
+            
+            // 記錄到控制台
+            console.log('顯示錯誤訊息:', message);
+        }
+
+        // 隱藏錯誤訊息
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('show');
+            console.log('隱藏錯誤訊息');
+        }
+        
+        // 測試後端錯誤訊息
+        function testBackendError(errorMsg) {
+            hasSubmitted = true;
+            showError(errorMsg);
+        }
+        
+        // 測試前端邏輯
+        function testFrontendLogic() {
+            const testCases = [
+                '無此帳號，請檢查帳號是否正確',
+                '密碼錯誤，請重新輸入',
+                '帳號或密碼錯誤',
+                'credentials invalid',
+                '認證失敗',
+                '帳號不存在',
+                '密碼不正確'
+            ];
+            
+            console.log('=== 前端錯誤處理邏輯測試 ===');
+            testCases.forEach((errorMsg, index) => {
+                let specificError = errorMsg;
+                
+                if (errorMsg.includes('無此帳號')) {
+                    specificError = '無此帳號，請檢查帳號是否正確';
+                } else if (errorMsg.includes('密碼錯誤')) {
+                    specificError = '密碼錯誤，請重新輸入';
+                } else if (errorMsg.includes('credentials') || errorMsg.includes('認證') || errorMsg.includes('帳號') || errorMsg.includes('密碼')) {
+                    if (errorMsg.includes('不存在') || errorMsg.includes('not found') || errorMsg.includes('找不到')) {
+                        specificError = '無此帳號，請檢查帳號是否正確';
+                    } else {
+                        specificError = '密碼錯誤，請重新輸入';
+                    }
+                }
+                
+                console.log(`測試 ${index + 1}: "${errorMsg}" -> "${specificError}"`);
+            });
+            
+            alert('前端邏輯測試完成，請查看控制台輸出');
+        }
+        
+        // 測試案例 1：無此帳號
+        function testCase1() {
+            hasSubmitted = true;
+            showError('無此帳號，請檢查帳號是否正確');
+        }
+        
+        // 測試案例 2：密碼錯誤
+        function testCase2() {
+            hasSubmitted = true;
+            showError('密碼錯誤，請重新輸入');
+        }
+        
+        // 測試案例 3：通用錯誤
+        function testCase3() {
+            hasSubmitted = true;
+            showError('帳號或密碼錯誤');
+        }
+        
+        // 清除所有錯誤
+        function clearAllErrors() {
+            hideError();
+            hasSubmitted = false;
+            console.log('清除所有錯誤狀態');
+        }
+
+        // 表單提交處理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 標記已提交過表單
+            hasSubmitted = true;
+            
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
+            
+            // 模擬驗證
+            if (!login || !password) {
+                showError('請輸入帳號和密碼');
+                return;
+            }
+            
+            // 模擬更具體的登入失敗
+            if (login === 'nonexistent') {
+                showError('無此帳號，請檢查帳號是否正確');
+            } else if (login === 'existing' && password === 'wrongpassword') {
+                showError('密碼錯誤，請重新輸入');
+            } else if (login === 'other') {
+                showError('帳號或密碼錯誤');
+            } else {
+                showError('帳號或密碼錯誤');
+            }
+        });
+
+        // 輸入時自動清除錯誤
+        document.getElementById('login').addEventListener('input', function() {
+            if (hasSubmitted) {
+                hideError();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('input', function() {
+            if (hasSubmitted) {
+                hideError();
+            }
+        });
+
+        // 頁面載入時顯示測試說明
+        window.addEventListener('load', function() {
+            console.log('登入錯誤訊息區分測試頁面已載入');
+            console.log('請使用測試按鈕來驗證錯誤訊息的區分是否正確');
+        });
+    </script>
+</body>
+</html> 

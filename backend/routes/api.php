@@ -29,6 +29,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/admin-login', [AuthController::class, 'adminLogin']);
     Route::post('/auth/line-login', [AuthController::class, 'lineLogin']);
+    Route::post('/auth/google-login', [AuthController::class, 'googleLogin']);
+    Route::post('/auth/facebook-login', [AuthController::class, 'facebookLogin']);
     Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 

@@ -139,6 +139,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/orders/:orderId/success',
+      name: 'OrderSuccess',
+      component: () => import('../views/OrderSuccessView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/member-center',
       name: 'member-center',
       component: () => import('../views/MemberCenterView.vue'),

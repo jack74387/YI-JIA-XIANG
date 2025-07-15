@@ -45,7 +45,9 @@
               <td class="py-3 px-2">{{ member.email }}</td>
               <td class="py-3 px-2">{{ member.phone || '-' }}</td>
               <td class="py-3 px-2">
-                <span :class="member.member_level_color">{{ member.member_level_name }}</span>
+                <span :class="member.member_level_color">
+                  {{ member.member_level_name }}
+                </span>
               </td>
               <td class="py-3 px-2">{{ member.points }}</td>
               <td class="py-3 px-2">{{ member.total_orders }}</td>
@@ -96,19 +98,23 @@
                   <div><span class="font-medium">Email：</span>{{ selectedMember.email }}</div>
                   <div><span class="font-medium">電話：</span>{{ selectedMember.phone || '-' }}</div>
                   <div><span class="font-medium">地址：</span>{{ selectedMember.address || '-' }}</div>
-                  <div><span class="font-medium">生日：</span>{{ selectedMember.birthday || '-' }}</div>
-                  <div><span class="font-medium">性別：</span>{{ selectedMember.gender || '-' }}</div>
+                  <div><span class="font-medium">生日：</span>{{ formatDateOnly(selectedMember.birthday) || '-' }}</div>
+                  <div><span class="font-medium">性別：</span>{{ genderText(selectedMember.gender) || '-' }}</div>
                 </div>
               </div>
               <div>
                 <h3 class="font-semibold mb-2">會員統計</h3>
                 <div class="space-y-2 text-sm">
-                  <div><span class="font-medium">會員等級：</span>{{ selectedMember.statistics?.member_level_name }}</div>
+                  <div><span class="font-medium">會員等級：</span>
+                    <span :class="selectedMember.statistics?.member_level_color">
+                      {{ selectedMember.statistics?.member_level_name || '-' }}
+                    </span>
+                  </div>
                   <div><span class="font-medium">目前點數：</span>{{ selectedMember.statistics?.current_points }}</div>
                   <div><span class="font-medium">總訂單數：</span>{{ selectedMember.statistics?.total_orders }}</div>
                   <div><span class="font-medium">總消費金額：</span>${{ selectedMember.statistics?.total_spent || 0 }}</div>
                   <div><span class="font-medium">平均訂單金額：</span>${{ selectedMember.statistics?.average_order_value || 0 }}</div>
-                  <div><span class="font-medium">最後登入：</span>{{ selectedMember.statistics?.last_login || '-' }}</div>
+                  <div><span class="font-medium">最後登入：</span>{{ formatDateTime(selectedMember.statistics?.last_login) || '-' }}</div>
                 </div>
               </div>
             </div>
@@ -130,7 +136,7 @@
                     <tr v-for="order in selectedMember.orders.slice(0, 5)" :key="order.id" class="border-b">
                       <td class="py-2 px-2">{{ order.id }}</td>
                       <td class="py-2 px-2">{{ order.status }}</td>
-                      <td class="py-2 px-2">${{ order.final_amount }}</td>
+                      <td class="py-2 px-2">${{ order.final_amount !== undefined ? order.final_amount : '-' }}</td>
                       <td class="py-2 px-2">{{ formatDate(order.created_at) }}</td>
                     </tr>
                   </tbody>
@@ -403,6 +409,28 @@ const exportMembers = async () => {
 const formatDate = (dateString: string) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleString('zh-TW')
+}
+
+// 新增格式化函數
+const formatDateOnly = (dateString: string) => {
+  if (!dateString) return ''
+  const d = new Date(dateString)
+  if (isNaN(d.getTime())) return dateString
+  return d.toISOString().slice(0, 10)
+}
+const genderText = (gender: string) => {
+  if (gender === 'male') return '男'
+  if (gender === 'female') return '女'
+  if (gender === 'other') return '其他'
+  return ''
+}
+
+// 新增格式化時間函數
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return '-'
+  const d = new Date(dateString)
+  if (isNaN(d.getTime())) return dateString
+  return d.toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 onMounted(() => fetchMembers(1))

@@ -31,16 +31,39 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'spec' => 'nullable|string',
+            'price' => 'nullable|integer|min:1', // 新增
+            'weight' => 'nullable|string', // 新增
         ]);
         $item = $cart->items()->where('product_id', $validated['product_id'])
             ->when(isset($validated['spec']), function($q) use ($validated) {
                 $q->where('spec', $validated['spec']);
-            })->first();
+            })
+            ->when(isset($validated['weight']), function($q) use ($validated) {
+                $q->where('weight', $validated['weight']);
+            })
+            ->first();
         if ($item) {
             $item->quantity += $validated['quantity'];
+            // 若 sample 且有 price，更新 price
+            if (($validated['spec'] ?? null) === 'sample' && isset($validated['price'])) {
+                $item->price = $validated['price'];
+            }
+            // 若有 weight，更新 weight
+            if (isset($validated['weight'])) {
+                $item->weight = $validated['weight'];
+            }
             $item->save();
         } else {
-            $item = $cart->items()->create($validated);
+            $data = $validated;
+            // 若 sample 且有 price，存入 price
+            if (($validated['spec'] ?? null) === 'sample' && isset($validated['price'])) {
+                $data['price'] = $validated['price'];
+            }
+            // 若有 weight，存入 weight
+            if (isset($validated['weight'])) {
+                $data['weight'] = $validated['weight'];
+            }
+            $item = $cart->items()->create($data);
         }
         return response()->json(['success' => true, 'item' => $this->formatCartItem($item)]);
     }
@@ -78,12 +101,13 @@ class CartController extends Controller
     {
         $product = $item->product;
         $spec = $item->spec;
+        // 預設價格
         $price = $product->price_small;
         if ($spec === 'large') $price = $product->price_large;
         elseif ($spec === 'small') $price = $product->price_small;
         elseif ($spec === 'sample') {
-            $basePrice = $product->price_large ?: ($product->price_small * 2);
-            $price = max(100, round($basePrice * 0.167));
+            // 僅用 item->price，不 fallback
+            $price = $item->price;
         }
         return [
             'id' => $item->id,
@@ -91,6 +115,7 @@ class CartController extends Controller
             'name' => $product->name,
             'image' => $product->primary_image?->image_path ?? $product->image ?? null,
             'spec' => $spec,
+            'weight' => $item->weight ?? null, // 新增 weight 回傳
             'quantity' => $item->quantity,
             'price' => $price,
             'product' => $product,

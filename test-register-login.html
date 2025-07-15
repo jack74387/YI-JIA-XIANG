@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>註冊登入 API 測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>註冊登入 API 測試</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('register')">註冊測試</div>
+        <div class="tab" onclick="showTab('login')">登入測試</div>
+    </div>
+
+    <!-- 註冊表單 -->
+    <div id="register" class="tab-content active">
+        <div class="container">
+            <h2>註冊測試</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName">姓名 *</label>
+                    <input type="text" id="regName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">手機號碼 *</label>
+                    <input type="tel" id="regPhone" name="phone" placeholder="09xxxxxxxx" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">電子信箱 *</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regBirthday">出生日期 *</label>
+                    <input type="date" id="regBirthday" name="birthday" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">密碼 *</label>
+                    <input type="password" id="regPassword" name="password" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPasswordConfirm">確認密碼 *</label>
+                    <input type="password" id="regPasswordConfirm" name="password_confirmation" minlength="6" required>
+                </div>
+                <button type="submit">註冊</button>
+            </form>
+            <div id="registerResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- 登入表單 -->
+    <div id="login" class="tab-content">
+        <div class="container">
+            <h2>登入測試</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginAccount">帳號 (手機號碼或電子信箱) *</label>
+                    <input type="text" id="loginAccount" name="login" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密碼 *</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit">登入</button>
+            </form>
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 設定最大日期為今天
+        document.getElementById('regBirthday').max = new Date().toISOString().split('T')[0];
+
+        function showTab(tabName) {
+            // 隱藏所有標籤內容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有標籤的active類
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 顯示選中的標籤內容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 添加active類到選中的標籤
+            event.target.classList.add('active');
+        }
+
+        // 註冊表單處理
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('registerResult');
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `註冊成功！\n用戶ID: ${result.user.id}\n姓名: ${result.user.name}\n手機: ${result.user.phone}\n電子信箱: ${result.user.email}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `註冊失敗：\n${result.message}\n${JSON.stringify(result.errors, null, 2)}`;
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('registerResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `網路錯誤：${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // 登入表單處理
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('loginResult');
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `登入成功！\n用戶ID: ${result.user.id}\n姓名: ${result.user.name}\n手機: ${result.user.phone}\n電子信箱: ${result.user.email}\nToken: ${result.token.substring(0, 20)}...`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `登入失敗：\n${result.message}\n${JSON.stringify(result.errors, null, 2)}`;
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('loginResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `網路錯誤：${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html> 

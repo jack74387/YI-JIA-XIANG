@@ -189,9 +189,9 @@
                 >
                   <div class="flex justify-between items-start">
                     <div>
-                      <p class="font-medium text-gray-900">訂單 #{{ order.order_number }}</p>
+                      <p class="font-medium text-gray-900">訂單 #{{ order.order_number || order.id }}</p>
                       <p class="text-sm text-gray-500">{{ formatDate(order.created_at) }}</p>
-                      <p class="text-sm text-gray-500">NT$ {{ formatPrice(order.final_amount) }}</p>
+                      <p class="text-sm text-gray-500">NT$ {{ formatPrice(order.final_amount ?? order.total) }}</p>
                     </div>
                     <div class="text-right">
                       <span 
@@ -232,7 +232,7 @@
               
               <div v-else class="space-y-3">
                 <div 
-                  v-for="transaction in pointTransactions" 
+                  v-for="transaction in pointTransactions.slice(0, 5)" 
                   :key="transaction.id"
                   class="flex justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
                 >
@@ -335,9 +335,10 @@ const statistics = ref({
   member_level_color: 'text-gray-900',
   is_premium: false
 })
-const recentOrders = ref([])
-const pointTransactions = ref([])
-const coupons = ref([])
+// recentOrders、pointTransactions、coupons 型別明確化
+const recentOrders = ref<any[]>([])
+const pointTransactions = ref<any[]>([])
+const coupons = ref<any[]>([])
 const loadingCoupons = ref(false)
 
 // 計算屬性
@@ -347,7 +348,8 @@ const userAvatarUrl = computed(() => {
 })
 
 // 格式化價格
-const formatPrice = (price: number) => {
+const formatPrice = (price: number | undefined | null) => {
+  if (typeof price !== 'number' || isNaN(price)) return '0'
   return price.toLocaleString()
 }
 
@@ -358,8 +360,8 @@ const formatDate = (dateString: string) => {
 }
 
 // 取得訂單狀態樣式
-const getStatusClass = (status: string) => {
-  const classes = {
+const getStatusClass = (status: string): string => {
+  const classes: Record<string, string> = {
     'pending': 'bg-yellow-100 text-yellow-800',
     'paid': 'bg-blue-100 text-blue-800',
     'processing': 'bg-purple-100 text-purple-800',
@@ -371,9 +373,9 @@ const getStatusClass = (status: string) => {
 }
 
 // 取得訂單狀態文字
-const getStatusText = (status: string) => {
-  const texts = {
-    'pending': '待付款',
+const getStatusText = (status: string): string => {
+  const texts: Record<string, string> = {
+    'pending': '待處理',
     'paid': '已付款',
     'processing': '處理中',
     'shipped': '已出貨',

@@ -34,7 +34,7 @@
             <tr v-for="order in orders" :key="order.id">
               <td class="py-2">{{ order.id }}</td>
               <td class="py-2">{{ order.user?.name || '-' }}</td>
-              <td class="py-2">NT${{ order.total }}</td>
+              <td class="py-2">NT${{ order.final_amount ?? order.total }}</td>
               <td class="py-2">
                 <span :class="statusColor(order.status)">{{ order.status_text || order.status }}</span>
               </td>
@@ -86,7 +86,10 @@
           <div v-else-if="orderDetail">
             <div class="mb-3"><b>訂單編號：</b>{{ orderDetail.id }}</div>
             <div class="mb-3"><b>會員：</b>{{ orderDetail.user?.name || '-' }}</div>
-            <div class="mb-3"><b>金額：</b>NT${{ orderDetail.total }}</div>
+            <div class="mb-3"><b>金額：</b>NT${{ orderDetail.final_amount ?? orderDetail.total }}</div>
+            <div v-if="orderDetail.discount && orderDetail.discount > 0" class="mb-1 text-sm text-green-700">優惠券折扣：-NT${{ orderDetail.discount }}</div>
+            <div v-if="orderDetail.point_discount && orderDetail.point_discount > 0" class="mb-1 text-sm text-green-700">點數折抵：-NT${{ orderDetail.point_discount }}</div>
+            <div v-if="orderDetail.final_amount !== undefined && orderDetail.final_amount !== orderDetail.total" class="mb-1 text-sm text-amber-700">原始金額：NT${{ orderDetail.total }}</div>
             <div class="mb-3"><b>狀態：</b>
               <select v-model="orderStatus" class="input-sm w-auto">
                 <option value="pending">待處理</option>

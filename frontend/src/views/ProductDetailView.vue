@@ -60,6 +60,7 @@ function addToCart(specData: any) {
     name: `${productData.name}（${getSpecLabel(spec)}）`,
     price: price,
     spec, // <--- 修正: 加入 spec
+    weight, // <--- 新增: 傳遞 weight
     image: productData.images?.[0] || productData.image
   }
   showAddToCart.value = true

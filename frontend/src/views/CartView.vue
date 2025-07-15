@@ -25,13 +25,20 @@
                 <img :src="item.image || '/images/placeholder.jpg'" alt="商品圖" class="w-16 h-16 object-cover rounded" />
               </td>
               <td class="font-semibold">{{ item.name }}</td>
-              <td class="text-sm text-gray-500">{{ getSpecLabel(item.spec) }}</td>
+              <td class="text-sm text-gray-500">
+                <template v-if="item.weight">
+                  {{ item.weight }}
+                </template>
+                <template v-else>
+                  {{ getSpecLabel(item.spec || '') || '-' }}
+                </template>
+              </td>
               <td class="text-primary-600 font-bold">NT${{ item.price }}</td>
               <td>
                 <div class="flex items-center gap-2">
                   <button @click="updateQty(item, item.quantity-1)" :disabled="item.quantity<=1" class="qty-btn">-</button>
                   <span class="w-8 text-center">{{ item.quantity }}</span>
-                  <button @click="updateQty(item, item.quantity+1)">+</button>
+                  <button @click="updateQty(item, item.quantity+1)" class="qty-btn">+</button>
                 </div>
               </td>
               <td class="font-bold">NT${{ item.price * item.quantity }}</td>
@@ -93,17 +100,30 @@ th, td { padding: 0.5em 0.7em; }
   background: #eee;
   border: none;
   border-radius: 50%;
-  width: 2em;
-  height: 2em;
-  font-size: 1.1em;
+  width: 2.2em;
+  height: 2.2em;
+  font-size: 1.3em;
   font-weight: bold;
   color: #b85c38;
   cursor: pointer;
-  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(184,92,56,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 .qty-btn:hover:not(:disabled) {
   background: #b85c38;
   color: #fff;
+  box-shadow: 0 4px 16px rgba(184,92,56,0.18);
+  transform: scale(1.08);
+}
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #eee;
+  color: #bbb;
+  box-shadow: none;
 }
 .checkout-btn {
   background: linear-gradient(90deg, #cb6a43 0%, #b85c38 100%);

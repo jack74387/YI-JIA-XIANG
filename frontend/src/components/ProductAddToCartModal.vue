@@ -8,6 +8,7 @@
           <div>
             <h2 class="text-lg font-bold text-gray-900 mb-1">{{ product.name }}</h2>
             <div class="text-amber-700 text-xl font-bold mb-2">NT${{ product.price }}</div>
+            <div v-if="product.weight" class="text-sm text-gray-500">重量：{{ product.weight }}</div>
           </div>
           <div class="flex items-center gap-2 mt-2">
             <button @click="decrease" class="w-8 h-8 rounded bg-gray-100 hover:bg-gray-200 text-xl">-</button>
@@ -39,6 +40,7 @@ const props = defineProps<{
     price: number
     image?: string
     spec?: string // Added spec to product type
+    weight?: string // 新增 weight
   }
 }>()
 const emit = defineEmits(['close', 'added'])
@@ -60,7 +62,15 @@ function decrease() {
 
 async function addToCart() {
   loading.value = true
-  await cartStore.addToCart(props.product.id, quantity.value, props.product.spec)
+  // 新增 price 傳遞，型別保證
+  const price = props.product.spec === 'sample' ? props.product.price : undefined
+  await cartStore.addToCart(
+    props.product.id,
+    quantity.value,
+    props.product.spec,
+    price,
+    props.product.weight // 新增 weight 傳遞
+  )
   loading.value = false
   emit('added')
   emit('close')

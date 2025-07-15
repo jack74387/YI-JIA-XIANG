@@ -62,6 +62,22 @@ export const useMemberStore = defineStore('member', () => {
   const pointTransactions = ref<PointTransaction[]>([])
   const userProfile = ref<any>(null)
 
+  // 新增：用戶點數資料
+  const userPoints = ref({
+    current: 0,
+    totalEarned: 0,
+    totalUsed: 0
+  })
+  // 新增：點數歷史
+  const pointsHistory = ref<PointTransaction[]>([])
+  // 新增：分頁資訊
+  const pointsPagination = ref({
+    current_page: 1,
+    last_page: 1,
+    per_page: 20,
+    total: 0
+  })
+
   // 計算屬性
   const hasOrders = computed(() => recentOrders.value.length > 0)
   const hasPointTransactions = computed(() => pointTransactions.value.length > 0)
@@ -194,6 +210,31 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
+  // 新增：取得點數餘額與歷史
+  const fetchPoints = async (page = 1, pageSize = 20) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/v1/points', {
+        params: { page, pageSize },
+        withCredentials: true
+      })
+      if (response.data.success) {
+        userPoints.value.current = response.data.points
+        userPoints.value.totalEarned = response.data.total_earned || 0
+        userPoints.value.totalUsed = response.data.total_used || 0
+        pointsHistory.value = response.data.history || []
+        if (response.data.pagination) {
+          pointsPagination.value = response.data.pagination
+        }
+      }
+    } catch (err: any) {
+      error.value = err.response?.data?.message || '載入點數失敗'
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 刪除帳戶
   const deleteAccount = async (password: string) => {
     loading.value = true
@@ -231,11 +272,12 @@ export const useMemberStore = defineStore('member', () => {
     recentOrders,
     pointTransactions,
     userProfile,
-    
+    userPoints,
+    pointsHistory,
+    pointsPagination, // 新增
     // 計算屬性
     hasOrders,
     hasPointTransactions,
-    
     // 方法
     fetchStatistics,
     updateProfile,
@@ -243,6 +285,7 @@ export const useMemberStore = defineStore('member', () => {
     uploadAvatar,
     fetchOrders,
     fetchPointHistory,
+    fetchPoints,
     deleteAccount,
     clearError
   }

@@ -24,16 +24,18 @@ interface User {
   google_user_id?: string
 }
 
-interface LoginForm {
-  email: string
-  password: string
-}
-
 interface RegisterForm {
   name: string
+  phone: string
   email: string
+  birthday: string
   password: string
   password_confirmation: string
+}
+
+interface LoginForm {
+  login: string // 可以是手機號碼或電子信箱
+  password: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -236,6 +238,141 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
+  // Google 登入
+  const googleLogin = async (googleToken: string) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/google-login', {
+        google_token: googleToken
+      })
+      
+      if (response.data.success) {
+        const { user: userData, token: authToken } = response.data
+        
+        user.value = userData
+        token.value = authToken
+        
+        // 儲存到 localStorage
+        localStorage.setItem('auth_token', authToken)
+        localStorage.setItem('auth_user', JSON.stringify(userData))
+        
+        // 設定 axios 預設 headers
+        axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+        
+        // 通知購物車 store 用戶已登入
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.handleAuthChange()
+        
+        return { success: true }
+      } else {
+        error.value = response.data.message || 'Google 登入失敗'
+        return { success: false, error: error.value }
+      }
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = 'Google 登入失敗，請檢查網路連線'
+      }
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Facebook 登入
+  const facebookLogin = async (facebookToken: string) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/facebook-login', {
+        facebook_token: facebookToken
+      })
+      
+      if (response.data.success) {
+        const { user: userData, token: authToken } = response.data
+        
+        user.value = userData
+        token.value = authToken
+        
+        // 儲存到 localStorage
+        localStorage.setItem('auth_token', authToken)
+        localStorage.setItem('auth_user', JSON.stringify(userData))
+        
+        // 設定 axios 預設 headers
+        axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+        
+        // 通知購物車 store 用戶已登入
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.handleAuthChange()
+        
+        return { success: true }
+      } else {
+        error.value = response.data.message || 'Facebook 登入失敗'
+        return { success: false, error: error.value }
+      }
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = 'Facebook 登入失敗，請檢查網路連線'
+      }
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // LINE 登入
+  const lineLogin = async (lineToken: string) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/line-login', {
+        line_token: lineToken
+      })
+      
+      if (response.data.success) {
+        const { user: userData, token: authToken } = response.data
+        
+        user.value = userData
+        token.value = authToken
+        
+        // 儲存到 localStorage
+        localStorage.setItem('auth_token', authToken)
+        localStorage.setItem('auth_user', JSON.stringify(userData))
+        
+        // 設定 axios 預設 headers
+        axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+        
+        // 通知購物車 store 用戶已登入
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.handleAuthChange()
+        
+        return { success: true }
+      } else {
+        error.value = response.data.message || 'LINE 登入失敗'
+        return { success: false, error: error.value }
+      }
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = 'LINE 登入失敗，請檢查網路連線'
+      }
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // 狀態
     user,
@@ -254,6 +391,9 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     forgotPassword,
     checkAuth,
-    clearError
+    clearError,
+    googleLogin,
+    facebookLogin,
+    lineLogin
   }
 }) 

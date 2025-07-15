@@ -4,15 +4,34 @@ use Illuminate\Http\Request;
 
 class PointController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $points = 120;
-        $history = [
-            ['id' => 1, 'date' => '2025-01-10', 'desc' => '購物獲得', 'change' => 50],
-            ['id' => 2, 'date' => '2025-01-15', 'desc' => '評論加碼', 'change' => 20],
-            ['id' => 3, 'date' => '2025-01-20', 'desc' => '兌換折抵', 'change' => -30],
-        ];
-        return response()->json(['success' => true, 'points' => $points, 'history' => $history]);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => '未登入'], 401);
+        }
+        $points = $user->points;
+        // 分頁參數
+        $pageSize = intval($request->input('pageSize', 20));
+        $page = intval($request->input('page', 1));
+        $query = $user->pointTransactions()->orderBy('created_at', 'desc');
+        $history = $query->paginate($pageSize, ['*'], 'page', $page);
+        // 累積獲得與已使用
+        $totalEarned = $user->pointTransactions()->where('type', 'earn')->sum('points');
+        $totalUsed = abs($user->pointTransactions()->where('type', 'spend')->sum('points'));
+        return response()->json([
+            'success' => true,
+            'points' => $points,
+            'history' => $history->items(),
+            'pagination' => [
+                'current_page' => $history->currentPage(),
+                'last_page' => $history->lastPage(),
+                'per_page' => $history->perPage(),
+                'total' => $history->total(),
+            ],
+            'total_earned' => $totalEarned,
+            'total_used' => $totalUsed
+        ]);
     }
     public function earn(Request $request)
     {

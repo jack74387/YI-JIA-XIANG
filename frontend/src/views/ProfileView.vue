@@ -152,7 +152,7 @@
                       id="name"
                       v-model="form.name"
                       type="text"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入您的姓名"
                     />
                   </div>
@@ -163,7 +163,7 @@
                       id="phone"
                       v-model="form.phone"
                       type="tel"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入您的電話"
                     />
                   </div>
@@ -174,21 +174,16 @@
                       id="email"
                       v-model="form.email"
                       type="email"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入您的電子郵件"
-                      disabled
                     />
-                    <p class="mt-1 text-sm text-gray-500">電子郵件地址無法修改</p>
                   </div>
 
                   <div>
-                    <label for="birthday" class="block text-sm font-medium text-gray-700">生日</label>
-                    <input
-                      id="birthday"
-                      v-model="form.birthday"
-                      type="date"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
-                    />
+                    <label for="birthday" class="block text-sm font-medium text-gray-700">生日 <span class="text-xs text-gray-400">（註冊後無法修改）</span></label>
+                    <span class="mt-1 block w-full rounded-md bg-gray-100 px-3 py-2 text-gray-400 border border-gray-200 cursor-not-allowed" style="min-height:38px;">
+                      {{ form.birthday ? formatDate(form.birthday) : '尚未填寫' }}
+                    </span>
                   </div>
 
                   <div>
@@ -196,7 +191,7 @@
                     <select
                       id="gender"
                       v-model="form.gender"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                     >
                       <option value="">請選擇</option>
                       <option value="male">男性</option>
@@ -211,7 +206,7 @@
                       id="address"
                       v-model="form.address"
                       rows="3"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入您的地址"
                     ></textarea>
                   </div>
@@ -259,7 +254,7 @@
                       id="current_password"
                       v-model="passwordForm.current_password"
                       type="password"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入目前密碼"
                     />
                   </div>
@@ -270,7 +265,7 @@
                       id="new_password"
                       v-model="passwordForm.new_password"
                       type="password"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請輸入新密碼"
                     />
                   </div>
@@ -281,7 +276,7 @@
                       id="new_password_confirmation"
                       v-model="passwordForm.new_password_confirmation"
                       type="password"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      class="mt-1 block w-full border border-gray-300 rounded-md bg-white shadow-sm focus:ring-amber-500 focus:border-amber-500 hover:shadow-lg transition sm:text-base h-12 px-4"
                       placeholder="請再次輸入新密碼"
                     />
                   </div>
@@ -436,10 +431,12 @@ const avatarUrl = computed(() => {
   return userAvatarUrl.value
 })
 
-// 格式化日期
+// 修改 formatDate 函數，回傳 yyyy-MM-dd 格式
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('zh-TW')
+  const d = new Date(dateString)
+  if (isNaN(d.getTime())) return dateString
+  return d.toISOString().slice(0, 10)
 }
 
 // 初始化表單資料
@@ -544,6 +541,8 @@ const fetchUserProfile = async () => {
       Object.assign(authStore.user, response.data.user)
       // 更新localStorage
       localStorage.setItem('auth_user', JSON.stringify(authStore.user))
+      // 取得最新資料後同步表單內容
+      initForm()
     }
   } catch (error) {
     console.error('獲取用戶資料失敗:', error)

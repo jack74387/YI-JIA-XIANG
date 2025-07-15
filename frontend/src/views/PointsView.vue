@@ -160,10 +160,24 @@
                 >
                   {{ record.type === 'earn' ? '+' : '-' }}{{ record.points }}
                 </span>
-                <p class="text-xs text-gray-500">餘額：{{ record.balance }}</p>
+                <!-- <p class="text-xs text-gray-500">餘額：{{ record.balance !== undefined ? record.balance : '-' }}</p> -->
               </div>
             </div>
           </div>
+        </div>
+        <!-- 分頁按鈕 -->
+        <div v-if="pointsPagination.last_page > 1" class="flex justify-center items-center gap-2 py-4">
+          <button
+            class="px-3 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100"
+            :disabled="currentPage === 1"
+            @click="goToPage(currentPage - 1)"
+          >上一頁</button>
+          <span>第 {{ pointsPagination.current_page }} / {{ pointsPagination.last_page }} 頁</span>
+          <button
+            class="px-3 py-1 rounded border border-gray-300 bg-white hover:bg-gray-100"
+            :disabled="currentPage === pointsPagination.last_page"
+            @click="goToPage(currentPage + 1)"
+          >下一頁</button>
         </div>
       </div>
 
@@ -212,17 +226,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, computed, ref } from 'vue'
+import { useMemberStore } from '@/stores/member'
 
-// 用戶點數資料
-const userPoints = ref({
-  current: 1250,
-  totalEarned: 3000,
-  totalUsed: 1750
+const memberStore = useMemberStore()
+const pageSize = 10
+const currentPage = ref(1)
+
+onMounted(() => {
+  memberStore.fetchPoints(currentPage.value, pageSize)
 })
 
-// 兌換獎勵
-const rewards = ref([
+const userPoints = computed(() => memberStore.userPoints)
+const pointsHistory = computed(() => memberStore.pointsHistory)
+const pointsPagination = computed(() => memberStore.pointsPagination)
+
+const goToPage = (page: number) => {
+  if (page < 1 || page > pointsPagination.value.last_page) return
+  currentPage.value = page
+  memberStore.fetchPoints(page, pageSize)
+}
+
+// 兌換獎勵（如需串接API可再調整）
+const rewards = [
   {
     id: 1,
     name: '購物金折抵券',
@@ -247,43 +273,7 @@ const rewards = ref([
     description: '生日當月專屬優惠',
     points: 1000
   }
-])
-
-// 點數歷史記錄
-const pointsHistory = ref([
-  {
-    id: 1,
-    type: 'earn',
-    points: 120,
-    description: '購物消費獲得點數',
-    created_at: '2025-07-08T10:30:00Z',
-    balance: 1250
-  },
-  {
-    id: 2,
-    type: 'earn',
-    points: 5,
-    description: '完成訂單評價',
-    created_at: '2025-07-05T14:20:00Z',
-    balance: 1130
-  },
-  {
-    id: 3,
-    type: 'use',
-    points: 200,
-    description: '兌換免運費券',
-    created_at: '2025-07-01T09:15:00Z',
-    balance: 1125
-  },
-  {
-    id: 4,
-    type: 'earn',
-    points: 800,
-    description: '購物消費獲得點數',
-    created_at: '2025-06-25T16:45:00Z',
-    balance: 1325
-  }
-])
+]
 
 // 格式化日期
 const formatDate = (dateString: string) => {
@@ -296,17 +286,9 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// 兌換獎勵
 const redeemReward = (reward: any) => {
-  console.log('兌換獎勵:', reward)
-  // 這裡可以呼叫 API 兌換獎勵
   alert(`成功兌換 ${reward.name}！`)
 }
-
-onMounted(() => {
-  // 這裡可以載入用戶的點數資料
-  console.log('載入點數資料')
-})
 </script>
 
 <style scoped>

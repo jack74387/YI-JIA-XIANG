@@ -330,10 +330,16 @@ class CouponController extends Controller
 
             // 記錄操作日誌
             OperationLog::create([
-                'user_id' => $user->id,
+                'admin_id' => null,
                 'action' => 'claim_coupon',
-                'description' => "用戶 {$user->name} 領取了優惠券 {$coupon->name}",
-                'ip_address' => $request->ip()
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent() ?? null,
+                'data' => [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'coupon_id' => $coupon->id,
+                    'coupon_name' => $coupon->name
+                ]
             ]);
 
             return response()->json([

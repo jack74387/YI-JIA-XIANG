@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('operation_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('admin_id')->nullable();
             $table->string('action');
             $table->ipAddress('ip')->nullable();
             $table->string('user_agent')->nullable();

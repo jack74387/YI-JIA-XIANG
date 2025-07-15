@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->integer('quantity');
             $table->integer('price');
             $table->string('specs')->nullable();
+            $table->string('weight')->nullable(); // 新增 weight 欄位
             $table->timestamps();
         });
     }

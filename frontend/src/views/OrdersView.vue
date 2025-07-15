@@ -70,7 +70,7 @@
           <div class="p-6 bg-gray-50">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div class="mb-4 sm:mb-0">
-                <span class="text-lg font-bold">總計：NT${{ order.total }}</span>
+                <span class="text-lg font-bold">總計：NT${{ order.final_amount ?? order.total }}</span>
               </div>
               <div class="flex flex-col sm:flex-row gap-2">
                 <router-link :to="`/orders/${order.id}`" class="btn-secondary">

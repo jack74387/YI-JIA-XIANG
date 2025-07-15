@@ -13,6 +13,7 @@ export interface CartItem {
   image?: string
   product?: any
   spec?: string
+  weight?: string // 新增 weight
 }
 
 export const useCartStore = defineStore('cart', {
@@ -43,6 +44,7 @@ export const useCartStore = defineStore('cart', {
             price: item.price || item.product?.final_price || 0,
             quantity: item.quantity,
             spec: item.spec,
+            weight: item.weight, // 新增 weight
             image: item.image || item.product?.primary_image?.image_path,
             product: item.product
           }))
@@ -55,12 +57,14 @@ export const useCartStore = defineStore('cart', {
         this.loading = false
       }
     },
-    async addToCart(productId: number, quantity = 1, spec?: string) {
+    async addToCart(productId: number, quantity = 1, spec?: string, price?: number, weight?: string) {
       try {
         await axios.post(`${API_BASE}/api/v1/cart`, {
           product_id: productId,
           quantity,
-          spec
+          spec,
+          price, // 新增
+          weight // 新增
         })
         await this.fetchCart()
       } catch (e) {

@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->integer('points');
-            $table->enum('type', ['earn', 'spend', 'expire']);
+            $table->enum('type', ['earn', 'spend', 'expire', 'adjust']);
             $table->string('description')->nullable();
             $table->foreignId('order_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
             

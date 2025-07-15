@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>點數累積功能測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .point-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .point-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- 頁面標題 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">點數累積功能測試</h1>
+            <p class="text-lg text-gray-600">測試滿百元消費累積一點數的功能</p>
+        </div>
+
+        <!-- 點數規則說明 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">點數累積規則</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-green-600 mb-3">基本規則</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center">
+                            <span class="text-green-500 mr-2">✓</span>
+                            滿百元消費累積一點
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-green-500 mr-2">✓</span>
+                            不足百元不累積點數
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-green-500 mr-2">✓</span>
+                            生日當月享雙倍點數
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-amber-600 mb-3">計算範例</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center">
+                            <span class="text-amber-500 mr-2">•</span>
+                            消費 150 元 = 1 點
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-amber-500 mr-2">•</span>
+                            消費 250 元 = 2 點
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-amber-500 mr-2">•</span>
+                            生日當月消費 300 元 = 6 點
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試區域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 模擬訂單測試 -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">模擬訂單測試</h3>
+                
+                <form id="orderForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">訂單金額</label>
+                        <input 
+                            type="number" 
+                            id="orderAmount" 
+                            min="1" 
+                            value="150" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            placeholder="輸入訂單金額"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">用戶生日</label>
+                        <input 
+                            type="date" 
+                            id="userBirthday" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        >
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                    >
+                        模擬建立訂單
+                    </button>
+                </form>
+
+                <div id="orderResult" class="mt-4 p-4 bg-gray-50 rounded-md hidden">
+                    <h4 class="font-semibold text-gray-900 mb-2">訂單結果</h4>
+                    <div id="orderResultContent" class="text-sm text-gray-700"></div>
+                </div>
+            </div>
+
+            <!-- 點數計算器 -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">點數計算器</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">消費金額</label>
+                        <input 
+                            type="number" 
+                            id="calcAmount" 
+                            min="1" 
+                            value="150" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            placeholder="輸入消費金額"
+                        >
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="isBirthdayMonth" 
+                            class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                        >
+                        <label for="isBirthdayMonth" class="ml-2 block text-sm text-gray-700">
+                            生日當月（雙倍點數）
+                        </label>
+                    </div>
+                    
+                    <button 
+                        onclick="calculatePoints()" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                    >
+                        計算點數
+                    </button>
+                </div>
+
+                <div id="calcResult" class="mt-4 p-4 bg-green-50 rounded-md hidden">
+                    <h4 class="font-semibold text-green-900 mb-2">計算結果</h4>
+                    <div id="calcResultContent" class="text-sm text-green-700"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試案例 -->
+        <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">測試案例</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="point-card bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                    <h4 class="font-semibold text-green-800 mb-2">基本測試</h4>
+                    <p class="text-sm text-green-700 mb-2">消費 150 元</p>
+                    <p class="text-lg font-bold text-green-600">獲得 1 點</p>
+                </div>
+                
+                <div class="point-card bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                    <h4 class="font-semibold text-blue-800 mb-2">整數測試</h4>
+                    <p class="text-sm text-blue-700 mb-2">消費 300 元</p>
+                    <p class="text-lg font-bold text-blue-600">獲得 3 點</p>
+                </div>
+                
+                <div class="point-card bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                    <h4 class="font-semibold text-purple-800 mb-2">生日雙倍</h4>
+                    <p class="text-sm text-purple-700 mb-2">消費 250 元（生日當月）</p>
+                    <p class="text-lg font-bold text-purple-600">獲得 5 點</p>
+                </div>
+                
+                <div class="point-card bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+                    <h4 class="font-semibold text-red-800 mb-2">不足百元</h4>
+                    <p class="text-sm text-red-700 mb-2">消費 80 元</p>
+                    <p class="text-lg font-bold text-red-600">獲得 0 點</p>
+                </div>
+                
+                <div class="point-card bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
+                    <h4 class="font-semibold text-yellow-800 mb-2">大額消費</h4>
+                    <p class="text-sm text-yellow-700 mb-2">消費 1250 元</p>
+                    <p class="text-lg font-bold text-yellow-600">獲得 12 點</p>
+                </div>
+                
+                <div class="point-card bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200">
+                    <h4 class="font-semibold text-pink-800 mb-2">生日大額</h4>
+                    <p class="text-sm text-pink-700 mb-2">消費 800 元（生日當月）</p>
+                    <p class="text-lg font-bold text-pink-600">獲得 16 點</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API 測試 -->
+        <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">API 測試</h3>
+            <div class="space-y-4">
+                <button 
+                    onclick="testPointsAPI()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                >
+                    測試點數 API
+                </button>
+                
+                <div id="apiResult" class="p-4 bg-blue-50 rounded-md hidden">
+                    <h4 class="font-semibold text-blue-900 mb-2">API 測試結果</h4>
+                    <div id="apiResultContent" class="text-sm text-blue-700"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回按鈕 -->
+        <div class="text-center mt-8">
+            <a href="/" class="text-amber-600 hover:text-amber-500 font-medium">
+                ← 返回首頁
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 設定預設生日日期（當前月份）
+        document.getElementById('userBirthday').value = new Date().toISOString().split('T')[0];
+
+        // 模擬建立訂單
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = parseInt(document.getElementById('orderAmount').value);
+            const birthday = document.getElementById('userBirthday').value;
+            
+            if (!amount || amount <= 0) {
+                alert('請輸入有效的訂單金額');
+                return;
+            }
+
+            try {
+                // 計算點數
+                const points = calculatePointsForAmount(amount, birthday);
+                const isBirthdayMonth = isBirthdayMonthCheck(birthday);
+                
+                // 顯示結果
+                const resultDiv = document.getElementById('orderResult');
+                const resultContent = document.getElementById('orderResultContent');
+                
+                resultContent.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>訂單金額：</strong> ${amount} 元</p>
+                        <p><strong>生日當月：</strong> ${isBirthdayMonth ? '是' : '否'}</p>
+                        <p><strong>獲得點數：</strong> <span class="text-green-600 font-bold">${points} 點</span></p>
+                        <p><strong>計算方式：</strong> ${Math.floor(amount / 100)} 點${isBirthdayMonth ? ' × 2（生日雙倍）' : ''}</p>
+                    </div>
+                `;
+                
+                resultDiv.classList.remove('hidden');
+                
+                // 這裡可以呼叫實際的 API
+                console.log('模擬建立訂單:', { amount, birthday, points });
+                
+            } catch (error) {
+                console.error('建立訂單失敗:', error);
+                alert('建立訂單失敗，請稍後再試');
+            }
+        });
+
+        // 點數計算器
+        function calculatePoints() {
+            const amount = parseInt(document.getElementById('calcAmount').value);
+            const isBirthdayMonth = document.getElementById('isBirthdayMonth').checked;
+            
+            if (!amount || amount <= 0) {
+                alert('請輸入有效的消費金額');
+                return;
+            }
+
+            const basePoints = Math.floor(amount / 100);
+            const finalPoints = isBirthdayMonth ? basePoints * 2 : basePoints;
+            
+            const resultDiv = document.getElementById('calcResult');
+            const resultContent = document.getElementById('calcResultContent');
+            
+            resultContent.innerHTML = `
+                <div class="space-y-2">
+                    <p><strong>消費金額：</strong> ${amount} 元</p>
+                    <p><strong>基本點數：</strong> ${basePoints} 點</p>
+                    <p><strong>生日雙倍：</strong> ${isBirthdayMonth ? '是' : '否'}</p>
+                    <p><strong>最終點數：</strong> <span class="text-green-600 font-bold">${finalPoints} 點</span></p>
+                </div>
+            `;
+            
+            resultDiv.classList.remove('hidden');
+        }
+
+        // 計算點數的輔助函數
+        function calculatePointsForAmount(amount, birthday) {
+            const basePoints = Math.floor(amount / 100);
+            const isBirthdayMonth = isBirthdayMonthCheck(birthday);
+            return isBirthdayMonth ? basePoints * 2 : basePoints;
+        }
+
+        // 檢查是否為生日當月
+        function isBirthdayMonthCheck(birthday) {
+            if (!birthday) return false;
+            
+            const birthDate = new Date(birthday);
+            const now = new Date();
+            
+            return birthDate.getMonth() === now.getMonth();
+        }
+
+        // 測試點數 API
+        async function testPointsAPI() {
+            try {
+                const response = await fetch('/api/v1/points', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                const resultDiv = document.getElementById('apiResult');
+                const resultContent = document.getElementById('apiResultContent');
+                
+                if (result.success) {
+                    resultContent.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>API 狀態：</strong> <span class="text-green-600">成功</span></p>
+                            <p><strong>目前點數：</strong> ${result.points || 0} 點</p>
+                            <p><strong>交易記錄：</strong> ${result.history ? result.history.length : 0} 筆</p>
+                        </div>
+                    `;
+                } else {
+                    resultContent.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>API 狀態：</strong> <span class="text-red-600">失敗</span></p>
+                            <p><strong>錯誤訊息：</strong> ${result.message || '未知錯誤'}</p>
+                        </div>
+                    `;
+                }
+                
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('API 測試失敗:', error);
+                
+                const resultDiv = document.getElementById('apiResult');
+                const resultContent = document.getElementById('apiResultContent');
+                
+                resultContent.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>API 狀態：</strong> <span class="text-red-600">連線失敗</span></p>
+                        <p><strong>錯誤訊息：</strong> ${error.message}</p>
+                    </div>
+                `;
+                
+                resultDiv.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html> 

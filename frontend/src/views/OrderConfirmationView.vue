@@ -98,9 +98,23 @@
 
         <!-- 訂單總計 -->
         <div class="p-6 bg-gray-50">
-          <div class="flex justify-between items-center text-lg font-bold">
-            <span>訂單總計</span>
-            <span class="text-primary-600">NT${{ order.total }}</span>
+          <div class="flex flex-col gap-1">
+            <div class="flex justify-between items-center text-lg font-bold">
+              <span>原始金額</span>
+              <span class="text-primary-600">NT${{ order.total }}</span>
+            </div>
+            <div v-if="order.discount && order.discount > 0" class="flex justify-between items-center text-base">
+              <span>優惠券折扣</span>
+              <span class="text-green-600">-NT${{ order.discount }}</span>
+            </div>
+            <div v-if="order.point_discount && order.point_discount > 0" class="flex justify-between items-center text-base">
+              <span>點數折抵</span>
+              <span class="text-green-600">-NT${{ order.point_discount }}</span>
+            </div>
+            <div class="flex justify-between items-center text-lg font-bold mt-2 border-t pt-2">
+              <span>折抵後總計</span>
+              <span class="text-primary-700">NT${{ order.final_amount ?? order.total }}</span>
+            </div>
           </div>
         </div>
 

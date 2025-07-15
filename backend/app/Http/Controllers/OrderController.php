@@ -22,9 +22,14 @@ class OrderController extends Controller
             'recipient_phone' => 'required|string|max:20',
             'recipient_email' => 'nullable|email|max:255',
             'shipping_address' => 'required|string',
+            'city' => 'required|string',
+            'district' => 'required|string',
+            'detail_address' => 'required|string',
             'shipping_method' => 'required|string|in:宅配,超商取貨,門市自取',
             'payment_method' => 'required|string|in:貨到付款,信用卡,LINE Pay',
             'note' => 'nullable|string',
+            'final_amount' => 'required|integer|min:0',
+            'discount' => 'required|integer|min:0',
         ]);
 
         try {
@@ -42,9 +47,8 @@ class OrderController extends Controller
             // 計算總金額
             $total = 0;
             $cartItems = $cart->items()->with('product')->get();
-            
             foreach ($cartItems as $item) {
-                $price = $this->getPriceBySpec($item->product, $item->spec);
+                $price = $item->price ?? $this->getPriceBySpec($item->product, $item->spec);
                 $total += $price * $item->quantity;
             }
 
@@ -53,10 +57,15 @@ class OrderController extends Controller
                 'user_id' => $user->id,
                 'status' => 'pending',
                 'total' => $total,
+                'final_amount' => $validated['final_amount'],
+                'discount' => $validated['discount'],
                 'recipient_name' => $validated['recipient_name'],
                 'recipient_phone' => $validated['recipient_phone'],
                 'recipient_email' => $validated['recipient_email'],
-                'shipping_address' => $validated['shipping_address'],
+                'shipping_address' => $validated['city'].$validated['district'].$validated['detail_address'],
+                'city' => $validated['city'],
+                'district' => $validated['district'],
+                'detail_address' => $validated['detail_address'],
                 'shipping_method' => $validated['shipping_method'],
                 'payment_method' => $validated['payment_method'],
                 'note' => $validated['note'] ?? null,
@@ -64,19 +73,24 @@ class OrderController extends Controller
 
             // 建立訂單項目
             foreach ($cartItems as $item) {
-                $price = $this->getPriceBySpec($item->product, $item->spec);
-                
+                // 若購物車有自訂 price/weight 則優先用
+                $price = $item->price ?? $this->getPriceBySpec($item->product, $item->spec);
+                $weight = $item->weight ?? null;
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'price' => $price,
                     'spec' => $item->spec,
+                    'weight' => $weight,
                 ]);
             }
 
             // 清空購物車
             $cart->items()->delete();
+
+            // 計算並累積點數（滿百元消費累積一點）
+            $this->calculateAndAddPoints($order, $user);
 
             DB::commit();
 
@@ -142,6 +156,11 @@ class OrderController extends Controller
         ]);
 
         $order->update(['status' => $validated['status']]);
+
+        // 狀態變更為 delivered 時，檢查會員等級
+        if ($validated['status'] === 'delivered' && $order->user) {
+            $order->user->checkLevelUpgrade();
+        }
 
         return response()->json([
             'success' => true,
@@ -216,6 +235,10 @@ class OrderController extends Controller
             'status' => 'required|string|in:pending,processing,shipped,delivered,cancelled'
         ]);
         $order->update(['status' => $validated['status']]);
+        // 狀態變更為 delivered 時，檢查會員等級
+        if ($validated['status'] === 'delivered' && $order->user) {
+            $order->user->checkLevelUpgrade();
+        }
         return response()->json([
             'success' => true,
             'message' => '訂單狀態更新成功',
@@ -313,6 +336,8 @@ class OrderController extends Controller
             'status' => $order->status,
             'status_text' => $this->getStatusText($order->status),
             'total' => $order->total,
+            'final_amount' => $order->final_amount,
+            'discount' => $order->discount,
             'recipient_name' => $order->recipient_name,
             'recipient_phone' => $order->recipient_phone,
             'recipient_email' => $order->recipient_email,
@@ -339,6 +364,7 @@ class OrderController extends Controller
                     'price' => $item->price,
                     'subtotal' => $item->price * $item->quantity,
                     'image' => $item->product->primary_image?->image_path ?? $item->product->image ?? null,
+                    'weight' => $item->weight,
                 ];
             }),
         ];
@@ -366,5 +392,57 @@ class OrderController extends Controller
             'sample' => '隨手包',
         ];
         return $specMap[$spec] ?? $spec;
+    }
+
+    /**
+     * 計算並累積點數
+     * 規則：滿百元消費累積一點
+     */
+    private function calculateAndAddPoints($order, $user)
+    {
+        try {
+            // 計算點數（滿百元消費累積一點）
+            $points = intval($order->total / 100);
+            
+            if ($points > 0) {
+                // 檢查是否為生日當月（雙倍點數）
+                $isBirthdayMonth = $this->isBirthdayMonth($user);
+                if ($isBirthdayMonth) {
+                    $points *= 2;
+                }
+
+                // 只呼叫 addPoints，不再重複建立 PointTransaction
+                $user->addPoints($points, "購物消費獲得點數（訂單 #{$order->id}）" . ($isBirthdayMonth ? ' - 生日當月雙倍' : ''));
+
+                \Log::info("用戶 {$user->id} 購物消費 {$order->total} 元，獲得 {$points} 點", [
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'order_total' => $order->total,
+                    'points_earned' => $points,
+                    'is_birthday_month' => $isBirthdayMonth
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error("累積點數失敗：{$e->getMessage()}", [
+                'user_id' => $user->id,
+                'order_id' => $order->id,
+                'order_total' => $order->total
+            ]);
+        }
+    }
+
+    /**
+     * 檢查是否為生日當月
+     */
+    private function isBirthdayMonth($user)
+    {
+        if (!$user->birthday) {
+            return false;
+        }
+
+        $birthday = \Carbon\Carbon::parse($user->birthday);
+        $now = \Carbon\Carbon::now();
+
+        return $birthday->month === $now->month;
     }
 } 

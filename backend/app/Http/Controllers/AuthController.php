@@ -12,14 +12,30 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:50',
+            'phone' => 'required|string|max:20|unique:users,phone',
             'email' => 'required|email|unique:users,email',
+            'birthday' => 'required|date|before:today',
             'password' => 'required|string|min:6|confirmed',
+        ], [
+            'name.required' => '請輸入姓名',
+            'name.max' => '姓名不能超過50個字元',
+            'phone.required' => '請輸入手機號碼',
+            'phone.unique' => '此手機號碼已被註冊',
+            'email.required' => '請輸入電子信箱',
+            'email.email' => '請輸入有效的電子信箱格式',
+            'email.unique' => '此電子信箱已被註冊',
+            'birthday.required' => '請選擇出生日期',
+            'birthday.date' => '請輸入有效的日期格式',
+            'birthday.before' => '出生日期不能是今天或未來日期',
+            'password.required' => '請輸入密碼',
+            'password.min' => '密碼至少需要6個字元',
+            'password.confirmed' => '密碼確認不符',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => '驗證失敗',
+                'message' => '註冊資料驗證失敗',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -27,7 +43,9 @@ class AuthController extends Controller
         try {
             $user = User::create([
                 'name' => $request->name,
+                'phone' => $request->phone,
                 'email' => $request->email,
+                'birthday' => $request->birthday,
                 'password' => Hash::make($request->password),
             ]);
 
@@ -50,26 +68,44 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'login' => 'required|string', // 可以是手機號碼或電子信箱
             'password' => 'required|string',
+        ], [
+            'login.required' => '請輸入手機號碼或電子信箱',
+            'password.required' => '請輸入密碼',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => '請提供有效的電子郵件和密碼',
+                'message' => '請提供有效的登入資訊',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        // 判斷是手機號碼還是電子信箱
+        $loginField = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        
+        // 先檢查用戶是否存在
+        $user = User::where($loginField, $request->login)->first();
+        
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => '帳號或密碼錯誤'
+                'message' => '無此帳號，請檢查帳號是否正確'
+            ], 401);
+        }
+        
+        // 檢查密碼是否正確
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => '密碼錯誤，請重新輸入'
             ], 401);
         }
 
-        $user = Auth::user();
+        // 登入成功
+        Auth::login($user);
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -125,6 +161,74 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'LINE 登入成功'
         ]);
+    }
+
+    public function googleLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'google_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的 Google 登入憑證',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // 這裡應該實作 Google OAuth 驗證邏輯
+            // 1. 驗證 Google token
+            // 2. 取得用戶資訊
+            // 3. 檢查用戶是否已存在，不存在則創建
+            // 4. 登入用戶並回傳 token
+            
+            // 目前僅回傳成功訊息作為範例
+            return response()->json([
+                'success' => true,
+                'message' => 'Google 登入成功'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Google 登入失敗，請稍後再試'
+            ], 500);
+        }
+    }
+
+    public function facebookLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'facebook_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '請提供有效的 Facebook 登入憑證',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // 這裡應該實作 Facebook Login 驗證邏輯
+            // 1. 驗證 Facebook token
+            // 2. 取得用戶資訊
+            // 3. 檢查用戶是否已存在，不存在則創建
+            // 4. 登入用戶並回傳 token
+            
+            // 目前僅回傳成功訊息作為範例
+            return response()->json([
+                'success' => true,
+                'message' => 'Facebook 登入成功'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Facebook 登入失敗，請稍後再試'
+            ], 500);
+        }
     }
 
     public function forgotPassword(Request $request)

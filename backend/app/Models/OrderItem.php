@@ -15,7 +15,8 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'price',
-        'spec'
+        'spec',
+        'weight'
     ];
 
     protected $casts = [

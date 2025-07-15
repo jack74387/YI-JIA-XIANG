@@ -15,6 +15,8 @@ class Order extends Model
         'user_id',
         'status',
         'total',
+        'final_amount',
+        'discount',
         'shipping_address',
         'shipping_method',
         'payment_method',
@@ -26,6 +28,8 @@ class Order extends Model
 
     protected $casts = [
         'total' => 'integer',
+        'final_amount' => 'integer',
+        'discount' => 'integer',
     ];
 
     public function user(): BelongsTo

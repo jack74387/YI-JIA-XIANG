@@ -233,17 +233,19 @@ class AdminController extends Controller
         }
 
         $members = $query->with(['orders' => function($q) {
-                $q->select('id', 'user_id', 'status', 'final_amount', 'created_at');
+                $q->select('id', 'user_id', 'status', 'total', 'created_at');
             }])
-            ->withCount(['orders as total_orders', 'orders as completed_orders' => function($q) {
-                $q->where('status', 'completed');
+            ->withCount(['orders as total_orders', 'orders as delivered_orders' => function($q) {
+                $q->where('status', 'delivered');
             }])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         // 格式化會員資料
         $members->getCollection()->transform(function($member) {
-            $member->total_spent = $member->orders->where('status', 'completed')->sum('final_amount');
+            $member->total_spent = $member->orders->where('status', 'delivered')->sum(function($order) {
+                return $order->final_amount ?? $order->total;
+            });
             $member->member_level_name = $member->member_level_name;
             $member->member_level_color = $member->member_level_color;
             $member->is_active = !is_null($member->email_verified_at);
@@ -275,12 +277,21 @@ class AdminController extends Controller
             }])
             ->findOrFail($id);
 
-        // 計算統計資料
-        $totalOrders = $member->orders->count();
-        $totalSpent = $member->orders->where('status', 'completed')->sum('final_amount');
+        // 只取已送達訂單
+        $deliveredOrders = $member->orders->where('status', 'delivered');
+        $totalOrders = $deliveredOrders->count();
+        $totalSpent = $deliveredOrders->sum('total');
         $averageOrderValue = $totalOrders > 0 ? $totalSpent / $totalOrders : 0;
 
         $memberData = $member->toArray();
+        $memberData['orders'] = $member->orders->map(function($order) {
+            return [
+                'id' => $order->id,
+                'status' => $order->status,
+                'final_amount' => $order->final_amount ?? $order->total,
+                'created_at' => $order->created_at ? $order->created_at->format('Y-m-d H:i') : null,
+            ];
+        })->toArray();
         $memberData['statistics'] = [
             'total_orders' => $totalOrders,
             'total_spent' => $totalSpent,
@@ -289,7 +300,7 @@ class AdminController extends Controller
             'member_level_name' => $member->member_level_name,
             'member_level_color' => $member->member_level_color,
             'is_active' => !is_null($member->email_verified_at),
-            'last_login' => $member->last_login_at,
+            'last_login' => $member->last_login_at ? $member->last_login_at->format('Y-m-d H:i') : '-',
         ];
 
         return response()->json([

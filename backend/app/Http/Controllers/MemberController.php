@@ -41,8 +41,9 @@ class MemberController extends Controller
             'name' => 'required|string|max:50',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
-            'birthday' => 'nullable|date|before:today',
+            // 'birthday' => 'nullable|date|before:today', // 移除生日驗證
             'gender' => 'nullable|in:male,female,other',
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'email_notifications' => 'boolean',
         ]);
 
@@ -56,7 +57,7 @@ class MemberController extends Controller
 
         try {
             $user->update($request->only([
-                'name', 'phone', 'address', 'birthday', 'gender',
+                'name', 'phone', 'address', /* 'birthday', */ 'gender', 'email',
                 'email_notifications'
             ]));
 
@@ -173,7 +174,7 @@ class MemberController extends Controller
         $user = $request->user();
         
         $totalOrders = $user->orders()->count();
-        $totalSpent = $user->orders()->where('status', 'completed')->sum('final_amount');
+        $totalSpent = $user->orders()->where('status', 'delivered')->sum('total');
         $currentPoints = $user->points;
         $memberLevel = $user->member_level_name;
         

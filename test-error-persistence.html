@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錯誤訊息持久性測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+        .error-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .error-icon {
+            margin-right: 10px;
+            color: #dc3545;
+        }
+        .error-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #721c24;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .test-buttons {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-button {
+            background-color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .test-button:hover {
+            background-color: #545b62;
+        }
+        .danger-button {
+            background-color: #dc3545;
+        }
+        .danger-button:hover {
+            background-color: #c82333;
+        }
+        .success-button {
+            background-color: #28a745;
+        }
+        .success-button:hover {
+            background-color: #218838;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>錯誤訊息持久性測試</h1>
+    
+    <div class="container">
+        <h2>模擬登入表單</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="login">帳號</label>
+                <input type="text" id="login" name="login" placeholder="請輸入手機號碼或電子信箱">
+            </div>
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" placeholder="請輸入密碼">
+            </div>
+            <button type="submit">登入</button>
+        </form>
+        
+        <!-- 錯誤訊息顯示區域 -->
+        <div id="errorMessage" class="error">
+            <div class="error-header">
+                <span class="error-icon">⚠️</span>
+                <strong>登入失敗</strong>
+                <button class="error-close" onclick="hideError()">×</button>
+            </div>
+            <div id="errorContent"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>錯誤訊息持久性測試</h2>
+        <div class="info-box">
+            <strong>測試說明：</strong>這個頁面模擬了錯誤訊息的持久性機制。當發生錯誤時，錯誤訊息會被保存到 localStorage，即使頁面重新載入也能恢復顯示。
+        </div>
+        
+        <div class="test-buttons">
+            <p>點擊以下按鈕測試錯誤訊息的持久性：</p>
+            <button class="test-button" onclick="simulateError('無此帳號，請檢查帳號是否正確')">模擬：無此帳號錯誤</button>
+            <button class="test-button" onclick="simulateError('密碼錯誤，請重新輸入')">模擬：密碼錯誤</button>
+            <button class="test-button" onclick="simulateError('網路連線失敗，請檢查網路設定')">模擬：網路錯誤</button>
+            <button class="test-button" onclick="simulateError('伺服器暫時無法回應，請稍後再試')">模擬：伺服器錯誤</button>
+            <button class="danger-button" onclick="simulatePageReload()">模擬頁面重新載入</button>
+            <button class="success-button" onclick="clearAllErrors()">清除所有錯誤</button>
+            <button class="test-button" onclick="hideError()">隱藏錯誤訊息</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>測試步驟</h2>
+        <ol>
+            <li><strong>產生錯誤</strong>：點擊任意錯誤模擬按鈕</li>
+            <li><strong>驗證顯示</strong>：確認錯誤訊息正確顯示</li>
+            <li><strong>模擬重新載入</strong>：點擊"模擬頁面重新載入"按鈕</li>
+            <li><strong>驗證持久性</strong>：確認錯誤訊息在重新載入後仍然顯示</li>
+            <li><strong>清除錯誤</strong>：點擊"清除所有錯誤"按鈕</li>
+            <li><strong>再次重新載入</strong>：確認錯誤訊息不會再出現</li>
+        </ol>
+        
+        <h3>技術實現</h3>
+        <ul>
+            <li><strong>localStorage 保存</strong>：錯誤訊息和提交狀態保存到瀏覽器本地儲存</li>
+            <li><strong>頁面載入恢復</strong>：頁面載入時檢查並恢復錯誤狀態</li>
+            <li><strong>自動清理</strong>：成功操作後自動清除保存的錯誤狀態</li>
+            <li><strong>手動清理</strong>：提供手動清除錯誤的功能</li>
+        </ul>
+    </div>
+
+    <script>
+        let hasSubmitted = false; // 追蹤是否已提交過表單
+        
+        // 從 localStorage 恢復錯誤狀態
+        function restoreErrorState() {
+            const savedError = localStorage.getItem('test_error')
+            const savedSubmitted = localStorage.getItem('test_submitted')
+            
+            if (savedError) {
+                showError(savedError)
+                localStorage.removeItem('test_error') // 清除保存的錯誤
+            }
+            
+            if (savedSubmitted === 'true') {
+                hasSubmitted = true
+                localStorage.removeItem('test_submitted') // 清除保存的狀態
+            }
+        }
+        
+        // 保存錯誤狀態到 localStorage
+        function saveErrorState(error) {
+            localStorage.setItem('test_error', error)
+            localStorage.setItem('test_submitted', 'true')
+        }
+        
+        // 顯示錯誤訊息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorContent = document.getElementById('errorContent');
+            
+            errorContent.textContent = message;
+            errorDiv.classList.add('show');
+            
+            // 保存錯誤狀態
+            saveErrorState(message);
+            
+            // 記錄到控制台
+            console.log('顯示錯誤訊息:', message);
+        }
+
+        // 隱藏錯誤訊息
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('show');
+            console.log('隱藏錯誤訊息');
+        }
+        
+        // 模擬錯誤
+        function simulateError(message) {
+            hasSubmitted = true;
+            showError(message);
+        }
+        
+        // 模擬頁面重新載入
+        function simulatePageReload() {
+            alert('模擬頁面重新載入...\n\n請注意觀察錯誤訊息是否在重新載入後仍然顯示。');
+            location.reload();
+        }
+        
+        // 清除所有錯誤
+        function clearAllErrors() {
+            hideError();
+            localStorage.removeItem('test_error');
+            localStorage.removeItem('test_submitted');
+            hasSubmitted = false;
+            console.log('清除所有錯誤狀態');
+        }
+
+        // 表單提交處理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 標記已提交過表單
+            hasSubmitted = true;
+            
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
+            
+            // 模擬驗證
+            if (!login || !password) {
+                showError('請輸入帳號和密碼');
+                return;
+            }
+            
+            // 模擬更具體的登入失敗
+            if (login === 'nonexistent') {
+                showError('無此帳號，請檢查帳號是否正確');
+            } else if (login === 'wrongpassword') {
+                showError('密碼錯誤，請重新輸入');
+            } else if (login === 'error') {
+                showError('網路連線失敗，請檢查網路設定');
+            } else if (login === 'server') {
+                showError('伺服器暫時無法回應，請稍後再試');
+            } else {
+                showError('帳號或密碼錯誤');
+            }
+        });
+
+        // 輸入時自動清除錯誤
+        document.getElementById('login').addEventListener('input', function() {
+            if (hasSubmitted) {
+                hideError();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('input', function() {
+            if (hasSubmitted) {
+                hideError();
+            }
+        });
+
+        // 頁面載入時恢復錯誤狀態
+        window.addEventListener('load', function() {
+            console.log('錯誤訊息持久性測試頁面已載入');
+            restoreErrorState();
+        });
+    </script>
+</body>
+</html> 
