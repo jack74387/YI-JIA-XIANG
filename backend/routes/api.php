@@ -9,6 +9,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\UserAddressController;
 
 // 測試路由
 Route::get('/test', function () {
@@ -78,6 +79,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/points/earn', [\App\Http\Controllers\PointController::class, 'earn']);
         Route::post('/points/spend', [\App\Http\Controllers\PointController::class, 'spend']);
 
+        // 常用地址管理
+        Route::get('/user-addresses', [UserAddressController::class, 'index']);
+        Route::post('/user-addresses', [UserAddressController::class, 'store']);
+        Route::put('/user-addresses/{id}', [UserAddressController::class, 'update']);
+        Route::delete('/user-addresses/{id}', [UserAddressController::class, 'destroy']);
+        Route::post('/user-addresses/{id}/set-default', [UserAddressController::class, 'setDefault']);
+
         // 管理員專用
         Route::middleware('auth:sanctum')->group(function () {
             Route::put('/auth/admin/password', [AuthController::class, 'changeAdminPassword']);
@@ -119,6 +127,13 @@ Route::prefix('v1')->group(function () {
             Route::post('/admin/coupons', [\App\Http\Controllers\AdminController::class, 'adminCouponStore']);
             Route::put('/admin/coupons/{id}', [\App\Http\Controllers\AdminController::class, 'adminCouponUpdate']);
             Route::delete('/admin/coupons/{id}', [\App\Http\Controllers\AdminController::class, 'adminCouponDestroy']);
+            
+            // 後台門市管理
+            Route::get('/admin/stores', [\App\Http\Controllers\AdminStoreController::class, 'index']);
+            Route::get('/admin/stores/{id}', [\App\Http\Controllers\AdminStoreController::class, 'show']);
+            Route::post('/admin/stores', [\App\Http\Controllers\AdminStoreController::class, 'store']);
+            Route::put('/admin/stores/{id}', [\App\Http\Controllers\AdminStoreController::class, 'update']);
+            Route::delete('/admin/stores/{id}', [\App\Http\Controllers\AdminStoreController::class, 'destroy']);
         });
     });
 

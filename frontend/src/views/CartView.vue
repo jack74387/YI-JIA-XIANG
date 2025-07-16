@@ -3,8 +3,20 @@
     <h1 class="text-2xl font-bold mb-8">購物車</h1>
     <div v-if="cart.loading" class="text-center py-10">載入中...</div>
     <div v-else>
-      <div v-if="cart.items.length === 0" class="text-center text-gray-500 py-16">
-        購物車是空的。
+      <div v-if="cart.items.length === 0" class="empty-cart-modern flex flex-col items-center justify-center py-20">
+        <div class="empty-cart-illustration mb-6">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="40" width="100" height="60" rx="16" fill="#fffbe8" stroke="#f3c77b" stroke-width="3"/>
+            <rect x="25" y="55" width="70" height="30" rx="8" fill="#ffe0b2"/>
+            <circle cx="40" cy="95" r="7" fill="#f3c77b"/>
+            <circle cx="80" cy="95" r="7" fill="#f3c77b"/>
+            <rect x="50" y="30" width="20" height="20" rx="6" fill="#f3c77b" stroke="#fffbe8" stroke-width="2"/>
+            <rect x="55" y="35" width="10" height="10" rx="3" fill="#fffbe8"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-amber-700 mb-2">購物車是空的</h2>
+        <p class="text-gray-500 mb-6">快去選購你喜歡的商品吧！</p>
+        <router-link to="/products" class="shop-now-btn">立即購物</router-link>
       </div>
       <div v-else>
         <table class="w-full mb-8 border-separate border-spacing-y-3">
@@ -145,5 +157,40 @@ th, td { padding: 0.5em 0.7em; }
 .checkout-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.empty-cart-modern {
+  background: linear-gradient(135deg, #fffbe8 60%, #ffe0b2 100%);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px #f3c77b33;
+  min-height: 400px;
+}
+.empty-cart-illustration {
+  background: #fffbe8;
+  border-radius: 50%;
+  box-shadow: 0 2px 16px #f3c77b33;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shop-now-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #f3c77b 0%, #cb6a43 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 25px;
+  padding: 0.8em 2.5em;
+  box-shadow: 0 4px 16px #f3c77b44;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  text-decoration: none;
+}
+.shop-now-btn:hover {
+  background: linear-gradient(90deg, #ffe0b2 0%, #b85c38 100%);
+  color: #b85c38;
+  box-shadow: 0 8px 24px #f3c77b55;
+  transform: translateY(-2px) scale(1.04);
 }
 </style> 

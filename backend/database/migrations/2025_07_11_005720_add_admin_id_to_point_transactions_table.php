@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('point_transactions', function (Blueprint $table) {
-            $table->foreignId('admin_id')->nullable()->after('order_id')->constrained('users')->onDelete('set null');
+            if (!Schema::hasColumn('point_transactions', 'admin_id')) {
+                $table->integer('admin_id')->nullable()->after('id');
+            }
             $table->enum('type', ['earn', 'spend', 'expire', 'adjust'])->change();
         });
     }
@@ -23,8 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('point_transactions', function (Blueprint $table) {
-            $table->dropForeign(['admin_id']);
-            $table->dropColumn('admin_id');
+            // if (Schema::hasColumn('point_transactions', 'admin_id')) {
+            //     $table->dropColumn('admin_id');
+            // }
             $table->enum('type', ['earn', 'spend', 'expire'])->change();
         });
     }

@@ -57,41 +57,7 @@
       </div>
 
       <!-- 點數兌換 -->
-      <div class="bg-white rounded-lg shadow mb-8">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">點數兌換</h2>
-        </div>
-        <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="reward in rewards"
-              :key="reward.id"
-              class="border border-gray-200 rounded-lg p-4 hover:border-amber-300 transition-colors duration-200"
-            >
-              <div class="text-center">
-                <div class="h-16 w-16 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
-                  <svg class="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ reward.name }}</h3>
-                <p class="text-sm text-gray-600 mb-4">{{ reward.description }}</p>
-                <div class="flex items-center justify-center space-x-2 mb-4">
-                  <span class="text-2xl font-bold text-amber-600">{{ reward.points }}</span>
-                  <span class="text-sm text-gray-500">點</span>
-                </div>
-                <button
-                  @click="redeemReward(reward)"
-                  :disabled="userPoints.current < reward.points"
-                  class="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200"
-                >
-                  {{ userPoints.current >= reward.points ? '立即兌換' : '點數不足' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- 已移除點數兌換區塊 -->
 
       <!-- 點數歷史 -->
       <div class="bg-white rounded-lg shadow">
@@ -247,34 +213,6 @@ const goToPage = (page: number) => {
   memberStore.fetchPoints(page, pageSize)
 }
 
-// 兌換獎勵（如需串接API可再調整）
-const rewards = [
-  {
-    id: 1,
-    name: '購物金折抵券',
-    description: '可折抵100元購物金',
-    points: 100
-  },
-  {
-    id: 2,
-    name: '免運費券',
-    description: '單筆訂單免運費',
-    points: 200
-  },
-  {
-    id: 3,
-    name: '9折優惠券',
-    description: '全館商品9折優惠',
-    points: 500
-  },
-  {
-    id: 4,
-    name: '生日禮券',
-    description: '生日當月專屬優惠',
-    points: 1000
-  }
-]
-
 // 格式化日期
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('zh-TW', {
@@ -286,9 +224,7 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const redeemReward = (reward: any) => {
-  alert(`成功兌換 ${reward.name}！`)
-}
+// 已移除 rewards 與 redeemReward 相關程式
 </script>
 
 <style scoped>

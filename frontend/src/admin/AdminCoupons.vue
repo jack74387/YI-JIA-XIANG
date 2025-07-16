@@ -19,9 +19,7 @@
               <th class="py-2">折扣類型</th>
               <th class="py-2">折扣值</th>
               <th class="py-2">最低消費</th>
-              <th class="py-2">使用限制</th>
-              <th class="py-2">已使用</th>
-              <th class="py-2">剩餘</th>
+              <th class="py-2">發放對象</th>
               <th class="py-2">有效期限</th>
               <th class="py-2">狀態</th>
               <th class="py-2">操作</th>
@@ -34,13 +32,7 @@
               <td class="py-2">{{ coupon.type === 'percent' ? '百分比' : '金額' }}</td>
               <td class="py-2">{{ coupon.type === 'percent' ? coupon.value + '%' : 'NT$' + coupon.value }}</td>
               <td class="py-2">{{ coupon.min_order ? 'NT$' + coupon.min_order : '無限制' }}</td>
-              <td class="py-2">{{ coupon.usage_limit || '無限制' }}</td>
-              <td class="py-2">{{ coupon.used_count || 0 }}</td>
-              <td class="py-2">
-                <span :class="getRemainingClass(coupon)">
-                  {{ getRemainingText(coupon) }}
-                </span>
-              </td>
+              <td class="py-2">{{ coupon.recipient_type_label || '全部會員' }}</td>
               <td class="py-2">{{ coupon.expires_at ? coupon.expires_at.slice(0, 10) : '-' }}</td>
               <td class="py-2">
                 <button :class="coupon.is_active ? 'text-green-600' : 'text-gray-400'" @click="toggleStatus(coupon)">
@@ -96,9 +88,16 @@
               <label class="block mb-1 text-sm">最低訂單金額</label>
               <input v-model="form.min_order" type="number" class="input-sm" placeholder="0 表示無限制" />
             </div>
-            <div class="mb-3">
-              <label class="block mb-1 text-sm">使用次數限制</label>
-              <input v-model="form.usage_limit" type="number" class="input-sm" placeholder="0 表示無限制" />
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-1">發放對象</label>
+              <select v-model="form.recipient_type" class="input-field">
+                <option value="all">全部會員</option>
+                <option value="birthday">生日會員</option>
+                <option value="platinum">白金會員</option>
+                <option value="gold">金牌會員</option>
+                <option value="silver">銀牌會員</option>
+                <option value="bronze">銅牌會員</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="block mb-1 text-sm">描述</label>
@@ -138,7 +137,7 @@ const form = ref({
   type: 'fixed', 
   value: '', 
   min_order: '', 
-  usage_limit: '', 
+  recipient_type: 'all', // 新增發放對象欄位
   description: '', 
   expires_at: '', 
   is_active: true 
@@ -171,7 +170,7 @@ const openAddModal = () => {
     type: 'fixed', 
     value: '', 
     min_order: '', 
-    usage_limit: '', 
+    recipient_type: 'all', // 新增發放對象欄位
     description: '', 
     expires_at: '', 
     is_active: true 

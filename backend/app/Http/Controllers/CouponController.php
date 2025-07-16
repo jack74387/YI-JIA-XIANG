@@ -17,9 +17,8 @@ class CouponController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+        $now = now();
         $query = Coupon::where('is_active', true);
-        
         // 搜尋功能
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -29,21 +28,44 @@ class CouponController extends Controller
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        
-        $coupons = $query->orderBy('created_at', 'desc')->paginate(15);
-        
-        // 如果用戶已登入，添加用戶使用狀態
+        // 依會員身分過濾發放對象
         if ($user) {
-            $coupons->getCollection()->transform(function($coupon) use ($user) {
-                $userCoupon = $coupon->userCoupons()->where('user_id', $user->id)->first();
-                $coupon->user_status = $userCoupon ? ($userCoupon->is_used ? 'used' : 'claimed') : 'available';
-                return $coupon;
+            $memberType = 'all';
+            if ($user->isBirthdayMonth()) {
+                $memberType = 'birthday';
+            } elseif ($user->member_level === 'platinum') {
+                $memberType = 'platinum';
+            } elseif ($user->member_level === 'gold') {
+                $memberType = 'gold';
+            } elseif ($user->member_level === 'silver') {
+                $memberType = 'silver';
+            } elseif ($user->member_level === 'bronze') {
+                $memberType = 'bronze';
+            }
+            $query->where(function($q) use ($memberType) {
+                $q->where('recipient_type', 'all')
+                  ->orWhere('recipient_type', $memberType);
             });
         }
-        
+        $coupons = $query->orderBy('created_at', 'desc')->get();
+        // 標註狀態
+        $result = $coupons->map(function($coupon) use ($user, $now) {
+            $status = 'available';
+            if ($coupon->expires_at && $coupon->expires_at < $now) {
+                $status = 'expired';
+            } elseif ($user) {
+                $userCoupon = $coupon->userCoupons()->where('user_id', $user->id)->first();
+                if ($userCoupon) {
+                    $status = $userCoupon->is_used ? 'used' : 'available';
+                }
+            }
+            $data = $coupon->toArray();
+            $data['status'] = $status;
+            return $data;
+        });
         return response()->json([
             'success' => true,
-            'data' => $coupons
+            'data' => $result
         ]);
     }
 
@@ -174,38 +196,72 @@ class CouponController extends Controller
     public function userCoupons(Request $request)
     {
         $user = Auth::user();
-        
-        $userCoupons = UserCoupon::with('coupon')
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $now = now();
+        // 取得所有啟用中的優惠券（依會員身分過濾）
+        $query = Coupon::where('is_active', true);
+        $memberType = 'all';
+        if ($user->isBirthdayMonth()) {
+            $memberType = 'birthday';
+        } elseif ($user->member_level === 'platinum') {
+            $memberType = 'platinum';
+        } elseif ($user->member_level === 'gold') {
+            $memberType = 'gold';
+        } elseif ($user->member_level === 'silver') {
+            $memberType = 'silver';
+        } elseif ($user->member_level === 'bronze') {
+            $memberType = 'bronze';
+        }
+        $query->where(function($q) use ($memberType) {
+            $q->where('recipient_type', 'all')
+              ->orWhere('recipient_type', $memberType);
+        });
+        $coupons = $query->orderBy('created_at', 'desc')->get();
+
+        // 取得用戶已領取的 UserCoupon
+        $userCoupons = UserCoupon::where('user_id', $user->id)->get()->keyBy('coupon_id');
 
         $availableCoupons = [];
         $usedCoupons = [];
         $expiredCoupons = [];
 
-        foreach ($userCoupons as $userCoupon) {
-            $coupon = $userCoupon->coupon;
-            
-            if ($userCoupon->is_used) {
-                $usedCoupons[] = [
-                    'id' => $userCoupon->id,
-                    'coupon' => $coupon,
-                    'used_at' => $userCoupon->used_at,
-                    'order_id' => $userCoupon->order_id
-                ];
-            } elseif (!$coupon->isValid()) {
-                $expiredCoupons[] = [
-                    'id' => $userCoupon->id,
-                    'coupon' => $coupon,
-                    'claimed_at' => $userCoupon->created_at
-                ];
+        foreach ($coupons as $coupon) {
+            $userCoupon = $userCoupons->get($coupon->id);
+            if ($userCoupon) {
+                if ($userCoupon->is_used) {
+                    $usedCoupons[] = [
+                        'id' => $userCoupon->id,
+                        'coupon' => $coupon,
+                        'used_at' => $userCoupon->used_at,
+                        'order_id' => $userCoupon->order_id
+                    ];
+                } elseif (!$coupon->isValid()) {
+                    $expiredCoupons[] = [
+                        'id' => $userCoupon->id,
+                        'coupon' => $coupon,
+                        'claimed_at' => $userCoupon->created_at
+                    ];
+                } else {
+                    $availableCoupons[] = [
+                        'id' => $userCoupon->id,
+                        'coupon' => $coupon,
+                        'claimed_at' => $userCoupon->created_at
+                    ];
+                }
             } else {
-                $availableCoupons[] = [
-                    'id' => $userCoupon->id,
-                    'coupon' => $coupon,
-                    'claimed_at' => $userCoupon->created_at
-                ];
+                // 未領取但啟用且未過期的也算 available
+                if ($coupon->isValid()) {
+                    $availableCoupons[] = [
+                        'id' => null,
+                        'coupon' => $coupon,
+                        'claimed_at' => null
+                    ];
+                } elseif ($coupon->expires_at && $coupon->expires_at < $now) {
+                    $expiredCoupons[] = [
+                        'id' => null,
+                        'coupon' => $coupon,
+                        'claimed_at' => null
+                    ];
+                }
             }
         }
 

@@ -43,30 +43,111 @@
             </div>
           </div>
 
-          <!-- 優惠券選擇區塊（美化下拉選單+已選卡片） -->
-          <section class="mb-6">
-            <label class="block mb-1 font-semibold">選擇優惠券</label>
-            <div class="flex items-center gap-4">
-              <select v-model="selectedCouponId" class="input-sm w-full max-w-xs rounded border border-gray-300 focus:ring-2 focus:ring-gray-300 focus:border-gray-400 shadow-sm transition" @change="applyCoupon">
-                <option value="">不使用優惠券</option>
-                <option v-for="coupon in availableCoupons" :key="coupon.id" :value="coupon.id">
-                  {{ coupon.name }} ({{ coupon.code }}) - {{ coupon.type === 'percent' ? coupon.value + '%' : 'NT$' + coupon.value }}
-                </option>
-              </select>
-              <button v-if="selectedCoupon" @click="removeCoupon" class="ml-2 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm">移除</button>
-            </div>
-            <!-- 已選優惠券資訊卡片 -->
-            <div v-if="selectedCoupon" class="mt-3 p-4 rounded border border-primary-200 bg-primary-50 shadow-sm flex flex-col gap-1">
-              <div class="font-bold text-primary-700 text-lg flex items-center gap-2">
-                <span>{{ selectedCoupon.name }}</span>
-                <span class="text-xs bg-primary-200 text-primary-800 rounded px-2 py-0.5">{{ selectedCoupon.code }}</span>
+          <!-- 優惠券選擇區塊 -->
+          <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+              <svg class="w-6 h-6 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+              </svg>
+              優惠券選擇
+            </h2>
+            
+            <!-- 優惠券選擇下拉選單 -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2">選擇優惠券</label>
+              <div class="relative">
+                <select 
+                  v-model="selectedCouponId" 
+                  @change="applyCoupon"
+                  class="w-full px-4 py-3 pr-10 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 appearance-none cursor-pointer hover:border-gray-400"
+                >
+                  <option value="" class="py-2">🎫 不使用優惠券</option>
+                  <option v-for="coupon in availableCoupons" :key="coupon.id" :value="coupon.id" class="py-2">
+                    💎 {{ coupon.name }} - {{ coupon.type === 'percent' ? coupon.value + '% 折扣' : 'NT$' + coupon.value + ' 折抵' }}
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
               </div>
-              <div class="text-sm text-gray-700">{{ selectedCoupon.description }}</div>
-              <div class="text-xs text-gray-500">{{ selectedCoupon.type === 'percent' ? selectedCoupon.value + '% 折扣' : '折 NT$' + selectedCoupon.value }}</div>
-              <div class="text-xs text-gray-500">滿 NT${{ selectedCoupon.min_amount || 0 }} 可用</div>
-              <div class="text-xs text-gray-400">到期日：{{ selectedCoupon.expired_at ? selectedCoupon.expired_at.split('T')[0] : '-' }}</div>
+              
+              <!-- 移除按鈕 -->
+              <button 
+                v-if="selectedCoupon" 
+                @click="removeCoupon" 
+                class="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                移除優惠券
+              </button>
             </div>
-          </section>
+            
+            <!-- 已選優惠券資訊卡片 -->
+            <div v-if="selectedCoupon" class="mt-4 p-4 rounded-xl border-2 border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100 shadow-lg">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-primary-800 text-lg">{{ selectedCoupon.name }}</h3>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-200 text-primary-800">
+                        {{ selectedCoupon.code }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="space-y-2 text-sm">
+                    <div class="text-gray-700">{{ selectedCoupon.description }}</div>
+                    <div class="flex items-center gap-4 text-gray-600">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span class="font-medium text-green-600">
+                          {{ selectedCoupon.type === 'percent' ? selectedCoupon.value + '% 折扣' : 'NT$' + selectedCoupon.value + ' 折抵' }}
+                        </span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                        <span>滿 NT${{ selectedCoupon.min_amount || 0 }} 可用</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center text-gray-500">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                      <span>到期日：{{ selectedCoupon.expired_at ? selectedCoupon.expired_at.split('T')[0] : '無期限' }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 折扣金額顯示 -->
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-green-600">-NT${{ discount }}</div>
+                  <div class="text-xs text-gray-500">本次折抵</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 無可用優惠券提示 -->
+            <div v-if="availableCoupons.length === 0 && !selectedCoupon" class="mt-4 p-4 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-center">
+              <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+              </svg>
+              <p class="text-gray-500">目前沒有可用的優惠券</p>
+              <p class="text-sm text-gray-400 mt-1">請稍後再來查看或前往會員中心領取優惠券</p>
+            </div>
+          </div>
 
           <!-- 點數折抵區塊（允許與優惠券同時選擇） -->
           <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
@@ -89,9 +170,222 @@
             <div v-else class="text-gray-500">您目前沒有可用點數</div>
           </div>
 
+          <!-- 配送與付款方式 -->
+          <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">配送與付款方式</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">配送方式 *</label>
+                <select v-model="form.shipping_method" required class="input-field">
+                  <option value="">請選擇配送方式</option>
+                  <option value="宅配">宅配</option>
+                  <option value="超商取貨">超商取貨</option>
+                  <option value="門市自取">門市自取</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">付款方式 *</label>
+                <select v-model="form.payment_method" required class="input-field">
+                  <option value="">請選擇付款方式</option>
+                  <option value="貨到付款">貨到付款</option>
+                  <option value="信用卡">信用卡</option>
+                  <option value="LINE Pay">LINE Pay</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <!-- 收件人資訊 -->
           <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">收件人資訊</h2>
+            
+            <!-- 宅配地址選擇 -->
+            <div v-if="form.shipping_method === '宅配'" class="mb-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">收件地址</h3>
+                <div class="flex gap-2">
+                  <button @click="showAddressSelectDialog = true" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    選擇地址
+                  </button>
+                  <button @click="showAddressDialog = true" class="inline-flex items-center px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 hover:border-primary-300 transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    新增地址
+                  </button>
+                </div>
+              </div>
+              
+              <!-- 當前選擇的地址顯示 -->
+              <div v-if="selectedAddressId" class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                      <h4 class="font-semibold text-gray-900 text-lg">{{ form.recipient_name }}</h4>
+                      <span v-if="selectedAddress && selectedAddress.is_default" class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                        預設
+                      </span>
+                    </div>
+                    <div class="space-y-1 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        {{ form.recipient_phone }}
+                      </div>
+                      <div class="flex items-start">
+                        <svg class="w-4 h-4 mr-2 mt-0.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>{{ selectedCity }}{{ selectedDistrict }}{{ detailAddress }}</span>
+                      </div>
+                      <div v-if="form.recipient_email" class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ form.recipient_email }}
+                      </div>
+                    </div>
+                  </div>
+                  <button @click="clearSelectedAddress" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div v-else class="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-gray-500">請選擇收件地址</p>
+              </div>
+            </div>
+            
+            <!-- 超商取貨門市選擇 -->
+            <div v-if="form.shipping_method === '超商取貨'" class="mb-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">超商門市選擇</h3>
+                <button @click="showConvenienceStoreDialog = true" class="inline-flex items-center px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 hover:border-primary-300 transition-colors">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  選擇門市
+                </button>
+              </div>
+              
+              <div v-if="selectedConvenienceStore" class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                      <h4 class="font-semibold text-gray-900 text-lg">{{ selectedConvenienceStore.name }}</h4>
+                      <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ selectedConvenienceStore.chain }}
+                      </span>
+                    </div>
+                    <div class="space-y-1 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>{{ selectedConvenienceStore.address }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        <span>{{ selectedConvenienceStore.phone }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button @click="selectedConvenienceStore = null" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div v-else class="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-gray-500">請選擇超商門市</p>
+              </div>
+            </div>
+            
+            <!-- 門市自取選擇 -->
+            <div v-if="form.shipping_method === '門市自取'" class="mb-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">門市選擇</h3>
+                <button @click="showStoreDialog = true" class="inline-flex items-center px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 hover:border-primary-300 transition-colors">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  選擇門市
+                </button>
+              </div>
+              
+              <div v-if="selectedStore" class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                      <h4 class="font-semibold text-gray-900 text-lg">{{ selectedStore.name }}</h4>
+                      <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        一佳香門市
+                      </span>
+                    </div>
+                    <div class="space-y-1 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>{{ selectedStore.address }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        <span>{{ selectedStore.phone }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ selectedStore.hours }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button @click="selectedStore = null" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div v-else class="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-gray-500">請選擇門市</p>
+              </div>
+            </div>
+            
+            <!-- 基本收件人資訊 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">收件人姓名 *</label>
@@ -122,7 +416,9 @@
                   placeholder="請輸入 Email（選填）"
                 />
               </div>
-              <div class="md:col-span-2">
+              
+              <!-- 宅配地址欄位 -->
+              <div v-if="form.shipping_method === '宅配'" class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">收件地址 *</label>
                 <div class="flex gap-2 mb-2">
                   <select v-model="selectedCity" @change="onCityChange" class="input-field w-40">
@@ -138,32 +434,12 @@
               </div>
             </div>
           </div>
-
-          <!-- 配送與付款方式 -->
+          
+          <!-- 備註 -->
           <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">配送與付款方式</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">配送方式 *</label>
-                <select v-model="form.shipping_method" required class="input-field">
-                  <option value="">請選擇配送方式</option>
-                  <option value="宅配">宅配</option>
-                  <option value="超商取貨">超商取貨</option>
-                  <option value="門市自取">門市自取</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">付款方式 *</label>
-                <select v-model="form.payment_method" required class="input-field">
-                  <option value="">請選擇付款方式</option>
-                  <option value="貨到付款">貨到付款</option>
-                  <option value="信用卡">信用卡</option>
-                  <option value="LINE Pay">LINE Pay</option>
-                </select>
-              </div>
-            </div>
-            <div class="mt-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">備註</label>
+            <h2 class="text-xl font-semibold mb-4">備註</h2>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">特殊需求說明</label>
               <textarea
                 v-model="form.note"
                 rows="3"
@@ -172,6 +448,310 @@
               ></textarea>
             </div>
           </div>
+          
+          <!-- 地址選擇 Dialog -->
+          <div v-if="showAddressSelectDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+              <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-semibold text-gray-900">選擇收件地址</h3>
+                  <button @click="showAddressSelectDialog = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div v-if="addressStore.loading" class="text-center py-12">
+                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <p class="mt-2 text-gray-500">載入地址中...</p>
+                </div>
+                <div v-else-if="addressStore.error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <div class="flex">
+                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="ml-3 text-sm text-red-800">{{ addressStore.error }}</p>
+                  </div>
+                </div>
+                <div v-else>
+                  <div v-if="addressStore.addresses.length === 0" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <p class="text-gray-500 mb-4">尚未新增任何常用地址</p>
+                    <button @click="showAddressDialog = true; showAddressSelectDialog = false" class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 hover:border-primary-300 transition-colors">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      新增地址
+                    </button>
+                  </div>
+                  <div v-else class="space-y-3 max-h-96 overflow-y-auto">
+                    <div v-for="address in addressStore.addresses" :key="address.id" 
+                         class="relative p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md"
+                         :class="{ 
+                           'border-primary-500 bg-primary-50 shadow-sm': selectedAddressId === address.id,
+                           'border-gray-200 bg-white hover:border-gray-300': selectedAddressId !== address.id 
+                         }"
+                         @click="selectAddressFromDialog(address)">
+                      <!-- 選中標記 -->
+                      <div v-if="selectedAddressId === address.id" class="absolute top-3 right-3">
+                        <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      <!-- 預設標記 -->
+                      <div v-if="address.is_default" class="absolute top-3 left-3">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                          </svg>
+                          預設
+                        </span>
+                      </div>
+                      
+                      <div class="pr-8">
+                        <div class="flex items-center mb-2">
+                          <h4 class="font-semibold text-gray-900 text-lg">{{ address.recipient_name }}</h4>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600">
+                          <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            {{ address.recipient_phone }}
+                          </div>
+                          <div class="flex items-start">
+                            <svg class="w-4 h-4 mr-2 mt-0.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>{{ address.city }}{{ address.district }}{{ address.detail_address }}</span>
+                          </div>
+                          <div v-if="address.recipient_email" class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ address.recipient_email }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-6 flex justify-between items-center">
+                    <button @click="showAddressDialog = true; showAddressSelectDialog = false" class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 hover:border-primary-300 transition-colors">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      新增地址
+                    </button>
+                    <div class="flex gap-3">
+                      <button @click="showAddressSelectDialog = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        取消
+                      </button>
+                      <button @click="confirmAddressSelection" :disabled="!selectedAddressId" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        確認選擇
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 超商門市選擇 Dialog -->
+          <div v-if="showConvenienceStoreDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+              <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-semibold text-gray-900">選擇超商門市</h3>
+                  <button @click="showConvenienceStoreDialog = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                  <div v-for="store in convenienceStores" :key="store.id" 
+                       class="relative p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md"
+                       :class="{ 
+                         'border-primary-500 bg-primary-50 shadow-sm': selectedConvenienceStore?.id === store.id,
+                         'border-gray-200 bg-white hover:border-gray-300': selectedConvenienceStore?.id !== store.id 
+                       }"
+                       @click="selectedConvenienceStore = store">
+                    <!-- 選中標記 -->
+                    <div v-if="selectedConvenienceStore?.id === store.id" class="absolute top-3 right-3">
+                      <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <div class="pr-8">
+                      <div class="flex items-center mb-2">
+                        <h4 class="font-semibold text-gray-900 text-lg">{{ store.name }}</h4>
+                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {{ store.chain }}
+                        </span>
+                      </div>
+                      <div class="space-y-1 text-sm text-gray-600">
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                          <span>{{ store.address }}</span>
+                        </div>
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                          </svg>
+                          <span>{{ store.phone }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end gap-3">
+                  <button @click="showConvenienceStoreDialog = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    取消
+                  </button>
+                  <button @click="showConvenienceStoreDialog = false" :disabled="!selectedConvenienceStore" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    確認選擇
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 門市選擇 Dialog -->
+          <div v-if="showStoreDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+              <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-semibold text-gray-900">選擇門市</h3>
+                  <button @click="showStoreDialog = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                  <div v-for="store in stores" :key="store.id" 
+                       class="relative p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md"
+                       :class="{ 
+                         'border-primary-500 bg-primary-50 shadow-sm': selectedStore?.id === store.id,
+                         'border-gray-200 bg-white hover:border-gray-300': selectedStore?.id !== store.id 
+                       }"
+                       @click="selectedStore = store">
+                    <!-- 選中標記 -->
+                    <div v-if="selectedStore?.id === store.id" class="absolute top-3 right-3">
+                      <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    <div class="pr-8">
+                      <div class="flex items-center mb-2">
+                        <h4 class="font-semibold text-gray-900 text-lg">{{ store.name }}</h4>
+                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                          一佳香門市
+                        </span>
+                      </div>
+                      <div class="space-y-1 text-sm text-gray-600">
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                          <span>{{ store.address }}</span>
+                        </div>
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                          </svg>
+                          <span>{{ store.phone }}</span>
+                        </div>
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <span>{{ store.hours }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end gap-3">
+                  <button @click="showStoreDialog = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    取消
+                  </button>
+                  <button @click="showStoreDialog = false" :disabled="!selectedStore" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    確認選擇
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 地址新增/編輯 Dialog -->
+          <div v-if="showAddressDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+              <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">新增常用地址</h3>
+                <form @submit.prevent="submitAddress">
+                  <div class="grid grid-cols-1 gap-4">
+                    <input v-model="addressForm.recipient_name" required placeholder="收件人姓名" class="border rounded px-3 py-2 w-full" />
+                    <input v-model="addressForm.recipient_phone" required placeholder="收件人電話" class="border rounded px-3 py-2 w-full" />
+                    <input v-model="addressForm.recipient_email" required placeholder="收件人 Email" class="border rounded px-3 py-2 w-full" />
+                    
+                    <!-- 縣市下拉選單 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">縣市</label>
+                      <select v-model="addressForm.city" @change="onAddressCityChange" required class="border rounded px-3 py-2 w-full">
+                        <option value="">請選擇縣市</option>
+                        <option v-for="city in addressStore.cities" :key="city" :value="city">{{ city }}</option>
+                      </select>
+                    </div>
+                    
+                    <!-- 鄉鎮市區下拉選單 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">鄉鎮市區</label>
+                      <select v-model="addressForm.district" required class="border rounded px-3 py-2 w-full" :disabled="!addressForm.city">
+                        <option value="">請選擇鄉鎮市區</option>
+                        <option v-for="district in addressAvailableDistricts" :key="district" :value="district">{{ district }}</option>
+                      </select>
+                    </div>
+                    
+                    <input v-model="addressForm.detail_address" required placeholder="詳細地址" class="border rounded px-3 py-2 w-full" />
+                    <label class="flex items-center space-x-2">
+                      <input type="checkbox" v-model="addressForm.is_default" />
+                      <span>設為預設地址</span>
+                    </label>
+                  </div>
+                  <div class="mt-6 flex justify-end space-x-3">
+                    <button @click="closeAddressDialog" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">取消</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">{{ addressDialogLoading ? '儲存中...' : '儲存' }}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+
         </div>
 
         <!-- 右側：訂單摘要 -->
@@ -240,13 +820,38 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
 import { useMemberStore } from '@/stores/member'
+import { useUserAddresses } from '@/stores/userAddresses'
 
 const router = useRouter()
 const cart = useCartStore()
 const memberStore = useMemberStore()
+const addressStore = useUserAddresses()
 
 const loading = ref(false)
 const submitting = ref(false)
+
+// 常用地址相關
+const showAddressDialog = ref(false)
+const showAddressSelectDialog = ref(false)
+const selectedAddressId = ref<number | null>(null)
+const addressDialogLoading = ref(false)
+
+// 超商取貨相關
+const showConvenienceStoreDialog = ref(false)
+const selectedConvenienceStore = ref<any>(null)
+
+// 門市自取相關
+const showStoreDialog = ref(false)
+const selectedStore = ref<any>(null)
+const addressForm = ref({
+  recipient_name: '',
+  recipient_phone: '',
+  recipient_email: '',
+  city: '',
+  district: '',
+  detail_address: '',
+  is_default: false,
+})
 
 // 表單資料
 const form = ref({
@@ -261,13 +866,21 @@ const form = ref({
 
 // 表單驗證
 const isFormValid = computed(() => {
-  return form.value.recipient_name &&
-         form.value.recipient_phone &&
-         form.value.shipping_method &&
-         form.value.payment_method &&
-         selectedCity.value &&
-         selectedDistrict.value &&
-         detailAddress.value
+  const basicValid = form.value.recipient_name &&
+                    form.value.recipient_phone &&
+                    form.value.shipping_method &&
+                    form.value.payment_method
+  
+  // 根據配送方式進行不同驗證
+  if (form.value.shipping_method === '宅配') {
+    return basicValid && selectedCity.value && selectedDistrict.value && detailAddress.value
+  } else if (form.value.shipping_method === '超商取貨') {
+    return basicValid && selectedConvenienceStore.value
+  } else if (form.value.shipping_method === '門市自取') {
+    return basicValid && selectedStore.value
+  }
+  
+  return basicValid
 })
 
 // 規格標籤轉換
@@ -284,8 +897,20 @@ const selectedCouponId = ref('')
 const discount = ref(0)
 
 // 新增：分可用/不可用
+function isCouponAvailable(coupon: any) {
+  // 滿額、未過期、啟用
+  const now = new Date()
+  if (!coupon.is_active) return false
+  if (coupon.expired_at && new Date(coupon.expired_at) < now) return false
+  // 支援多種欄位名稱
+  const minAmount = coupon.min_amount ?? coupon.min_order ?? coupon.min_total ?? 0
+  if (minAmount && cart.totalPrice < minAmount) return false
+  if (coupon.status === 'used') return false
+  return true
+}
+
 const availableCoupons = computed(() => {
-  return coupons.value.filter((c: any) => c.is_active && isCouponAvailable(c))
+  return coupons.value.filter((c: any) => isCouponAvailable(c))
 })
 const unavailableCoupons = computed(() => {
   return coupons.value.filter((c: any) => !isCouponAvailable(c)).map((c: any) => ({
@@ -294,14 +919,6 @@ const unavailableCoupons = computed(() => {
   }))
 })
 
-function isCouponAvailable(coupon: any) {
-  // 滿額、未過期、啟用
-  const now = new Date()
-  if (!coupon.is_active) return false
-  if (coupon.expired_at && new Date(coupon.expired_at) < now) return false
-  if (coupon.min_amount && cart.totalPrice < coupon.min_amount) return false
-  return true
-}
 function getCouponUnavailableReason(coupon: any) {
   const now = new Date()
   if (!coupon.is_active) return '已停用'
@@ -437,22 +1054,48 @@ async function submitOrder() {
     alert('請填寫完整的收件人資訊')
     return
   }
-  if (!selectedCity.value || !selectedDistrict.value || !detailAddress.value) {
-    alert('請選擇完整的縣市、鄉鎮市區並填寫詳細地址')
-    return
+  
+  // 根據配送方式驗證必要資訊
+  if (form.value.shipping_method === '宅配') {
+    if (!selectedCity.value || !selectedDistrict.value || !detailAddress.value) {
+      alert('請選擇完整的縣市、鄉鎮市區並填寫詳細地址')
+      return
+    }
+  } else if (form.value.shipping_method === '門市自取') {
+    if (!selectedStore.value) {
+      alert('請選擇門市')
+      return
+    }
+  } else if (form.value.shipping_method === '超商取貨') {
+    if (!selectedConvenienceStore.value) {
+      alert('請選擇超商門市')
+      return
+    }
   }
+  
   submitting.value = true
   try {
     const payload = {
       ...form.value,
-      shipping_address: `${selectedCity.value}${selectedDistrict.value}${detailAddress.value}`,
-      city: selectedCity.value,
-      district: selectedDistrict.value,
-      detail_address: detailAddress.value,
-      use_points: usePoints.value,
+      shipping_address: form.value.shipping_method === '宅配' ? `${selectedCity.value}${selectedDistrict.value}${detailAddress.value}` : null,
+      city: form.value.shipping_method === '宅配' ? selectedCity.value : null,
+      district: form.value.shipping_method === '宅配' ? selectedDistrict.value : null,
+      detail_address: form.value.shipping_method === '宅配' ? detailAddress.value : null,
+      used_points: usePoints.value,
       coupon_id: selectedCouponId.value || undefined,
       final_amount: finalTotalWithPoints.value, // 折抵後總計
-      discount: discount.value + discountByPoints.value // 優惠券+點數折抵總和
+      discount: discount.value + discountByPoints.value, // 優惠券+點數折抵總和
+      // 門市自取相關資訊
+      store_id: form.value.shipping_method === '門市自取' && selectedStore.value?.id != null ? String(selectedStore.value.id) : null,
+      store_name: form.value.shipping_method === '門市自取' ? selectedStore.value?.name : null,
+      store_address: form.value.shipping_method === '門市自取' ? selectedStore.value?.address : null,
+      store_phone: form.value.shipping_method === '門市自取' ? selectedStore.value?.phone : null,
+      store_hours: form.value.shipping_method === '門市自取' ? selectedStore.value?.hours : null,
+      // 超商取貨相關資訊
+      convenience_store_name: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.name : null,
+      convenience_store_address: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.address : null,
+      convenience_store_phone: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.phone : null,
+      convenience_store_chain: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.chain : null,
     }
     const response = await axios.post('http://127.0.0.1:8000/api/v1/orders', payload)
     
@@ -474,19 +1117,158 @@ async function submitOrder() {
 }
 
 // 頁面載入時取得購物車資料
-onMounted(() => {
+onMounted(async () => {
   loading.value = true
   cart.fetchCart().finally(() => {
     loading.value = false
   })
   fetchCoupons()
   memberStore.fetchPoints() // ← 新增，確保點數正確
+  await addressStore.fetchAddresses() // ← 新增，載入常用地址
+  
+  // 取得門市資料
+  try {
+    const res = await axios.get('http://127.0.0.1:8000/api/v1/stores')
+    if (res.data.success) {
+      stores.value = res.data.stores
+      // 預設選擇台東總店
+      const taitungStore = stores.value.find((s: any) => s.name.includes('台東總店'))
+      if (taitungStore) {
+        selectedStore.value = taitungStore
+      }
+    }
+  } catch (e) {
+    stores.value = []
+  }
+  
+  // 自動填入預設地址
+  const defaultAddress = addressStore.getDefaultAddress()
+  if (defaultAddress) {
+    selectedAddressId.value = defaultAddress.id
+    selectAddress(defaultAddress)
+  }
 })
 
 const selectedCoupon = computed(() => coupons.value.find((c: any) => c.id == selectedCouponId.value) || null)
 const removeCoupon = () => {
   discount.value = 0
   selectedCouponId.value = ''
+}
+
+// 選中的地址
+const selectedAddress = computed(() => {
+  if (!selectedAddressId.value) return null
+  return addressStore.addresses.find(a => a.id === selectedAddressId.value)
+})
+
+// 清空選中的地址
+const clearSelectedAddress = () => {
+  selectedAddressId.value = null
+  form.value.recipient_name = ''
+  form.value.recipient_phone = ''
+  form.value.recipient_email = ''
+  selectedCity.value = ''
+  selectedDistrict.value = ''
+  detailAddress.value = ''
+}
+
+// 模擬超商門市資料
+const convenienceStores = ref([
+  {
+    id: 1,
+    name: '7-ELEVEN 台北車站門市',
+    chain: '7-ELEVEN',
+    address: '台北市中正區忠孝西路一段49號',
+    phone: '02-2311-1234'
+  },
+  {
+    id: 2,
+    name: '全家 西門町店',
+    chain: '全家',
+    address: '台北市萬華區西寧南路50號',
+    phone: '02-2311-5678'
+  },
+  {
+    id: 3,
+    name: '萊爾富 信義店',
+    chain: '萊爾富',
+    address: '台北市信義區信義路五段7號',
+    phone: '02-2720-1234'
+  }
+])
+
+// 串接後端取得門市資料
+const stores = ref<any[]>([])
+
+// 常用地址相關方法
+const selectAddress = (address: any) => {
+  selectedAddressId.value = address.id
+  form.value.recipient_name = address.recipient_name
+  form.value.recipient_phone = address.recipient_phone
+  form.value.recipient_email = address.recipient_email
+  selectedCity.value = address.city
+  selectedDistrict.value = address.district
+  detailAddress.value = address.detail_address
+}
+
+// 從彈窗選擇地址
+const selectAddressFromDialog = (address: any) => {
+  selectedAddressId.value = address.id
+}
+
+// 確認地址選擇
+const confirmAddressSelection = () => {
+  if (selectedAddressId.value && selectedAddress.value) {
+    const address = selectedAddress.value
+    form.value.recipient_name = address.recipient_name
+    form.value.recipient_phone = address.recipient_phone
+    form.value.recipient_email = address.recipient_email || ''
+    selectedCity.value = address.city
+    selectedDistrict.value = address.district
+    detailAddress.value = address.detail_address
+    showAddressSelectDialog.value = false
+  }
+}
+
+
+
+// 地址表單相關
+const addressAvailableDistricts = computed(() => {
+  if (!addressForm.value.city) return []
+  return addressStore.getDistricts(addressForm.value.city)
+})
+
+const onAddressCityChange = () => {
+  addressForm.value.district = ''
+}
+
+const submitAddress = async () => {
+  addressDialogLoading.value = true
+  try {
+    await addressStore.addAddress(addressForm.value)
+    showAddressDialog.value = false
+    resetAddressForm()
+    await addressStore.fetchAddresses()
+  } catch (error) {
+    console.error('儲存地址失敗:', error)
+  } finally {
+    addressDialogLoading.value = false
+  }
+}
+
+const resetAddressForm = () => {
+  addressForm.value.recipient_name = ''
+  addressForm.value.recipient_phone = ''
+  addressForm.value.recipient_email = ''
+  addressForm.value.city = ''
+  addressForm.value.district = ''
+  addressForm.value.detail_address = ''
+  addressForm.value.is_default = false
+}
+
+const closeAddressDialog = () => {
+  showAddressDialog.value = false
+  resetAddressForm()
 }
 </script>
 

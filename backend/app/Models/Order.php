@@ -23,7 +23,21 @@ class Order extends Model
         'note',
         'recipient_name',
         'recipient_phone',
-        'recipient_email'
+        'recipient_email',
+        'city',
+        'district',
+        'detail_address',
+        // 門市自取相關欄位
+        'store_id',
+        'store_name',
+        'store_address',
+        'store_phone',
+        'store_hours',
+        // 超商取貨相關欄位
+        'convenience_store_name',
+        'convenience_store_address',
+        'convenience_store_phone',
+        'convenience_store_chain'
     ];
 
     protected $casts = [

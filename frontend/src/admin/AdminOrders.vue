@@ -100,7 +100,31 @@
               </select>
               <button class="btn-admin-sm ml-2" @click="updateStatus" :disabled="updatingStatus">{{ updatingStatus ? '儲存中...' : '儲存' }}</button>
             </div>
-            <div class="mb-3"><b>收件人：</b>{{ orderDetail.recipient_name }}，{{ orderDetail.recipient_phone }}，{{ orderDetail.shipping_address }}</div>
+            <div class="mb-3"><b>收件人：</b>{{ orderDetail.recipient_name }}，{{ orderDetail.recipient_phone }}
+              <span v-if="orderDetail.recipient_email">，{{ orderDetail.recipient_email }}</span>
+            </div>
+            
+            <!-- 配送資訊 -->
+            <div class="mb-3">
+              <b>配送方式：</b>{{ orderDetail.shipping_method }}
+              <div v-if="orderDetail.shipping_method === '宅配'" class="ml-4 text-sm text-gray-600">
+                地址：{{ orderDetail.shipping_address }}
+              </div>
+              <div v-if="orderDetail.shipping_method === '門市自取' && orderDetail.store_name" class="ml-4 text-sm text-gray-600">
+                門市：{{ orderDetail.store_name }}<br>
+                地址：{{ orderDetail.store_address }}<br>
+                電話：{{ orderDetail.store_phone }}
+                <span v-if="orderDetail.store_hours">，營業時間：{{ orderDetail.store_hours }}</span>
+              </div>
+              <div v-if="orderDetail.shipping_method === '超商取貨' && orderDetail.convenience_store_name" class="ml-4 text-sm text-gray-600">
+                超商：{{ orderDetail.convenience_store_name }} ({{ orderDetail.convenience_store_chain }})<br>
+                地址：{{ orderDetail.convenience_store_address }}<br>
+                電話：{{ orderDetail.convenience_store_phone }}
+              </div>
+            </div>
+            
+            <div class="mb-3"><b>付款方式：</b>{{ orderDetail.payment_method }}</div>
+            <div v-if="orderDetail.note" class="mb-3"><b>備註：</b>{{ orderDetail.note }}</div>
             <div class="mb-3"><b>建立時間：</b>{{ orderDetail.created_at ? orderDetail.created_at.slice(0, 19).replace('T', ' ') : '-' }}</div>
             <div class="mb-3"><b>商品明細：</b>
               <table class="w-full text-left border mt-2">
@@ -302,4 +326,4 @@ onMounted(() => fetchOrders(1))
 .btn-cancel-sm {
   @apply bg-gray-300 text-gray-700 font-semibold py-1 px-4 text-sm rounded hover:bg-gray-400 transition-colors;
 }
-</style> 
+</style>

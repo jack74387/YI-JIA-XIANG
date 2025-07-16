@@ -274,9 +274,7 @@
                   <div class="font-semibold">{{ coupon.name }} <span class="ml-2 text-xs text-gray-500">({{ coupon.code }})</span></div>
                   <div>折扣：{{ coupon.type === 'percent' ? coupon.value + '%' : 'NT$' + coupon.value }}</div>
                   <div>有效期限：{{ coupon.expired_at ? coupon.expired_at.slice(0, 10) : '無期限' }}</div>
-                  <div>狀態：<span :class="coupon.active ? 'text-green-600' : 'text-gray-400'">{{ coupon.active ? '啟用' : '停用' }}</span></div>
-                  <button v-if="!coupon.redeemed" class="btn-admin-sm w-max" @click="redeemCoupon(coupon)">領取/兌換</button>
-                  <span v-else class="text-blue-600">已領取</span>
+                  <!-- 狀態與領取/兌換按鈕已移除 -->
                 </div>
               </div>
             </div>

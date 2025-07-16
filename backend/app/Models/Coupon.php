@@ -11,7 +11,7 @@ class Coupon extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'code', 'type', 'value', 'min_order', 'expires_at', 'usage_limit', 'used_count', 'description', 'is_active'
+        'name', 'code', 'type', 'value', 'min_order', 'expires_at', 'description', 'is_active', 'recipient_type'
     ];
 
     protected $casts = [
@@ -124,5 +124,17 @@ class Coupon extends Model
         }
         
         return '啟用';
+    }
+
+    public function getRecipientTypeLabelAttribute()
+    {
+        switch ($this->recipient_type) {
+            case 'birthday': return '生日會員';
+            case 'platinum': return '白金會員';
+            case 'gold': return '金牌會員';
+            case 'silver': return '銀牌會員';
+            case 'bronze': return '銅牌會員';
+            default: return '全部會員';
+        }
     }
 } 

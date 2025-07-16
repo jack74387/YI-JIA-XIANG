@@ -21,15 +21,28 @@ class OrderController extends Controller
             'recipient_name' => 'required|string|max:255',
             'recipient_phone' => 'required|string|max:20',
             'recipient_email' => 'nullable|email|max:255',
-            'shipping_address' => 'required|string',
-            'city' => 'required|string',
-            'district' => 'required|string',
-            'detail_address' => 'required|string',
+            'shipping_address' => 'nullable|string',
+            'city' => 'nullable|string',
+            'district' => 'nullable|string',
+            'detail_address' => 'nullable|string',
             'shipping_method' => 'required|string|in:宅配,超商取貨,門市自取',
             'payment_method' => 'required|string|in:貨到付款,信用卡,LINE Pay',
             'note' => 'nullable|string',
             'final_amount' => 'required|integer|min:0',
             'discount' => 'required|integer|min:0',
+            'point_discount' => 'nullable|integer|min:0',
+            'used_points' => 'nullable|integer|min:0',
+            // 門市自取相關欄位
+            'store_id' => 'nullable|string',
+            'store_name' => 'nullable|string',
+            'store_address' => 'nullable|string',
+            'store_phone' => 'nullable|string',
+            'store_hours' => 'nullable|string',
+            // 超商取貨相關欄位
+            'convenience_store_name' => 'nullable|string',
+            'convenience_store_address' => 'nullable|string',
+            'convenience_store_phone' => 'nullable|string',
+            'convenience_store_chain' => 'nullable|string',
         ]);
 
         try {
@@ -42,6 +55,18 @@ class OrderController extends Controller
                     'success' => false,
                     'message' => '購物車是空的'
                 ], 400);
+            }
+
+            // 點數折抵與扣除
+            $usedPoints = $request->input('used_points', 0);
+            $pointDiscount = $request->input('point_discount', 0);
+            if ($usedPoints > 0) {
+                if ($user->points < $usedPoints) {
+                    return response()->json(['success' => false, 'message' => '點數不足'], 400);
+                }
+                // 扣除點數
+                $user->points -= $usedPoints;
+                $user->save();
             }
 
             // 計算總金額
@@ -59,6 +84,8 @@ class OrderController extends Controller
                 'total' => $total,
                 'final_amount' => $validated['final_amount'],
                 'discount' => $validated['discount'],
+                'point_discount' => $pointDiscount,
+                'used_points' => $usedPoints,
                 'recipient_name' => $validated['recipient_name'],
                 'recipient_phone' => $validated['recipient_phone'],
                 'recipient_email' => $validated['recipient_email'],
@@ -69,7 +96,52 @@ class OrderController extends Controller
                 'shipping_method' => $validated['shipping_method'],
                 'payment_method' => $validated['payment_method'],
                 'note' => $validated['note'] ?? null,
+                // 門市自取相關欄位
+                'store_id' => $validated['store_id'],
+                'store_name' => $validated['store_name'],
+                'store_address' => $validated['store_address'],
+                'store_phone' => $validated['store_phone'],
+                'store_hours' => $validated['store_hours'],
+                // 超商取貨相關欄位
+                'convenience_store_name' => $validated['convenience_store_name'],
+                'convenience_store_address' => $validated['convenience_store_address'],
+                'convenience_store_phone' => $validated['convenience_store_phone'],
+                'convenience_store_chain' => $validated['convenience_store_chain'],
             ]);
+
+            // 點數異動紀錄（要在訂單建立後補上 order_id）
+            if ($usedPoints > 0) {
+                \App\Models\PointTransaction::create([
+                    'user_id' => $user->id,
+                    'type' => 'spend',
+                    'points' => -$usedPoints,
+                    'description' => '訂單折抵（訂單建立時自動扣除）',
+                    'order_id' => $order->id
+                ]);
+            }
+
+            // 優惠券標記為已使用
+            if ($request->has('coupon_id') && $request->coupon_id) {
+                $couponId = $request->coupon_id;
+                $userCoupon = \App\Models\UserCoupon::where('user_id', $user->id)
+                    ->where('coupon_id', $couponId)
+                    ->first();
+                if ($userCoupon) {
+                    $userCoupon->is_used = true;
+                    $userCoupon->used_at = now();
+                    $userCoupon->order_id = $order->id;
+                    $userCoupon->save();
+                } else {
+                    // 若無領取紀錄則自動建立一筆
+                    \App\Models\UserCoupon::create([
+                        'user_id' => $user->id,
+                        'coupon_id' => $couponId,
+                        'is_used' => true,
+                        'used_at' => now(),
+                        'order_id' => $order->id
+                    ]);
+                }
+            }
 
             // 建立訂單項目
             foreach ($cartItems as $item) {
@@ -338,15 +410,31 @@ class OrderController extends Controller
             'total' => $order->total,
             'final_amount' => $order->final_amount,
             'discount' => $order->discount,
+            'point_discount' => $order->point_discount,
+            'used_points' => $order->used_points,
             'recipient_name' => $order->recipient_name,
             'recipient_phone' => $order->recipient_phone,
             'recipient_email' => $order->recipient_email,
             'shipping_address' => $order->shipping_address,
+            'city' => $order->city,
+            'district' => $order->district,
+            'detail_address' => $order->detail_address,
             'shipping_method' => $order->shipping_method,
             'payment_method' => $order->payment_method,
             'note' => $order->note,
             'created_at' => $order->created_at,
             'updated_at' => $order->updated_at,
+            // 門市自取相關資訊
+            'store_id' => $order->store_id,
+            'store_name' => $order->store_name,
+            'store_address' => $order->store_address,
+            'store_phone' => $order->store_phone,
+            'store_hours' => $order->store_hours,
+            // 超商取貨相關資訊
+            'convenience_store_name' => $order->convenience_store_name,
+            'convenience_store_address' => $order->convenience_store_address,
+            'convenience_store_phone' => $order->convenience_store_phone,
+            'convenience_store_chain' => $order->convenience_store_chain,
             'user' => $order->user ? [
                 'id' => $order->user->id,
                 'name' => $order->user->name,

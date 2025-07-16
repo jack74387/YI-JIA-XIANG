@@ -280,8 +280,13 @@ class AdminController extends Controller
         // 只取已送達訂單
         $deliveredOrders = $member->orders->where('status', 'delivered');
         $totalOrders = $deliveredOrders->count();
-        $totalSpent = $deliveredOrders->sum('total');
+        $totalSpent = $deliveredOrders->sum(function($order) {
+            return $order->final_amount ?? $order->total;
+        });
         $averageOrderValue = $totalOrders > 0 ? $totalSpent / $totalOrders : 0;
+
+        // 新增：累積已用點數
+        $totalUsedPoints = abs($member->pointTransactions()->where('type', 'spend')->sum('points'));
 
         $memberData = $member->toArray();
         $memberData['orders'] = $member->orders->map(function($order) {
@@ -292,6 +297,16 @@ class AdminController extends Controller
                 'created_at' => $order->created_at ? $order->created_at->format('Y-m-d H:i') : null,
             ];
         })->toArray();
+        $memberData['point_transactions'] = $member->pointTransactions->map(function($pt) {
+            return [
+                'id' => $pt->id,
+                'type' => $pt->type,
+                'points' => $pt->points,
+                'description' => $pt->description,
+                'created_at' => $pt->created_at ? $pt->created_at->format('Y-m-d H:i') : null,
+            ];
+        })->toArray();
+        $memberData['total_used_points'] = $totalUsedPoints;
         $memberData['statistics'] = [
             'total_orders' => $totalOrders,
             'total_spent' => $totalSpent,
@@ -656,7 +671,7 @@ class AdminController extends Controller
             'value' => 'required|numeric|min:0',
             'min_order' => 'nullable|numeric|min:0',
             'expires_at' => 'nullable|date|after:now',
-            'usage_limit' => 'nullable|integer|min:1',
+            'recipient_type' => 'required|in:birthday,platinum,gold,silver,bronze,all',
             'description' => 'nullable|string|max:500',
             'is_active' => 'boolean'
         ]);
@@ -717,7 +732,7 @@ class AdminController extends Controller
             'value' => 'sometimes|required|numeric|min:0',
             'min_order' => 'nullable|numeric|min:0',
             'expires_at' => 'nullable|date',
-            'usage_limit' => 'nullable|integer|min:1',
+            'recipient_type' => 'sometimes|required|in:birthday,platinum,gold,silver,bronze,all',
             'description' => 'nullable|string|max:500',
             'is_active' => 'boolean'
         ]);
@@ -830,7 +845,7 @@ class AdminController extends Controller
             $csvData = [];
             $csvData[] = [
                 'ID', '名稱', '代碼', '類型', '折扣值', '最低訂單金額',
-                '有效期限', '使用限制', '已使用次數', '狀態', '描述', '建立時間'
+                '有效期限', '發放對象', '已使用次數', '狀態', '描述', '建立時間'
             ];
 
             foreach ($coupons as $coupon) {
@@ -842,7 +857,7 @@ class AdminController extends Controller
                     $coupon->discount_text,
                     $coupon->min_order ?? '',
                     $coupon->expires_at ? $coupon->expires_at->format('Y-m-d H:i:s') : '',
-                    $coupon->usage_limit ?? '',
+                    $coupon->recipient_type,
                     $coupon->used_count,
                     $coupon->status_text,
                     $coupon->description ?? '',

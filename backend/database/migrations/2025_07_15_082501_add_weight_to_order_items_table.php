@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->string('weight')->nullable()->after('spec');
+            if (!Schema::hasColumn('order_items', 'weight')) {
+                $table->string('weight')->nullable()->after('spec');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->dropColumn('weight');
+            if (Schema::hasColumn('order_items', 'weight')) {
+                $table->dropColumn('weight');
+            }
         });
     }
 };

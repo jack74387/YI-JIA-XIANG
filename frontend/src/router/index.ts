@@ -189,6 +189,31 @@ const router = createRouter({
       path: '/admin/operation-logs',
       name: 'admin-operation-logs',
       component: () => import('../admin/AdminOperationLogs.vue')
+    },
+    {
+      path: '/admin/stores',
+      name: 'admin-stores',
+      component: () => import('../admin/AdminStores.vue')
+    },
+    {
+      path: '/artisan-craft',
+      name: 'artisan-craft',
+      component: () => import('../views/ArtisanCraftView.vue')
+    },
+    {
+      path: '/shopping-notice',
+      name: 'shopping-notice',
+      component: () => import('../views/ShoppingNoticeView.vue')
+    },
+    {
+      path: '/return-policy',
+      name: 'return-policy',
+      component: () => import('../views/ReturnPolicyView.vue')
+    },
+    {
+      path: '/delivery-info',
+      name: 'delivery-info',
+      component: () => import('../views/DeliveryInfoView.vue')
     }
   ]
 })

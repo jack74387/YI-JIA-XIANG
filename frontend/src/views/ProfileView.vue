@@ -239,6 +239,37 @@
             </div>
           </div>
 
+          <!-- 常用地址管理區塊 -->
+          <div class="mt-8 bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">常用地址管理</h3>
+              <button @click="openAddAddress" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm font-medium">新增地址</button>
+            </div>
+            <div class="px-6 py-6">
+              <div v-if="addressStore.loading" class="text-center text-gray-400 py-8">載入中...</div>
+              <div v-else-if="addressStore.error" class="text-red-500 mb-4">{{ addressStore.error }}</div>
+              <div v-else>
+                <div v-if="addressStore.addresses.length === 0" class="text-gray-400">尚未新增任何常用地址</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div v-for="address in addressStore.addresses" :key="address.id" class="relative bg-gray-50 border rounded-lg p-4 shadow-sm flex flex-col">
+                    <div class="flex items-center mb-2">
+                      <span class="font-semibold text-lg mr-2">{{ address.recipient_name }}</span>
+                      <span v-if="address.is_default" class="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">預設</span>
+                    </div>
+                    <div class="text-gray-600 text-sm mb-1">電話：{{ address.recipient_phone }}</div>
+                    <div class="text-gray-600 text-sm mb-1">Email：{{ address.recipient_email }}</div>
+                    <div class="text-gray-600 text-sm mb-1">地址：{{ address.city }}{{ address.district }}{{ address.detail_address }}</div>
+                    <div class="flex mt-3 space-x-2">
+                      <button @click="openEditAddress(address)" class="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded">編輯</button>
+                      <button @click="deleteAddress(address.id)" class="px-2 py-1 text-xs bg-red-100 text-red-600 hover:bg-red-200 rounded">刪除</button>
+                      <button v-if="!address.is_default" @click="setDefault(address.id)" class="px-2 py-1 text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 rounded">設為預設</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 密碼修改區塊 -->
           <div class="mt-8 bg-white rounded-lg shadow">
             <div class="px-6 py-4 border-b border-gray-200">
@@ -292,6 +323,50 @@
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+
+          <!-- 地址新增/編輯 Dialog -->
+          <div v-if="showAddressDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+              <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">{{ editAddress ? '編輯地址' : '新增地址' }}</h3>
+                <form @submit.prevent="submitAddress">
+                  <div class="grid grid-cols-1 gap-4">
+                    <input v-model="addressForm.recipient_name" required placeholder="收件人姓名" class="border rounded px-3 py-2 w-full" />
+                    <input v-model="addressForm.recipient_phone" required placeholder="收件人電話" class="border rounded px-3 py-2 w-full" />
+                    <input v-model="addressForm.recipient_email" required placeholder="收件人 Email" class="border rounded px-3 py-2 w-full" />
+                    
+                    <!-- 縣市下拉選單 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">縣市</label>
+                      <select v-model="addressForm.city" @change="onCityChange" required class="border rounded px-3 py-2 w-full">
+                        <option value="">請選擇縣市</option>
+                        <option v-for="city in addressStore.cities" :key="city" :value="city">{{ city }}</option>
+                      </select>
+                    </div>
+                    
+                    <!-- 鄉鎮市區下拉選單 -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">鄉鎮市區</label>
+                      <select v-model="addressForm.district" required class="border rounded px-3 py-2 w-full" :disabled="!addressForm.city">
+                        <option value="">請選擇鄉鎮市區</option>
+                        <option v-for="district in availableDistricts" :key="district" :value="district">{{ district }}</option>
+                      </select>
+                    </div>
+                    
+                    <input v-model="addressForm.detail_address" required placeholder="詳細地址" class="border rounded px-3 py-2 w-full" />
+                    <label class="flex items-center space-x-2">
+                      <input type="checkbox" v-model="addressForm.is_default" />
+                      <span>設為預設地址</span>
+                    </label>
+                  </div>
+                  <div class="mt-6 flex justify-end space-x-3">
+                    <button @click="closeAddressDialog" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">取消</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700">{{ addressDialogLoading ? '儲存中...' : '儲存' }}</button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
 
@@ -387,18 +462,23 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useMemberStore } from '@/stores/member'
+import { useUserAddresses } from '@/stores/userAddresses'
 import axios from 'axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const memberStore = useMemberStore()
+const addressStore = useUserAddresses()
 
 const showAvatarUpload = ref(false)
 const showDeleteDialog = ref(false)
+const showAddressDialog = ref(false)
+const editAddress = ref<any>(null)
 const avatarInput = ref<HTMLInputElement>()
 const successMessage = ref('')
 const deletePassword = ref('')
 const deleteConfirmation = ref('')
+const addressDialogLoading = ref(false)
 
 const form = reactive({
   name: '',
@@ -416,11 +496,27 @@ const passwordForm = reactive({
   new_password_confirmation: ''
 })
 
+const addressForm = reactive({
+  recipient_name: '',
+  recipient_phone: '',
+  recipient_email: '',
+  city: '',
+  district: '',
+  detail_address: '',
+  is_default: false,
+})
+
 // 計算屬性
 const userProfile = computed(() => memberStore.userProfile)
 const userAvatarUrl = computed(() => {
   if (!authStore.user?.name) return ''
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.user.name)}&color=7C3AED&background=F3E8FF`
+})
+
+// 可用的鄉鎮市區選項
+const availableDistricts = computed(() => {
+  if (!addressForm.city) return []
+  return addressStore.getDistricts(addressForm.city)
 })
 
 // 計算頭像URL
@@ -526,10 +622,104 @@ const handleLogout = async () => {
   }
 }
 
+// 新增或編輯地址
+const submitAddress = async () => {
+  addressDialogLoading.value = true
+  try {
+    if (editAddress.value) {
+      await addressStore.updateAddress(editAddress.value.id, addressForm)
+    } else {
+      await addressStore.addAddress(addressForm)
+    }
+    showAddressDialog.value = false
+    editAddress.value = null
+    resetAddressForm()
+    await addressStore.fetchAddresses()
+    successMessage.value = editAddress.value ? '地址更新成功' : '地址新增成功'
+  } catch (error) {
+    console.error('儲存地址失敗:', error)
+    successMessage.value = '儲存地址失敗'
+  } finally {
+    addressDialogLoading.value = false
+  }
+}
+
+// 重置地址表單
+const resetAddressForm = () => {
+  addressForm.recipient_name = ''
+  addressForm.recipient_phone = ''
+  addressForm.recipient_email = ''
+  addressForm.city = ''
+  addressForm.district = ''
+  addressForm.detail_address = ''
+  addressForm.is_default = false
+}
+
+// 開啟編輯地址對話框
+const openEditAddress = (address: any) => {
+  editAddress.value = address
+  addressForm.recipient_name = address.recipient_name
+  addressForm.recipient_phone = address.recipient_phone
+  addressForm.recipient_email = address.recipient_email
+  addressForm.city = address.city
+  addressForm.district = address.district
+  addressForm.detail_address = address.detail_address
+  addressForm.is_default = address.is_default
+  showAddressDialog.value = true
+}
+
+// 開啟新增地址對話框
+const openAddAddress = () => {
+  editAddress.value = null
+  resetAddressForm()
+  showAddressDialog.value = true
+}
+
+// 關閉地址對話框
+const closeAddressDialog = () => {
+  showAddressDialog.value = false
+  editAddress.value = null
+  resetAddressForm()
+}
+
+// 縣市變更時清空鄉鎮市區
+const onCityChange = () => {
+  addressForm.district = ''
+}
+
+// 刪除地址
+const deleteAddress = async (id: number) => {
+  if (confirm('確定要刪除此地址嗎？此操作無法復原。')) {
+    try {
+      await addressStore.deleteAddress(id)
+      showAddressDialog.value = false
+      editAddress.value = null
+      await addressStore.fetchAddresses()
+      successMessage.value = '地址已刪除'
+    } catch (error) {
+      console.error('刪除地址失敗:', error)
+      successMessage.value = '刪除地址失敗'
+    }
+  }
+}
+
+// 設為預設地址
+const setDefault = async (id: number) => {
+  try {
+    await addressStore.setDefault(id)
+    await addressStore.fetchAddresses()
+    successMessage.value = '地址已設為預設'
+  } catch (error) {
+    console.error('設為預設地址失敗:', error)
+    successMessage.value = '設為預設地址失敗'
+  }
+}
+
 onMounted(async () => {
   initForm()
   // 獲取最新的用戶資料
   await fetchUserProfile()
+  await addressStore.fetchAddresses()
 })
 
 // 獲取用戶資料

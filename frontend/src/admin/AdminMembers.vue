@@ -111,6 +111,7 @@
                     </span>
                   </div>
                   <div><span class="font-medium">目前點數：</span>{{ selectedMember.statistics?.current_points }}</div>
+                  <div><span class="font-medium">累積已用點數：</span>{{ selectedMember.total_used_points || 0 }}</div>
                   <div><span class="font-medium">總訂單數：</span>{{ selectedMember.statistics?.total_orders }}</div>
                   <div><span class="font-medium">總消費金額：</span>${{ selectedMember.statistics?.total_spent || 0 }}</div>
                   <div><span class="font-medium">平均訂單金額：</span>${{ selectedMember.statistics?.average_order_value || 0 }}</div>
@@ -158,7 +159,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="transaction in selectedMember.point_transactions.slice(0, 5)" :key="transaction.id" class="border-b">
+                    <tr v-for="transaction in pagedPointTransactions" :key="transaction.id" class="border-b">
                       <td class="py-2 px-2">{{ transaction.type }}</td>
                       <td class="py-2 px-2">{{ transaction.points }}</td>
                       <td class="py-2 px-2">{{ transaction.description }}</td>
@@ -166,6 +167,20 @@
                     </tr>
                   </tbody>
                 </table>
+                <!-- 分頁按鈕 -->
+                <div v-if="totalPointsPages > 1" class="flex justify-center mt-2 gap-2">
+                  <button
+                    class="px-3 py-1 rounded border"
+                    :disabled="currentPointsPage === 1"
+                    @click="goToPointsPage(currentPointsPage - 1)"
+                  >上一頁</button>
+                  <span>第 {{ currentPointsPage }} 頁 / 共 {{ totalPointsPages }} 頁</span>
+                  <button
+                    class="px-3 py-1 rounded border"
+                    :disabled="currentPointsPage === totalPointsPages"
+                    @click="goToPointsPage(currentPointsPage + 1)"
+                  >下一頁</button>
+                </div>
               </div>
             </div>
           </div>
@@ -298,6 +313,23 @@ const pointsForm = ref({
   points: 0,
   reason: ''
 })
+
+// 新增：點數交易分頁狀態
+const currentPointsPage = ref(1)
+const pointsPerPage = 5
+const pagedPointTransactions = computed(() => {
+  if (!selectedMember.value?.point_transactions) return []
+  const start = (currentPointsPage.value - 1) * pointsPerPage
+  return selectedMember.value.point_transactions.slice(start, start + pointsPerPage)
+})
+const totalPointsPages = computed(() => {
+  if (!selectedMember.value?.point_transactions) return 1
+  return Math.ceil(selectedMember.value.point_transactions.length / pointsPerPage) || 1
+})
+function goToPointsPage(page: number) {
+  if (page < 1 || page > totalPointsPages.value) return
+  currentPointsPage.value = page
+}
 
 const fetchMembers = async (page = 1) => {
   try {

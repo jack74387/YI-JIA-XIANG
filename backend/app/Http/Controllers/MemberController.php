@@ -172,25 +172,34 @@ class MemberController extends Controller
     public function statistics(Request $request)
     {
         $user = $request->user();
-        
         $totalOrders = $user->orders()->count();
         $totalSpent = $user->orders()->where('status', 'delivered')->sum('total');
         $currentPoints = $user->points;
         $memberLevel = $user->member_level_name;
-        
         // 最近訂單
         $recentOrders = $user->orders()
             ->with('items')
             ->latest()
             ->limit(5)
             ->get();
-
         // 點數交易記錄
         $pointTransactions = $user->pointTransactions()
             ->latest()
             ->limit(10)
-            ->get();
-
+            ->get()
+            ->map(function($pt) {
+                $desc = $pt->description;
+                if ($pt->type === 'spend' && $pt->order_id) {
+                    $desc = '訂單折抵（訂單 #' . $pt->order_id . '）';
+                }
+                return [
+                    'id' => $pt->id,
+                    'type' => $pt->type,
+                    'points' => $pt->points,
+                    'description' => $desc,
+                    'created_at' => $pt->created_at,
+                ];
+            });
         return response()->json([
             'success' => true,
             'statistics' => [
@@ -230,14 +239,29 @@ class MemberController extends Controller
     public function pointHistory(Request $request)
     {
         $user = $request->user();
-        
         $transactions = $user->pointTransactions()
             ->latest()
             ->paginate(20);
-
+        $data = $transactions->map(function($pt) {
+            $desc = $pt->description;
+            if ($pt->type === 'spend' && $pt->order_id) {
+                $desc = '訂單折抵（訂單 #' . $pt->order_id . '）';
+            }
+            return [
+                'id' => $pt->id,
+                'type' => $pt->type,
+                'points' => $pt->points,
+                'description' => $desc,
+                'created_at' => $pt->created_at,
+            ];
+        });
         return response()->json([
             'success' => true,
-            'transactions' => $transactions
+            'transactions' => $data,
+            'pagination' => [
+                'current_page' => $transactions->currentPage(),
+                'last_page' => $transactions->lastPage(),
+            ]
         ]);
     }
 

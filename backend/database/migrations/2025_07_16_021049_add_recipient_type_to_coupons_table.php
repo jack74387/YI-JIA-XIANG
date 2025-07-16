@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->enum('status', ['draft', 'published', 'notification', 'archived'])->default('published')->after('specs');
+        Schema::table('coupons', function (Blueprint $table) {
+            $table->string('recipient_type')->default('all')->after('is_active')->comment('發放對象：birthday, platinum, gold, silver, bronze, all');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('coupons', function (Blueprint $table) {
+            $table->dropColumn('recipient_type');
         });
     }
-}; 
+};

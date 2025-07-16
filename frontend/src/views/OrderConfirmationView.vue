@@ -51,9 +51,73 @@
               <label class="block text-sm font-medium text-gray-700">Email</label>
               <p class="mt-1 text-sm text-gray-900">{{ order.recipient_email }}</p>
             </div>
-            <div class="md:col-span-2">
+            
+            <!-- 宅配地址 -->
+            <div v-if="order.shipping_method === '宅配'" class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700">收件地址</label>
               <p class="mt-1 text-sm text-gray-900">{{ order.shipping_address }}</p>
+            </div>
+            
+            <!-- 門市自取資訊 -->
+            <div v-if="order.shipping_method === '門市自取' && order.store_name" class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">取貨門市</label>
+              <div class="mt-2 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <h4 class="font-semibold text-gray-900">{{ order.store_name }}</h4>
+                  <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                    一佳香門市
+                  </span>
+                </div>
+                <div class="space-y-1 text-sm text-gray-600">
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>{{ order.store_address }}</span>
+                  </div>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <span>{{ order.store_phone }}</span>
+                  </div>
+                  <div v-if="order.store_hours" class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{{ order.store_hours }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 超商取貨資訊 -->
+            <div v-if="order.shipping_method === '超商取貨' && order.convenience_store_name" class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">取貨超商</label>
+              <div class="mt-2 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center mb-2">
+                  <h4 class="font-semibold text-gray-900">{{ order.convenience_store_name }}</h4>
+                  <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    {{ order.convenience_store_chain }}
+                  </span>
+                </div>
+                <div class="space-y-1 text-sm text-gray-600">
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>{{ order.convenience_store_address }}</span>
+                  </div>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <span>{{ order.convenience_store_phone }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

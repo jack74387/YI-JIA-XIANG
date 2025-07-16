@@ -196,4 +196,18 @@ class User extends Authenticatable
     {
         return $this->hasOne(Cart::class);
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+
+    /**
+     * 判斷會員生日是否為本月
+     */
+    public function isBirthdayMonth()
+    {
+        if (!$this->birthday) return false;
+        return date('m', strtotime($this->birthday)) == date('m');
+    }
 }

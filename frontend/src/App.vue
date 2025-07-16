@@ -19,7 +19,7 @@
             <h4 class="text-md font-semibold mb-4">關於我們</h4>
             <ul class="space-y-2 text-gray-300">
               <li><router-link to="/about" class="hover:text-white">品牌故事</router-link></li>
-              <li><router-link to="/about" class="hover:text-white">職人工藝</router-link></li>
+              <li><router-link to="/artisan-craft" class="hover:text-white">職人工藝</router-link></li>
               <li><router-link to="/store-locator" class="hover:text-white">門市據點</router-link></li>
               <li><router-link to="/contact" class="hover:text-white">聯絡我們</router-link></li>
             </ul>
@@ -27,10 +27,10 @@
           <div>
             <h4 class="text-md font-semibold mb-4">客戶服務</h4>
             <ul class="space-y-2 text-gray-300">
-              <li><a href="#" class="hover:text-white">購物須知</a></li>
-              <li><a href="#" class="hover:text-white">退換貨政策</a></li>
-              <li><a href="#" class="hover:text-white">配送說明</a></li>
-              <li><a href="#" class="hover:text-white">常見問題</a></li>
+              <li><router-link to="/shopping-notice" class="hover:text-white">購物須知</router-link></li>
+              <li><router-link to="/return-policy" class="hover:text-white">退換貨政策</router-link></li>
+              <li><router-link to="/delivery-info" class="hover:text-white">配送說明</router-link></li>
+              <li><a href="/faq" class="hover:text-white">常見問題</a></li>
             </ul>
           </div>
           <div>
