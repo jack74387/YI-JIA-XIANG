@@ -31,12 +31,26 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'spec' => 'nullable|string',
+            'spec_id' => 'nullable|integer', // 新增
             'price' => 'nullable|integer|min:1', // 新增
             'weight' => 'nullable|string', // 新增
         ]);
+
+        // 檢查商品是否可以加入購物車
+        $product = Product::find($validated['product_id']);
+        if (!$product || !$product->canAddToCart()) {
+            return response()->json([
+                'success' => false,
+                'message' => '此商品目前無法加入購物車'
+            ], 400);
+        }
+
         $item = $cart->items()->where('product_id', $validated['product_id'])
             ->when(isset($validated['spec']), function($q) use ($validated) {
                 $q->where('spec', $validated['spec']);
+            })
+            ->when(isset($validated['spec_id']), function($q) use ($validated) {
+                $q->where('spec_id', $validated['spec_id']);
             })
             ->when(isset($validated['weight']), function($q) use ($validated) {
                 $q->where('weight', $validated['weight']);
@@ -52,6 +66,10 @@ class CartController extends Controller
             if (isset($validated['weight'])) {
                 $item->weight = $validated['weight'];
             }
+            // 若有 spec_id，更新 spec_id
+            if (isset($validated['spec_id'])) {
+                $item->spec_id = $validated['spec_id'];
+            }
             $item->save();
         } else {
             $data = $validated;
@@ -62,6 +80,10 @@ class CartController extends Controller
             // 若有 weight，存入 weight
             if (isset($validated['weight'])) {
                 $data['weight'] = $validated['weight'];
+            }
+            // 若有 spec_id，存入 spec_id
+            if (isset($validated['spec_id'])) {
+                $data['spec_id'] = $validated['spec_id'];
             }
             $item = $cart->items()->create($data);
         }
@@ -115,6 +137,7 @@ class CartController extends Controller
             'name' => $product->name,
             'image' => $product->primary_image?->image_path ?? $product->image ?? null,
             'spec' => $spec,
+            'spec_id' => $item->spec_id ?? null, // 新增
             'weight' => $item->weight ?? null, // 新增 weight 回傳
             'quantity' => $item->quantity,
             'price' => $price,

@@ -31,14 +31,38 @@ class Product extends Model
 
     public function getPrimaryImageAttribute()
     {
-        if (is_array($this->images) && count($this->images) > 0) {
+        // 優先使用 image 欄位（後台上傳的主圖）
+        if ($this->image) {
+            $img = $this->image;
+            // 統一路徑格式
+            $img = str_replace('\\', '/', $img);
+            if (!str_starts_with($img, '/')) {
+                $img = '/' . ltrim($img, '/');
+            }
             return (object)[
-                'image_path' => $this->images[0]['image_path'] ?? $this->images[0] ?? $this->image
+                'image_path' => $img
             ];
         }
+        // 如果沒有 image，則使用 images 陣列的第一張
+        if (is_array($this->images) && count($this->images) > 0) {
+            $img = $this->images[0]['image_path'] ?? $this->images[0];
+            $img = str_replace('\\', '/', $img);
+            if (!str_starts_with($img, '/')) {
+                $img = '/' . ltrim($img, '/');
+            }
+            return (object)[
+                'image_path' => $img
+            ];
+        }
+        // 都沒有則返回預設圖片
         return (object)[
-            'image_path' => $this->image
+            'image_path' => '/images/placeholder.jpg'
         ];
+    }
+
+    public function specs()
+    {
+        return $this->hasMany(ProductSpec::class);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
@@ -72,6 +73,17 @@ class OrderController extends Controller
             // 計算總金額
             $total = 0;
             $cartItems = $cart->items()->with('product')->get();
+            
+            // 檢查購物車中是否有無法購買的商品
+            foreach ($cartItems as $item) {
+                if (!$item->product || !$item->product->canAddToCart()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '購物車中有商品目前無法購買，請重新整理購物車'
+                    ], 400);
+                }
+            }
+            
             foreach ($cartItems as $item) {
                 $price = $item->price ?? $this->getPriceBySpec($item->product, $item->spec);
                 $total += $price * $item->quantity;
@@ -143,7 +155,7 @@ class OrderController extends Controller
                 }
             }
 
-            // 建立訂單項目
+            // 建立訂單項目 & 扣庫存
             foreach ($cartItems as $item) {
                 // 若購物車有自訂 price/weight 則優先用
                 $price = $item->price ?? $this->getPriceBySpec($item->product, $item->spec);
@@ -156,6 +168,83 @@ class OrderController extends Controller
                     'spec' => $item->spec,
                     'weight' => $weight,
                 ]);
+
+                // 扣庫存 - 優先使用 spec name 匹配，不管 spec_id 有沒有傳遞
+                if ($item->spec) {
+                    // 先嘗試用 spec name 找規格
+                    $spec = \App\Models\ProductSpec::where('product_id', $item->product_id)
+                        ->where('name', $item->spec)
+                        ->first();
+                    
+                    if ($spec) {
+                        // 找到規格，扣規格庫存
+                        Log::info('扣庫存-規格-name', [
+                           'product_id' => $item->product_id,
+                           'spec' => $item->spec,                  'spec_found' => $spec->id,
+                           'before' => $spec->stock,
+                          'qty' => $item->quantity
+                        ]);
+                        $spec->stock = max(0, $spec->stock - $item->quantity);
+                        $spec->save();
+                        Log::info('扣庫存-規格-name-完成', ['after' => $spec->stock]);
+                        
+                        // 自動切換商品狀態
+                        $product = $spec->product;
+                        if ($spec->stock <= 5) {
+                            $product->status = 'notification';
+                            $product->save();
+                        } elseif ($spec->stock > 5 && $product->status === 'notification') {
+                            // 檢查該商品所有規格是否都 > 5
+                            $allSpecsAbove5 = $product->specs()->where('stock', '<=', 5)->count() === 0;
+                            if ($allSpecsAbove5) {
+                                $product->status = 'published';
+                                $product->save();
+                            }
+                        }
+                    } else {
+                        // 沒找到規格，扣商品本身庫存
+                        $product = \App\Models\Product::find($item->product_id);
+                        Log::info('扣庫存-商品（規格不存在）', [
+                           'product_id' => $item->product_id,
+                           'spec' => $item->spec,              'before' => $product ? $product->stock : null,
+                          'qty' => $item->quantity
+                        ]);
+                        if ($product) {
+                            $product->stock = max(0, $product->stock - $item->quantity);
+                            
+                            // 自動切換商品狀態
+                            if ($product->stock <= 5) {
+                                $product->status = 'notification';
+                            } elseif ($product->stock > 5 && $product->status === 'notification') {
+                                $product->status = 'published';
+                            }
+                            
+                            $product->save();
+                            Log::info('扣庫存-商品-完成', ['after' => $product->stock]);
+                        }
+                    }
+                } else {
+                    // 沒有 spec，直接扣商品庫存
+                    $product = \App\Models\Product::find($item->product_id);
+                    Log::info('扣庫存-商品（無規格）', [
+                       'product_id' => $item->product_id,
+                   'before' => $product ? $product->stock : null,
+                      'qty' => $item->quantity
+                    ]);
+                    if ($product) {
+                        $product->stock = max(0, $product->stock - $item->quantity);
+                        
+                        // 自動切換商品狀態
+                        if ($product->stock <= 5) {
+                            $product->status = 'notification';
+                        } elseif ($product->stock > 5 && $product->status === 'notification') {
+                            $product->status = 'published';
+                        }
+                        
+                        $product->save();
+                        Log::info('扣庫存-商品-完成', ['after' => $product->stock]);
+                    }
+                }
             }
 
             // 清空購物車

@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative animate-fade-in">
       <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl" @click="$emit('close')">&times;</button>
       <div class="flex gap-4">
-        <img :src="product.image || '/images/placeholder.jpg'" :alt="product.name" class="w-28 h-28 object-cover rounded-lg border" />
+        <img :src="getImageUrl(product.primary_image?.image_path || (Array.isArray(product.images) && product.images[0]?.image_path) || product.image) || '/images/placeholder.jpg'" :alt="product.name" class="w-28 h-28 object-cover rounded-lg border" />
         <div class="flex-1 flex flex-col justify-between">
           <div>
             <h2 class="text-lg font-bold text-gray-900 mb-1">{{ product.name }}</h2>
@@ -41,6 +41,9 @@ const props = defineProps<{
     image?: string
     spec?: string // Added spec to product type
     weight?: string // 新增 weight
+    spec_id?: number // 新增: 新增 spec_id
+    primary_image?: { image_path: string } // 新增 primary_image
+    images?: { image_path: string }[] // 新增 images
   }
 }>()
 const emit = defineEmits(['close', 'added'])
@@ -60,6 +63,14 @@ function decrease() {
   if (quantity.value > 1) quantity.value--
 }
 
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
+}
+
 async function addToCart() {
   loading.value = true
   // 新增 price 傳遞，型別保證
@@ -69,7 +80,8 @@ async function addToCart() {
     quantity.value,
     props.product.spec,
     price,
-    props.product.weight // 新增 weight 傳遞
+    props.product.weight, // 新增 weight 傳遞
+    props.product.spec_id // 新增: 傳遞 spec_id
   )
   loading.value = false
   emit('added')

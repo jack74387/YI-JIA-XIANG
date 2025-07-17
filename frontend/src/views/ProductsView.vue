@@ -61,7 +61,7 @@
           >
             <div class="relative" @click="goToProduct(product.id)">
               <img
-                :src="product.primary_image?.image_path || '/images/placeholder.jpg'"
+                :src="getImageUrl(product.primary_image?.image_path) || '/images/placeholder.jpg'"
                 :alt="product.name"
                 class="w-full h-48 object-cover rounded-t-lg mx-auto"
                 :class="product.status === 'notification' ? 'brightness-75 grayscale' : ''"
@@ -100,16 +100,33 @@
                   </button>
                   <button
                     class="icon-btn icon-btn-small"
-                    :disabled="product.stock_quantity !== undefined && product.stock_quantity <= 0"
+                    :disabled="!product.can_add_to_cart"
                     @click.stop="openAddToCart(product)"
-                    :title="(product.stock_quantity !== undefined && product.stock_quantity <= 0) ? '缺貨' : '加入購物車'"
+                    :title="!product.can_add_to_cart ? '此商品僅供參考，無法加入購物車' : '加入購物車'"
+                    :class="{
+                      'icon-btn-disabled': !product.can_add_to_cart
+                    }"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b85c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6 6h15l-1.5 9h-13z"/>
+                    <!-- 正常購物車圖標 -->
+                    <svg v-if="product.can_add_to_cart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b85c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="9" cy="20" r="1.5" fill="#b85c38"/>
                       <circle cx="18" cy="20" r="1.5" fill="#b85c38"/>
+                      <path d="M6 6h15l-1.5 9h-13z"/>
                       <path d="M6 6L5 2H2"/>
                     </svg>
+                    <!-- 禁用狀態：灰色購物車圖標 + 禁止符號 -->
+                    <template v-else>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b0b0b0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="20" r="1.5" fill="#b0b0b0"/>
+                        <circle cx="18" cy="20" r="1.5" fill="#b0b0b0"/>
+                        <path d="M6 6h15l-1.5 9h-13z"/>
+                        <path d="M6 6L5 2H2"/>
+                      </svg>
+                      <svg class="ban-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" style="position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: opacity 0.2s;">
+                        <circle cx="12" cy="12" r="10" stroke="#d9534f" stroke-width="2" fill="none"/>
+                        <line x1="7" y1="7" x2="17" y2="17" stroke="#d9534f" stroke-width="2"/>
+                      </svg>
+                    </template>
                   </button>
                 </div>
               </div>
@@ -191,6 +208,16 @@ function getSpecLabel(spec: string) {
 }
 function selectSpec(product: any, spec: string) {
   selectedSpecs.value[product.id] = spec
+}
+
+// 處理圖片 URL
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  // 只要是 /storage 開頭就加 API_BASE
+  if (imagePath.startsWith('/storage')) return `${API_BASE}${imagePath}`
+  if (imagePath.startsWith('/')) return `${API_BASE}${imagePath}`
+  return imagePath
 }
 
 // 搜尋防抖
@@ -287,6 +314,11 @@ const goToPage = (page: number) => {
 
 // 加入購物車
 const openAddToCart = (product: any) => {
+  // 檢查商品是否可以加入購物車
+  if (!product.can_add_to_cart) {
+    return
+  }
+  
   const spec = selectedSpecs.value[product.id] || 'small'
   let price = getSpecPrice(product, spec)
   selectedProduct.value = {
@@ -432,5 +464,29 @@ onMounted(() => {
 }
 .grayscale {
   filter: grayscale(1);
+}
+/* 禁用狀態的按鈕樣式 */
+.icon-btn,
+.icon-btn-disabled {
+  position: relative;
+}
+.icon-btn-disabled {
+  background: #f8d7da !important; /* 明顯的淡紅色 */
+  color: #999;
+  cursor: not-allowed !important;
+  box-shadow: 0 1px 4px #e0e0e0;
+  opacity: 1;
+}
+.icon-btn-disabled:hover {
+  background: #f5c6cb !important;
+}
+.icon-btn-disabled .ban-icon {
+  opacity: 0;
+}
+.icon-btn-disabled:hover .ban-icon {
+  opacity: 1;
+}
+.icon-btn-disabled svg {
+  stroke: #999 !important;
 }
 </style> 

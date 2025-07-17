@@ -33,6 +33,13 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 12);
         $products = $query->paginate($perPage);
         
+        // 為每個商品添加 can_add_to_cart 和 primary_image 欄位
+        $products->getCollection()->transform(function($product) {
+            $product->can_add_to_cart = $product->canAddToCart();
+            $product->primary_image = $product->primary_image;
+            return $product;
+        });
+        
         return response()->json([
             'success' => true,
             'data' => $products
@@ -41,7 +48,7 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with('category')->findOrFail($id);
+        $product = Product::with(['category', 'specs'])->findOrFail($id);
         
         // 檢查產品是否可見
         if (!$product->isVisible()) {

@@ -146,7 +146,11 @@
           <h2 class="text-lg font-semibold mb-4">商品清單</h2>
           <div class="space-y-4">
             <div v-for="item in order.items" :key="item.id" class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <img :src="item.image || '/images/placeholder.jpg'" :alt="item.name" class="w-16 h-16 object-cover rounded" />
+              <img :src="getImageUrl(
+                item.product?.primary_image?.image_path
+                || (item.product?.images && item.product.images[0]?.image_path)
+                || item.image
+              ) || '/images/placeholder.jpg'" :alt="item.name" class="w-16 h-16 object-cover rounded" />
               <div class="flex-1">
                 <h3 class="font-semibold">{{ item.name }}</h3>
                 <p class="text-sm text-gray-600">{{ item.spec_text }}</p>
@@ -224,6 +228,17 @@ function formatDate(dateString: string) {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const API_BASE = 'http://127.0.0.1:8000';
+function getImageUrl(imagePath: string | { image_path: string } | undefined) {
+  if (!imagePath) return null
+  if (typeof imagePath === 'object' && imagePath.image_path) imagePath = imagePath.image_path
+  if (typeof imagePath !== 'string') return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return API_BASE + imagePath
+  if (imagePath.startsWith('/')) return API_BASE + imagePath
+  return imagePath
 }
 
 // 載入訂單資料

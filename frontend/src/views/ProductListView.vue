@@ -10,7 +10,10 @@
           <ProductCard
             v-for="p in filteredProducts"
             :key="p.id"
-            :product="p"
+            :product="{
+              ...p,
+              image: getImageUrl(p.primary_image?.image_path || (Array.isArray(p.images) && p.images[0]) || p.image)
+            }"
             @add-to-cart="openAddToCart(p)"
             @click-img="goToDetail(p.id)"
             @click-title="goToDetail(p.id)"
@@ -102,6 +105,13 @@ function goToDetail(id: number) {
 }
 function addToCart(product: any) {
   openAddToCart(product)
+}
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
 }
 onMounted(() => {
   productsStore.fetchProducts()

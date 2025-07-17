@@ -169,6 +169,12 @@ const savings = computed(() => {
   return currentOriginalPrice.value - currentPrice.value
 })
 
+// 找到當前選擇的 spec 物件
+const currentSpecObj = computed(() => {
+  if (!props.product.specs || !Array.isArray(props.product.specs)) return null
+  return props.product.specs.find((s: any) => s.name === selectedSpec.value || s.key === selectedSpec.value) || null
+})
+
 // 選擇規格
 function selectSpec(specKey: string) {
   selectedSpec.value = specKey
@@ -191,6 +197,7 @@ function addToCart() {
   emit('add-to-cart', {
     product: props.product,
     spec: selectedSpec.value,
+    spec_id: currentSpecObj.value ? currentSpecObj.value.id : undefined,
     price: currentPrice.value,
     weight: currentWeight.value
   })
@@ -201,6 +208,7 @@ function buyNow() {
   emit('buy-now', {
     product: props.product,
     spec: selectedSpec.value,
+    spec_id: currentSpecObj.value ? currentSpecObj.value.id : undefined,
     price: currentPrice.value,
     weight: currentWeight.value
   })

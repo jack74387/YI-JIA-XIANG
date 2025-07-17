@@ -315,7 +315,10 @@ const success = ref('')
 // 獲取儀錶板資料
 const fetchDashboardData = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/dashboard')
+    const token = localStorage.getItem('admin_token')
+    const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/dashboard', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
     if (response.data.success) {
       // 確保所有必要欄位都有預設值
       const data = response.data.data

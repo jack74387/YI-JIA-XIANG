@@ -57,14 +57,15 @@ export const useCartStore = defineStore('cart', {
         this.loading = false
       }
     },
-    async addToCart(productId: number, quantity = 1, spec?: string, price?: number, weight?: string) {
+    async addToCart(productId: number, quantity = 1, spec?: string, price?: number, weight?: string, spec_id?: number) {
       try {
         await axios.post(`${API_BASE}/api/v1/cart`, {
           product_id: productId,
           quantity,
           spec,
           price, // 新增
-          weight // 新增
+          weight, // 新增
+          spec_id // 新增
         })
         await this.fetchCart()
       } catch (e) {

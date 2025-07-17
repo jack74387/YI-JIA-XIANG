@@ -12,6 +12,11 @@
     <div class="order-items">
       <h2>商品明細</h2>
       <div v-for="item in order.items || []" :key="item.id" class="item-row">
+        <img :src="getImageUrl(
+          item.product?.primary_image?.image_path
+          || (item.product?.images && item.product.images[0]?.image_path)
+          || item.image
+        ) || '/images/placeholder.jpg'" :alt="item.name" class="w-12 h-12 object-cover rounded inline-block mr-3" />
         <span>{{ item.name }}</span>
         <span>x{{ item.quantity }}</span>
         <span>NT$ {{ item.price }}</span>
@@ -33,13 +38,14 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import ServiceNavButtons from '@/components/ServiceNavButtons.vue'
 
+const API_BASE = 'http://127.0.0.1:8000';
 const route = useRoute()
 const order = ref<any>({})
 
 onMounted(async () => {
   try {
     const orderId = route.params.id
-    const res = await axios.get(`http://127.0.0.1:8000/api/v1/orders/${orderId}`)
+    const res = await axios.get(`${API_BASE}/api/v1/orders/${orderId}`)
     if (res.data.success) {
       order.value = res.data.order
     }
@@ -47,6 +53,16 @@ onMounted(async () => {
     order.value = { id: '-', status: '查無訂單', items: [] }
   }
 })
+
+function getImageUrl(imagePath: string | { image_path: string } | undefined) {
+  if (!imagePath) return null
+  if (typeof imagePath === 'object' && imagePath.image_path) imagePath = imagePath.image_path
+  if (typeof imagePath !== 'string') return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return API_BASE + imagePath
+  if (imagePath.startsWith('/')) return API_BASE + imagePath
+  return imagePath
+}
 </script>
 
 <style scoped>

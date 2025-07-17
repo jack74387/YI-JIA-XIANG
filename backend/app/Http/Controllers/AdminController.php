@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Coupon;
@@ -1210,6 +1211,26 @@ class AdminController extends Controller
                 'tags' => 'nullable|array'
             ]);
 
+            // 取得原本的圖片路徑
+            $oldImage = $product->image ?? null;
+
+            // 如果 image 欄位被清空，且原本有圖片，則刪除實體檔案
+            if (
+                array_key_exists('image', $validated) &&
+                empty($validated['image']) &&
+                $oldImage &&
+                (str_starts_with($oldImage, '/storage/products/') || str_starts_with($oldImage, 'storage/products/'))
+            ) {
+                // 處理路徑，移除開頭的 /storage/ 或 storage/
+                $relativePath = ltrim(preg_replace('#^/?storage/#', '', $oldImage), '/');
+                \Log::info('嘗試刪除圖片', [
+                    'oldImage' => $oldImage,
+                    'relativePath' => $relativePath,
+                    'exists' => \Storage::disk('public')->exists($relativePath)
+                ]);
+                \Storage::disk('public')->delete($relativePath);
+            }
+
             $product->update($validated);
 
             return response()->json([
@@ -1316,6 +1337,97 @@ class AdminController extends Controller
                 'message' => '匯出失敗：' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * 後台商品圖片上傳
+     */
+    public function uploadImage(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (!$user || !$user->is_admin) {
+                \Log::warning('圖片上傳失敗：無權限', ['user_id' => $user?->id]);
+                return response()->json(['success' => false, 'message' => '無權限'], 403);
+            }
+            
+            $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
+            ]);
+            
+            $file = $request->file('image');
+            if (!$file) {
+                \Log::error('圖片上傳失敗：未找到檔案', ['user_id' => $user->id]);
+                return response()->json(['success' => false, 'message' => '未找到上傳的檔案'], 400);
+            }
+            
+            // 使用 public disk 明確指定
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'products/' . $filename;
+            
+            // 使用 Storage facade 的 public disk
+            $stored = \Storage::disk('public')->put($path, file_get_contents($file));
+            
+            if (!$stored) {
+                throw new \Exception('檔案儲存失敗');
+            }
+            
+            // 驗證檔案是否真的被儲存
+            if (!\Storage::disk('public')->exists($path)) {
+                throw new \Exception('檔案儲存後無法找到');
+            }
+            
+            $url = \Storage::disk('public')->url($path);
+            
+            \Log::info('圖片上傳成功', [
+                'user_id' => $user->id,
+                'file_name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'url' => $url,
+                'file_size' => $file->getSize(),
+                'storage_path' => storage_path('app/public/' . $path)
+            ]);
+            
+            return response()->json(['success' => true, 'url' => $url]);
+            
+        } catch (\Exception $e) {
+            \Log::error('圖片上傳失敗', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $request->user()?->id
+            ]);
+            return response()->json(['success' => false, 'message' => '圖片上傳失敗: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * 刪除產品圖片
+     */
+    public function deleteProductImage(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $product = \App\Models\Product::find($id);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => '產品不存在'], 404);
+        }
+        $imagePath = $request->input('image');
+        if (!$imagePath) {
+            return response()->json(['success' => false, 'message' => '未指定圖片路徑'], 400);
+        }
+        // 刪除實體檔案
+        $relativePath = ltrim(preg_replace('#^/?storage/#', '', $imagePath), '/');
+        \Storage::disk('public')->delete($relativePath);
+
+        // 從 images 陣列移除
+        $images = $product->images ?? [];
+        $images = array_values(array_filter($images, fn($img) => $img !== $imagePath));
+        $product->images = $images;
+        $product->save();
+
+        return response()->json(['success' => true, 'images' => $images]);
     }
 
     /**

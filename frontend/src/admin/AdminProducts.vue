@@ -103,7 +103,7 @@
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10">
                         <img 
-                          :src="product.image || '/images/product-placeholder.jpg'" 
+                          :src="getImageUrl(product.primary_image?.image_path || (Array.isArray(product.images) && product.images[0]?.image_path) || product.image) || '/images/product-placeholder.jpg'" 
                           :alt="product.name"
                           class="h-10 w-10 rounded-lg object-cover"
                         />
@@ -280,13 +280,74 @@
                 </div>
 
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">商品圖片</label>
-                  <input 
-                    v-model="form.image" 
-                    type="text" 
-                    placeholder="圖片 URL"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
+                  <label class="block text-sm font-medium text-gray-700 mb-2">商品主圖</label>
+                  <div class="space-y-4">
+                    <!-- 圖片預覽 -->
+                    <div v-if="imagePreview || form.image" class="flex items-center space-x-4">
+                      <img 
+                        :src="imagePreview || getImageUrl(form.image)" 
+                        alt="商品圖片預覽"
+                        class="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                      <button 
+                        type="button"
+                        @click="removeImage"
+                        class="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        移除圖片
+                      </button>
+                    </div>
+                    
+                    <!-- 檔案上傳 -->
+                    <div class="flex items-center space-x-4">
+                      <input 
+                        ref="fileInput"
+                        type="file" 
+                        accept="image/*"
+                        @change="handleImageUpload"
+                        class="hidden"
+                      />
+                      <button 
+                        type="button"
+                        @click="$refs.fileInput.click()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      >
+                        選擇圖片
+                      </button>
+                      <span class="text-sm text-gray-500">
+                        支援 JPG、PNG、GIF 格式，建議尺寸 800x800 像素
+                      </span>
+                    </div>
+                    
+                    <!-- 上傳進度 -->
+                    <div v-if="uploadProgress > 0 && uploadProgress < 100" class="space-y-2">
+                      <div class="bg-gray-200 rounded-full h-2">
+                        <div 
+                          class="bg-amber-600 rounded-full transition-all duration-300"
+                          :style="{ width: uploadProgress + '%' }"
+                        ></div>
+                      </div>
+                      <p class="text-sm text-gray-600">上傳中... {{ uploadProgress }}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">商品額外圖片（最多10張）</label>
+                  <div class="flex flex-wrap gap-4 mb-2">
+                    <div v-for="(img, idx) in form.images" :key="img" class="relative">
+                      <img :src="getImageUrl(img)" class="w-24 h-24 object-cover rounded border" />
+                      <button type="button" class="absolute top-0 right-0 bg-white bg-opacity-80 rounded-full p-1" @click="removeExtraImage(idx)">✕</button>
+                    </div>
+                    <button
+                      v-if="form.images.length < 10"
+                      type="button"
+                      class="w-24 h-24 flex items-center justify-center border rounded text-gray-400 hover:bg-gray-100"
+                      @click="$refs.extraFileInput.click()"
+                    >＋</button>
+                    <input ref="extraFileInput" type="file" accept="image/*" multiple class="hidden" @change="handleExtraImagesUpload" />
+                  </div>
+                  <span class="text-sm text-gray-500">支援 JPG、PNG、GIF 格式，建議尺寸 800x800 像素</span>
                 </div>
 
                 <div class="md:col-span-2">
@@ -373,8 +434,111 @@ const form = ref({
   unit: '',
   specs: '',
   status: 'draft',
-  stock: 0 // 預設為 0
+  stock: 0, // 預設為 0
+  images: [] // 新增 images 陣列
 })
+
+// 圖片上傳相關
+const imagePreview = ref('')
+const uploadProgress = ref(0)
+const selectedFile = ref(null)
+
+// 額外圖片上傳相關
+const extraFileInput = ref(null)
+
+function handleImageUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  selectedFile.value = file
+  // 預覽
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    imagePreview.value = ev.target.result
+  }
+  reader.readAsDataURL(file)
+  // 上傳
+  const formData = new FormData()
+  formData.append('image', file)
+  uploadProgress.value = 0
+  axios.post('http://127.0.0.1:8000/api/v1/admin/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (progressEvent) => {
+      if (progressEvent.total) {
+        uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+      }
+    }
+  }).then(res => {
+    if (res.data.success) {
+      // 只存相對路徑
+      const url = res.data.url
+      form.value.image = url.replace(/^https?:\/\/[^/]+/, '')
+      uploadProgress.value = 100
+    } else {
+      alert('圖片上傳失敗: ' + (res.data.message || '未知錯誤'))
+      uploadProgress.value = 0
+    }
+  }).catch((error) => {
+    console.error('圖片上傳錯誤:', error)
+    alert('圖片上傳失敗: ' + (error.response?.data?.message || error.message || '網路錯誤'))
+    uploadProgress.value = 0
+  })
+}
+
+async function handleExtraImagesUpload(e) {
+  const files = Array.from(e.target.files)
+  for (const file of files) {
+    if (form.value.images.length >= 10) break
+    const formData = new FormData()
+    formData.append('image', file)
+    try {
+      const res = await axios.post('http://127.0.0.1:8000/api/v1/admin/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      if (res.data.success) {
+        // 只存相對路徑
+        const url = res.data.url
+        form.value.images.push(url.replace(/^https?:\/\/[^/]+/, ''))
+      }
+    } catch (err) {
+      alert('圖片上傳失敗')
+    }
+  }
+  e.target.value = '' // 清空 input
+}
+
+async function removeExtraImage(idx) {
+  const img = form.value.images[idx]
+  form.value.images.splice(idx, 1)
+  if (showEditModal.value && editingProduct.value) {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/v1/admin/products/${editingProduct.value.id}/image`, {
+        data: { image: img }
+      })
+    } catch (err) {
+      alert('刪除圖片檔案失敗')
+    }
+  }
+}
+
+async function removeImage() {
+  form.value.image = ''
+  imagePreview.value = ''
+  selectedFile.value = null
+  if (showEditModal.value && editingProduct.value) {
+    // 立即同步到後端
+    formLoading.value = true
+    try {
+      await axios.put(`http://127.0.0.1:8000/api/v1/admin/products/${editingProduct.value.id}`, { image: '' })
+      // 重新取得商品資料
+      await fetchProducts(pagination.value?.current_page || 1)
+      alert('圖片已移除')
+    } catch (error) {
+      alert('移除圖片失敗: ' + (error.response?.data?.message || error.message))
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
 
 // 獲取商品列表
 const fetchProducts = async (page = 1) => {
@@ -476,7 +640,8 @@ const editProduct = (product) => {
     unit: product.unit || '',
     specs: product.specs || '',
     status: product.status,
-    stock: product.stock ?? 0 // 確保有庫存值
+    stock: product.stock ?? 0, // 確保有庫存值
+    images: product.images || [] // 確保有圖片陣列
   }
   showEditModal.value = true
 }
@@ -556,7 +721,8 @@ const closeModal = () => {
     unit: '',
     specs: '',
     status: 'draft',
-    stock: 0
+    stock: 0,
+    images: [] // 關閉時清空圖片陣列
   }
 }
 
@@ -592,6 +758,15 @@ const getStatusClass = (status) => {
     'archived': 'bg-red-100 text-red-800'
   }
   return classMap[status] || 'bg-gray-100 text-gray-800'
+}
+
+// 1. 在 <script setup> 中加入 getImageUrl 函數
+function getImageUrl(imagePath) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
 }
 
 onMounted(async () => {

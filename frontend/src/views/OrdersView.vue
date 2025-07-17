@@ -54,7 +54,7 @@
             <h3 class="text-md font-semibold mb-4">商品清單</h3>
             <div class="space-y-3">
               <div v-for="item in order.items" :key="item.id" class="flex items-center gap-4">
-                <img :src="item.image || '/images/placeholder.jpg'" :alt="item.name" class="w-12 h-12 object-cover rounded" />
+                <img :src="getImageUrl(item.product?.primary_image?.image_path || (item.product?.images && item.product.images[0]) || item.image) || '/images/placeholder.jpg'" :alt="item.name" class="w-12 h-12 object-cover rounded" />
                 <div class="flex-1">
                   <h4 class="font-medium">{{ item.name }}</h4>
                   <p class="text-sm text-gray-600">{{ item.spec_text }} x {{ item.quantity }}</p>
@@ -124,6 +124,14 @@ function getStatusClass(status: string) {
     'cancelled': 'bg-red-100 text-red-800'
   }
   return statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800'
+}
+
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
 }
 
 // 載入訂單列表

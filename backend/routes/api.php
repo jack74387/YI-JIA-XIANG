@@ -10,10 +10,40 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UserAddressController;
+use Illuminate\Http\Request;
 
 // 測試路由
 Route::get('/test', function () {
     return response()->json(['message' => 'API is working!']);
+});
+
+// 測試檔案上傳路由（僅用於調試）
+Route::post('/test-upload', function (Request $request) {
+    try {
+        if (!$request->hasFile('image')) {
+            return response()->json(['success' => false, 'message' => '沒有檔案']);
+        }
+        
+        $file = $request->file('image');
+        $filename = 'test_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = 'products/' . $filename;
+        
+        $stored = \Storage::disk('public')->put($path, file_get_contents($file));
+        
+        if ($stored) {
+            $url = \Storage::disk('public')->url($path);
+            return response()->json([
+                'success' => true, 
+                'url' => $url,
+                'path' => $path,
+                'storage_path' => storage_path('app/public/' . $path)
+            ]);
+        } else {
+            return response()->json(['success' => false, 'message' => '儲存失敗']);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
 });
 
 Route::prefix('v1')->group(function () {
@@ -119,6 +149,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/admin/products', [\App\Http\Controllers\AdminController::class, 'adminProductStore']);
             Route::put('/admin/products/{id}', [\App\Http\Controllers\AdminController::class, 'adminProductUpdate']);
             Route::delete('/admin/products/{id}', [\App\Http\Controllers\AdminController::class, 'adminProductDestroy']);
+            // 新增刪除商品額外圖片 API
+            Route::delete('/admin/products/{id}/image', [\App\Http\Controllers\AdminController::class, 'deleteProductImage']);
+            // 新增圖片上傳 API
+            Route::post('/admin/upload-image', [\App\Http\Controllers\AdminController::class, 'uploadImage']);
             
             // 後台優惠券管理
             Route::get('/admin/coupons', [\App\Http\Controllers\AdminController::class, 'adminCoupons']);
@@ -144,4 +178,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/food-trace', [\App\Http\Controllers\FoodTraceController::class, 'show']);
     Route::post('/group-orders', [\App\Http\Controllers\GroupOrderController::class, 'store']);
     Route::get('/recommend', [\App\Http\Controllers\RecommendController::class, 'index']);
+}); 
+
+// Admin 庫存管理
+Route::middleware(['auth:sanctum'])->prefix('v1/admin')->group(function () {
+    Route::get('inventories', [\App\Http\Controllers\AdminInventoryController::class, 'adminInventories']);
+    Route::post('inventories/{id}/adjust', [\App\Http\Controllers\AdminInventoryController::class, 'adminInventoryAdjust']);
 }); 

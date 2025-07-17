@@ -34,7 +34,7 @@
           <tbody>
             <tr v-for="item in cart.items" :key="item.id" class="bg-white rounded-lg shadow-sm">
               <td class="py-2">
-                <img :src="item.image || '/images/placeholder.jpg'" alt="商品圖" class="w-16 h-16 object-cover rounded" />
+                <img :src="getImageUrl(item.product?.primary_image?.image_path || (item.product?.images && item.product.images[0]) || item.image) || '/images/placeholder.jpg'" alt="商品圖" class="w-16 h-16 object-cover rounded" />
               </td>
               <td class="font-semibold">{{ item.name }}</td>
               <td class="text-sm text-gray-500">
@@ -101,6 +101,14 @@ function getSpecLabel(spec: string) {
   if (spec === 'small') return '300g'
   if (spec === 'sample') return '隨手包'
   return '-'
+}
+
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
 }
 </script>
 

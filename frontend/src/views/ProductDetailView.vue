@@ -2,7 +2,7 @@
   <div class="product-detail flex flex-col md:flex-row gap-8">
     <!-- 左側圖片區 -->
     <div class="relative">
-      <ProductImageGallery :images="product.images || []" :weight="product.weight || ''" :status="product.status || ''" />
+      <ProductImageGallery :images="getAllImages()" :weight="product.weight || ''" :status="product.status || ''" :title="product.name" />
       <div v-if="product.status === 'notification'" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
         <span class="text-lg font-bold bg-black bg-opacity-60 text-white px-6 py-2 rounded">貨到通知</span>
       </div>
@@ -53,15 +53,16 @@ onMounted(async () => {
 })
 
 function addToCart(specData: any) {
-  const { product: productData, spec, price, weight } = specData
+  const { product: productData, spec, spec_id, price, weight } = specData
   
   selectedProduct.value = {
     id: productData.id,
     name: `${productData.name}（${getSpecLabel(spec)}）`,
     price: price,
     spec, // <--- 修正: 加入 spec
+    spec_id, // 新增: 傳遞 spec_id
     weight, // <--- 新增: 傳遞 weight
-    image: productData.images?.[0] || productData.image
+    image: productData.primary_image?.image_path || (productData.images && productData.images[0]) || productData.image
   }
   showAddToCart.value = true
 }
@@ -70,9 +71,9 @@ function buyNow(specData: any) {
   const { product: productData, spec, price, weight } = specData
   
   // 先加入購物車，然後跳轉到結帳頁面
-  addToCart(specData)
+  // addToCart(specData)
   // 這裡可以添加跳轉到結帳頁面的邏輯
-  // router.push('/checkout')
+  router.push('/checkout')
 }
 
 function onAddedToCart() {
@@ -85,6 +86,18 @@ function getSpecLabel(spec: string) {
   if (spec === 'small') return '300g'
   if (spec === 'sample') return '隨手包'
   return ''
+}
+
+// 傳遞主圖+多圖給 ProductImageGallery
+function getAllImages() {
+  const arr = []
+  if (product.value.primary_image?.image_path) arr.push(product.value.primary_image.image_path)
+  if (Array.isArray(product.value.images)) {
+    for (const img of product.value.images) {
+      if (img && !arr.includes(img)) arr.push(img)
+    }
+  }
+  return arr.slice(0, 10)
 }
 </script>
 

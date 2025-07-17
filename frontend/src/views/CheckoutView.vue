@@ -29,7 +29,7 @@
             <h2 class="text-xl font-semibold mb-4">商品清單</h2>
             <div class="space-y-4">
               <div v-for="item in cart.items" :key="item.id" class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <img :src="item.image || '/images/placeholder.jpg'" :alt="item.name" class="w-16 h-16 object-cover rounded" />
+                <img :src="getImageUrl(item.product?.primary_image?.image_path || (item.product?.images && item.product.images[0]) || item.image) || '/images/placeholder.jpg'" :alt="item.name" class="w-16 h-16 object-cover rounded" />
                 <div class="flex-1">
                   <h3 class="font-semibold">{{ item.name }}</h3>
                   <p class="text-sm text-gray-600">{{ getSpecLabel(item.spec) }}</p>
@@ -1269,6 +1269,14 @@ const resetAddressForm = () => {
 const closeAddressDialog = () => {
   showAddressDialog.value = false
   resetAddressForm()
+}
+
+function getImageUrl(imagePath: string | undefined) {
+  if (!imagePath) return null
+  if (imagePath.startsWith('http')) return imagePath
+  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  return imagePath
 }
 </script>
 

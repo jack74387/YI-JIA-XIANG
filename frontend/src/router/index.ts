@@ -196,6 +196,11 @@ const router = createRouter({
       component: () => import('../admin/AdminStores.vue')
     },
     {
+      path: '/admin/inventories',
+      name: 'admin-inventories',
+      component: () => import('../admin/AdminInventory.vue')
+    },
+    {
       path: '/artisan-craft',
       name: 'artisan-craft',
       component: () => import('../views/ArtisanCraftView.vue')
