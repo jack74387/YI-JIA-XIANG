@@ -13,7 +13,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-const products = ref([])
+
+interface ProductRecommendItem {
+  id: number;
+  name: string;
+  image: string;
+}
+const products = ref<ProductRecommendItem[]>([])
 onMounted(async () => {
   try {
     const res = await axios.get('http://127.0.0.1:8000/api/v1/recommend')

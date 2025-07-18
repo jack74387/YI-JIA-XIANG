@@ -12,7 +12,7 @@
             :key="p.id"
             :product="{
               ...p,
-              image: getImageUrl(p.primary_image?.image_path || (Array.isArray(p.images) && p.images[0]) || p.image)
+              image: getImageUrl((p.primary_image?.image_path || p.image) ?? undefined)
             }"
             @add-to-cart="openAddToCart(p)"
             @click-img="goToDetail(p.id)"

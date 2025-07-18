@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 關閉外鍵檢查
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('users')->truncate();
         DB::table('coupons')->truncate();
 
@@ -33,6 +35,9 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             CouponSeeder::class,
             InventorySeeder::class,
+            StoreSeeder::class, // 新增這一行
         ]);
+        // 開啟外鍵檢查
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }
