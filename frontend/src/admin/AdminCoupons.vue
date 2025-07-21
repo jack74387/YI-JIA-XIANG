@@ -145,7 +145,7 @@ const form = ref({
 
 const fetchCoupons = async (page = 1) => {
   try {
-    let url = `http://127.0.0.1:8000/api/v1/admin/coupons?page=${page}`
+    let url = `/api/v1/admin/coupons?page=${page}`
     if (search.value) url += `&search=${encodeURIComponent(search.value)}`
     const res = await axios.get(url)
     const pageData = res.data.data
@@ -195,10 +195,10 @@ const submitCoupon = async () => {
   }
   try {
     if (editingCoupon.value) {
-      await axios.put(`http://127.0.0.1:8000/api/v1/admin/coupons/${editingCoupon.value.id}`, form.value)
+      await axios.put(`/api/v1/admin/coupons/${editingCoupon.value.id}`, form.value)
       alert('優惠券已更新')
     } else {
-      await axios.post('http://127.0.0.1:8000/api/v1/admin/coupons', form.value)
+      await axios.post('/api/v1/admin/coupons', form.value)
       alert('優惠券已新增')
     }
     showModal.value = false
@@ -212,7 +212,7 @@ const submitCoupon = async () => {
 const deleteCoupon = async (id: number) => {
   if (!confirm('確定要刪除這個優惠券嗎？')) return
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/v1/admin/coupons/${id}`)
+    await axios.delete(`/api/v1/admin/coupons/${id}`)
     alert('優惠券已刪除')
     await fetchCoupons(pagination.value.current_page)
   } catch (error: any) {
@@ -223,7 +223,7 @@ const deleteCoupon = async (id: number) => {
 
 const toggleStatus = async (coupon: any) => {
   try {
-    await axios.put(`http://127.0.0.1:8000/api/v1/admin/coupons/${coupon.id}`, { 
+    await axios.put(`/api/v1/admin/coupons/${coupon.id}`, { 
       ...coupon, 
       is_active: !coupon.is_active 
     })

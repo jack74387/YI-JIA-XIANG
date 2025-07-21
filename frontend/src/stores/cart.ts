@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useAuthStore } from './auth'
 
-const API_BASE = 'http://127.0.0.1:8000';
-
 export interface CartItem {
   id: number
   product_id: number
@@ -32,62 +30,78 @@ export const useCartStore = defineStore('cart', {
   },
   actions: {
     async fetchCart() {
-      this.loading = true
-      try {
-        const res = await axios.get(`${API_BASE}/api/v1/cart`)
-        if (res.data.success) {
-          // 後端回傳 data: [ { id, product_id, quantity, product: {...}, spec, price } ]
-          this.items = res.data.data.map((item: any) => ({
-            id: item.id,
-            product_id: item.product_id,
-            name: item.name || item.product?.name || '',
-            price: item.price || item.product?.final_price || 0,
-            quantity: item.quantity,
-            spec: item.spec,
-            weight: item.weight, // 新增 weight
-            image: item.image || item.product?.primary_image?.image_path,
-            product: item.product
-          }))
+      if (useAuthStore().isAuthenticated) {
+        this.loading = true
+        try {
+          const res = await axios.get(`/api/v1/cart`)
+          if (res.data.success) {
+            // 後端回傳 data: [ { id, product_id, quantity, product: {...}, spec, price } ]
+            this.items = res.data.data.map((item: any) => ({
+              id: item.id,
+              product_id: item.product_id,
+              name: item.name || item.product?.name || '',
+              price: item.price || item.product?.final_price || 0,
+              quantity: item.quantity,
+              spec: item.spec,
+              weight: item.weight, // 新增 weight
+              image: item.image || item.product?.primary_image?.image_path,
+              product: item.product
+            }))
+          }
+        } catch (e) {
+          this.error = '無法取得購物車資料'
+          // 如果無法取得購物車資料，清空本地購物車
+          this.items = []
+        } finally {
+          this.loading = false
         }
-      } catch (e) {
-        this.error = '無法取得購物車資料'
-        // 如果無法取得購物車資料，清空本地購物車
-        this.items = []
-      } finally {
-        this.loading = false
+      } else {
+        this.clearCart()
       }
     },
     async addToCart(productId: number, quantity = 1, spec?: string, price?: number, weight?: string, spec_id?: number) {
-      try {
-        await axios.post(`${API_BASE}/api/v1/cart`, {
-          product_id: productId,
-          quantity,
-          spec,
-          price, // 新增
-          weight, // 新增
-          spec_id // 新增
-        })
-        await this.fetchCart()
-      } catch (e) {
-        this.error = '加入購物車失敗'
+      if (useAuthStore().isAuthenticated) {
+        try {
+          await axios.post(`/api/v1/cart`, {
+            product_id: productId,
+            quantity,
+            spec,
+            price, // 新增
+            weight, // 新增
+            spec_id // 新增
+          })
+          await this.fetchCart()
+        } catch (e) {
+          this.error = '加入購物車失敗'
+        }
+      } else {
+        this.error = '請先登入以加入購物車'
       }
     },
     async updateQuantity(cartItemId: number, quantity: number) {
-      try {
-        await axios.put(`${API_BASE}/api/v1/cart/${cartItemId}`, {
-          quantity
-        })
-        await this.fetchCart()
-      } catch (e) {
-        this.error = '更新數量失敗'
+      if (useAuthStore().isAuthenticated) {
+        try {
+          await axios.put(`/api/v1/cart/${cartItemId}`, {
+            quantity
+          })
+          await this.fetchCart()
+        } catch (e) {
+          this.error = '更新數量失敗'
+        }
+      } else {
+        this.error = '請先登入以更新購物車'
       }
     },
     async removeFromCart(cartItemId: number) {
-      try {
-        await axios.delete(`${API_BASE}/api/v1/cart/${cartItemId}`)
-        await this.fetchCart()
-      } catch (e) {
-        this.error = '移除商品失敗'
+      if (useAuthStore().isAuthenticated) {
+        try {
+          await axios.delete(`/api/v1/cart/${cartItemId}`)
+          await this.fetchCart()
+        } catch (e) {
+          this.error = '移除商品失敗'
+        }
+      } else {
+        this.error = '請先登入以移除商品'
       }
     },
     clearCart() {

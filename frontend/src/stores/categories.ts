@@ -16,11 +16,18 @@ export const useCategoriesStore = defineStore('categories', {
   }),
   actions: {
     async fetchCategories() {
-      this.loading = true
+      if (this.categories.length > 0) return
+      
       try {
-        const API_BASE = 'http://127.0.0.1:8000';
-        const res = await axios.get(`${API_BASE}/api/v1/categories`)
-        this.categories = res.data
+        this.loading = true
+        try {
+          const res = await axios.get(`/api/v1/categories`)
+          this.categories = res.data
+        } catch (e) {
+          this.error = '無法取得分類資料'
+        } finally {
+          this.loading = false
+        }
       } catch (e) {
         this.error = '無法取得分類資料'
       } finally {

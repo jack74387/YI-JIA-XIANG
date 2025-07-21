@@ -725,7 +725,7 @@ onMounted(async () => {
 // 獲取用戶資料
 const fetchUserProfile = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/member/profile')
+    const response = await axios.get('/api/v1/member/profile')
     if (response.data.success && authStore.user) {
       // 更新auth store中的用戶資料
       Object.assign(authStore.user, response.data.user)

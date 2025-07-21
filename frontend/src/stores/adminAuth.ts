@@ -14,7 +14,7 @@ export const useAdminAuthStore = defineStore('adminAuth', {
       if (token) {
         try {
           // 驗證 token 是否有效
-          const response = await axios.get('http://127.0.0.1:8000/api/v1/auth/user', {
+          const response = await axios.get('/api/v1/auth/user', {
             headers: {
               'Authorization': `Bearer ${token}`
             }

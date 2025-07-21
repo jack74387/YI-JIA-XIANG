@@ -214,7 +214,7 @@ const updatingStatus = ref(false)
 
 const fetchOrders = async (page = 1) => {
   const token = localStorage.getItem('admin_token')
-  let url = `http://127.0.0.1:8000/api/v1/admin/orders?page=${page}`
+  let url = `/api/v1/admin/orders?page=${page}`
   if (search.value) url += `&search=${encodeURIComponent(search.value)}`
   if (statusFilter.value) url += `&status=${encodeURIComponent(statusFilter.value)}`
   const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } })
@@ -245,7 +245,7 @@ const viewOrder = async (order: any) => {
   orderDetail.value = null
   try {
     const token = localStorage.getItem('admin_token')
-    const res = await axios.get(`http://127.0.0.1:8000/api/v1/admin/orders/${order.id}`, { headers: { Authorization: `Bearer ${token}` } })
+    const res = await axios.get(`/api/v1/admin/orders/${order.id}`, { headers: { Authorization: `Bearer ${token}` } })
     orderDetail.value = res.data.order
     orderStatus.value = orderDetail.value.status
   } catch (e) {
@@ -266,7 +266,7 @@ const updateStatus = async () => {
   updatingStatus.value = true
   try {
     const token = localStorage.getItem('admin_token')
-    await axios.put(`http://127.0.0.1:8000/api/v1/admin/orders/${orderDetail.value.id}/status`, { status: orderStatus.value }, { headers: { Authorization: `Bearer ${token}` } })
+    await axios.put(`/api/v1/admin/orders/${orderDetail.value.id}/status`, { status: orderStatus.value }, { headers: { Authorization: `Bearer ${token}` } })
     alert('狀態已更新')
     closeModal()
     await fetchOrders(pagination.value.current_page)
@@ -280,7 +280,7 @@ const updateStatus = async () => {
 const exportOrders = async () => {
   try {
     const token = localStorage.getItem('admin_token')
-    let url = 'http://127.0.0.1:8000/api/v1/admin/orders/export'
+    let url = '/api/v1/admin/orders/export'
     const params = new URLSearchParams()
     if (search.value) params.append('search', search.value)
     if (statusFilter.value) params.append('status', statusFilter.value)

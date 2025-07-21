@@ -19,7 +19,7 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: yijiaxiang:arm64
     depends_on:
       db:
         condition: service_healthy
@@ -32,8 +32,6 @@ services:
       DB_PASSWORD: yi_jia_xiang_password_2024
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/var/www
     working_dir: /var/www
 
   frontend:

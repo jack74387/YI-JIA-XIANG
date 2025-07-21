@@ -129,15 +129,15 @@ function getStatusClass(status: string) {
 function getImageUrl(imagePath: string | undefined) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
-  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 
 // 載入訂單列表
 async function loadOrders() {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/user/orders')
+    const response = await axios.get('/api/v1/user/orders')
     if (response.data.success) {
       orders.value = response.data.orders
     }
@@ -155,7 +155,7 @@ async function cancelOrder(orderId: number) {
   }
 
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/v1/orders/${orderId}/status`, {
+    const response = await axios.put(`/api/v1/orders/${orderId}/status`, {
       status: 'cancelled'
     })
     

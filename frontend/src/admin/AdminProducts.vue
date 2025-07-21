@@ -460,7 +460,7 @@ function handleImageUpload(e) {
   const formData = new FormData()
   formData.append('image', file)
   uploadProgress.value = 0
-  axios.post('http://127.0.0.1:8000/api/v1/admin/upload-image', formData, {
+  axios.post('/api/v1/admin/upload-image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
@@ -491,7 +491,7 @@ async function handleExtraImagesUpload(e) {
     const formData = new FormData()
     formData.append('image', file)
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/v1/admin/upload-image', formData, {
+      const res = await axios.post('/api/v1/admin/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       if (res.data.success) {
@@ -511,7 +511,7 @@ async function removeExtraImage(idx) {
   form.value.images.splice(idx, 1)
   if (showEditModal.value && editingProduct.value) {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/v1/admin/products/${editingProduct.value.id}/image`, {
+      await axios.delete(`/api/v1/admin/products/${editingProduct.value.id}/image`, {
         data: { image: img }
       })
     } catch (err) {
@@ -528,7 +528,7 @@ async function removeImage() {
     // 立即同步到後端
     formLoading.value = true
     try {
-      await axios.put(`http://127.0.0.1:8000/api/v1/admin/products/${editingProduct.value.id}`, { image: '' })
+      await axios.put(`/api/v1/admin/products/${editingProduct.value.id}`, { image: '' })
       // 重新取得商品資料
       await fetchProducts(pagination.value?.current_page || 1)
       alert('圖片已移除')
@@ -550,7 +550,7 @@ const fetchProducts = async (page = 1) => {
       category_id: categoryFilter.value
     }
     
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/products', { params })
+    const response = await axios.get('/api/v1/admin/products', { params })
     
     if (response.data.success) {
       products.value = response.data.data.data
@@ -566,7 +566,7 @@ const fetchProducts = async (page = 1) => {
 // 獲取分類列表
 const fetchCategories = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/categories')
+    const response = await axios.get('/api/v1/categories')
     if (response.data.success) {
       categories.value = response.data.data
     }
@@ -612,7 +612,7 @@ const createProduct = async () => {
     form.value.stock = Number(form.value.stock)
   }
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/admin/products', form.value)
+    const response = await axios.post('/api/v1/admin/products', form.value)
     
     if (response.data.success) {
       closeModal()
@@ -656,7 +656,7 @@ const updateProduct = async () => {
     form.value.stock = Number(form.value.stock)
   }
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/v1/admin/products/${editingProduct.value.id}`, form.value)
+    const response = await axios.put(`/api/v1/admin/products/${editingProduct.value.id}`, form.value)
     
     if (response.data.success) {
       closeModal()
@@ -676,7 +676,7 @@ const deleteProduct = async (id) => {
   if (!confirm('確定要刪除這個商品嗎？')) return
   
   try {
-    const response = await axios.delete(`http://127.0.0.1:8000/api/v1/admin/products/${id}`)
+    const response = await axios.delete(`/api/v1/admin/products/${id}`)
     
     if (response.data.success) {
       fetchProducts(pagination.value?.current_page || 1)
@@ -692,7 +692,7 @@ const deleteProduct = async (id) => {
 const exportProducts = async () => {
   exportLoading.value = true
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/products/export')
+    const response = await axios.get('/api/v1/admin/products/export')
     
     if (response.data.success) {
       window.open(response.data.download_url, '_blank')
@@ -764,8 +764,8 @@ const getStatusClass = (status) => {
 function getImageUrl(imagePath) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
-  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 

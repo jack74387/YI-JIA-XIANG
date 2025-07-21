@@ -928,7 +928,7 @@ function getCouponUnavailableReason(coupon: any) {
 }
 
 const fetchCoupons = async () => {
-  const res = await axios.get('http://127.0.0.1:8000/api/v1/coupons')
+  const res = await axios.get('/api/v1/coupons')
   coupons.value = (res.data.data?.data || res.data.data || []).filter((c: any) => c.is_active)
 }
 
@@ -944,7 +944,7 @@ const applyCoupon = async () => {
       discount.value = 0
       return
     }
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/coupons/validate', {
+    const response = await axios.post('/api/v1/coupons/validate', {
       code: coupon.code,
       order_amount: cart.totalPrice
     })
@@ -995,7 +995,7 @@ watch(usePoints, (val) => {
     if (usePoints.value > 0) {
       pointsLoading.value = true
       try {
-        const res = await axios.post('http://127.0.0.1:8000/api/v1/points/spend', { amount: usePoints.value }, { withCredentials: true })
+        const res = await axios.post('/api/v1/points/spend', { amount: usePoints.value }, { withCredentials: true })
         if (!res.data.success) {
           pointsError.value = res.data.message || '點數折抵驗證失敗'
           usePoints.value = 0
@@ -1097,7 +1097,7 @@ async function submitOrder() {
       convenience_store_phone: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.phone : null,
       convenience_store_chain: form.value.shipping_method === '超商取貨' ? selectedConvenienceStore.value?.chain : null,
     }
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/orders', payload)
+    const response = await axios.post('/api/v1/orders', payload)
     
     if (response.data.success) {
       // 清空購物車
@@ -1128,7 +1128,7 @@ onMounted(async () => {
   
   // 取得門市資料
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/stores')
+    const res = await axios.get('/api/v1/stores')
     if (res.data.success) {
       stores.value = res.data.stores
       // 預設選擇台東總店
@@ -1274,8 +1274,8 @@ const closeAddressDialog = () => {
 function getImageUrl(imagePath: string | undefined) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
-  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 </script>

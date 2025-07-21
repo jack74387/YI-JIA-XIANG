@@ -180,8 +180,6 @@ import ProductAddToCartModal from '@/components/ProductAddToCartModal.vue'
 const router = useRouter()
 const cartStore = useCartStore()
 
-const API_BASE = 'http://127.0.0.1:8000';
-
 // 響應式資料
 const products = ref<any[]>([])
 const categories = ref<any[]>([])
@@ -215,8 +213,8 @@ function getImageUrl(imagePath: string | undefined) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
   // 只要是 /storage 開頭就加 API_BASE
-  if (imagePath.startsWith('/storage')) return `${API_BASE}${imagePath}`
-  if (imagePath.startsWith('/')) return `${API_BASE}${imagePath}`
+  if (imagePath.startsWith('/storage')) return `/api${imagePath}`
+  if (imagePath.startsWith('/')) return `/api${imagePath}`
   return imagePath
 }
 
@@ -247,7 +245,7 @@ const loadProducts = async (page = 1) => {
       sort_order
     })
 
-    const response = await fetch(`${API_BASE}/api/v1/products?${params}`)
+    const response = await fetch(`/api/v1/products?${params}`)
     const data = await response.json()
 
    
@@ -265,7 +263,7 @@ const loadProducts = async (page = 1) => {
 // 載入分類
 const loadCategories = async () => {
   try {
-    const response = await fetch(`${API_BASE}/api/v1/categories`)
+    const response = await fetch(`/api/v1/categories`)
     const data = await response.json()
 
     if (data.success) {

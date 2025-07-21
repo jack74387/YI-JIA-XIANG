@@ -230,14 +230,14 @@ function formatDate(dateString: string) {
   })
 }
 
-const API_BASE = 'http://127.0.0.1:8000';
 function getImageUrl(imagePath: string | { image_path: string } | undefined) {
   if (!imagePath) return null
-  if (typeof imagePath === 'object' && imagePath.image_path) imagePath = imagePath.image_path
-  if (typeof imagePath !== 'string') return null
+  if (typeof imagePath === 'object') {
+    imagePath = imagePath.image_path
+  }
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return API_BASE + imagePath
-  if (imagePath.startsWith('/')) return API_BASE + imagePath
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 
@@ -245,7 +245,7 @@ function getImageUrl(imagePath: string | { image_path: string } | undefined) {
 async function loadOrder() {
   try {
     const orderId = route.params.id
-    const response = await axios.get(`http://127.0.0.1:8000/api/v1/orders/${orderId}`)
+    const response = await axios.get(`/api/v1/orders/${orderId}`)
     
     if (response.data.success) {
       order.value = response.data.order
@@ -257,8 +257,19 @@ async function loadOrder() {
   }
 }
 
-onMounted(() => {
-  loadOrder()
+onMounted(async () => {
+  try {
+    const orderId = route.params.id
+    const response = await axios.get(`/api/v1/orders/${orderId}`)
+    
+    if (response.data.success) {
+      order.value = response.data.order
+    }
+  } catch (error) {
+    console.error('載入訂單失敗:', error)
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 

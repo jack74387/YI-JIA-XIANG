@@ -333,7 +333,7 @@ function goToPointsPage(page: number) {
 
 const fetchMembers = async (page = 1) => {
   try {
-    let url = `http://127.0.0.1:8000/api/v1/admin/members?page=${page}`
+    let url = `/api/v1/admin/members?page=${page}`
     if (search.value) url += `&search=${encodeURIComponent(search.value)}`
     if (statusFilter.value) url += `&status=${statusFilter.value}`
     if (levelFilter.value) url += `&level=${levelFilter.value}`
@@ -355,7 +355,7 @@ const fetchMembers = async (page = 1) => {
 
 const viewMember = async (member: any) => {
   try {
-    const res = await axios.get(`http://127.0.0.1:8000/api/v1/admin/members/${member.id}`)
+    const res = await axios.get(`/api/v1/admin/members/${member.id}`)
     if (res.data.success) {
       selectedMember.value = res.data.member
       showMemberModal.value = true
@@ -381,7 +381,7 @@ const editMember = (member: any) => {
 
 const updateMember = async () => {
   try {
-    const res = await axios.put(`http://127.0.0.1:8000/api/v1/admin/members/${selectedMember.value.id}`, editForm.value)
+    const res = await axios.put(`/api/v1/admin/members/${selectedMember.value.id}`, editForm.value)
     if (res.data.success) {
       alert('會員資料更新成功')
       showEditModal.value = false
@@ -394,7 +394,7 @@ const updateMember = async () => {
 
 const adjustPoints = async () => {
   try {
-    const res = await axios.post(`http://127.0.0.1:8000/api/v1/admin/members/${selectedMember.value.id}/points`, pointsForm.value)
+    const res = await axios.post(`/api/v1/admin/members/${selectedMember.value.id}/points`, pointsForm.value)
     if (res.data.success) {
       alert('點數調整成功')
       showPointsModal.value = false
@@ -411,7 +411,7 @@ const adjustPoints = async () => {
 
 const exportMembers = async () => {
   try {
-    let url = 'http://127.0.0.1:8000/api/v1/admin/members/export'
+    let url = '/api/v1/admin/members/export'
     const params = new URLSearchParams()
     if (search.value) params.append('search', search.value)
     if (statusFilter.value) params.append('status', statusFilter.value)

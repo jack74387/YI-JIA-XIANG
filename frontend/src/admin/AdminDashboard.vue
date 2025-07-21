@@ -316,7 +316,7 @@ const success = ref('')
 const fetchDashboardData = async () => {
   try {
     const token = localStorage.getItem('admin_token')
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/dashboard', {
+    const response = await axios.get('/api/v1/admin/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
     })
     if (response.data.success) {
@@ -429,7 +429,7 @@ const changePassword = async () => {
   passwordLoading.value = true
   try {
     const response = await axios.put(
-      'http://127.0.0.1:8000/api/v1/auth/admin/password',
+      '/api/v1/auth/admin/password',
       {
         old_password: oldPassword.value,
         password: newPassword.value,

@@ -29,7 +29,7 @@ const login = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.post('http://127.0.0.1:8000/api/v1/auth/admin-login', {
+    const res = await axios.post('/api/v1/auth/admin-login', {
       email: email.value,
       password: password.value
     })

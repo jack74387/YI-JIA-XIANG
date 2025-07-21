@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/login', credentials)
+      const response = await axios.post('/api/v1/auth/login', credentials)
       
       if (response.data.success) {
         const { user: userData, token: authToken } = response.data
@@ -118,7 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/register', userData)
+      const response = await axios.post('/api/v1/auth/register', userData)
       
       if (response.data.success) {
         const { user: newUser, token: authToken } = response.data
@@ -166,7 +166,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // 如果有 token，先呼叫後端登出 API
       if (token.value) {
-        await axios.post('http://127.0.0.1:8000/api/v1/auth/logout')
+        await axios.post('/api/v1/auth/logout')
       }
     } catch (err: any) {
       // 即使後端登出失敗，也要清除前端狀態
@@ -199,7 +199,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/forgot-password', { email })
+      const response = await axios.post('/api/v1/auth/forgot-password', { email })
       
       if (response.data.success) {
         return { success: true, message: response.data.message }
@@ -224,7 +224,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return false
     
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/v1/auth/user')
+      const response = await axios.get('/api/v1/auth/user')
       user.value = response.data.user
       return true
     } catch (err) {
@@ -244,7 +244,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/google-login', {
+      const response = await axios.post('/api/v1/auth/google-login', {
         google_token: googleToken
       })
       
@@ -289,7 +289,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/facebook-login', {
+      const response = await axios.post('/api/v1/auth/facebook-login', {
         facebook_token: facebookToken
       })
       
@@ -334,7 +334,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/auth/line-login', {
+      const response = await axios.post('/api/v1/auth/line-login', {
         line_token: lineToken
       })
       

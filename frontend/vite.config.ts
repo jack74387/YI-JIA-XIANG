@@ -11,12 +11,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://192.168.99.27:8000',
         changeOrigin: true,
-        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },

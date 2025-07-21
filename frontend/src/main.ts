@@ -7,7 +7,7 @@ import axios from 'axios'
 import './style.css'
 
 // 設定 axios 預設配置
-axios.defaults.baseURL = 'http://192.168.99.26:8000'
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 axios.defaults.headers.common['Accept'] = 'application/json'
 axios.defaults.withCredentials = false // 不使用 cookies

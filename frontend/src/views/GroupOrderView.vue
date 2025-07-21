@@ -52,7 +52,7 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    const res = await axios.post('http://127.0.0.1:8000/api/v1/group-orders', {
+    const res = await axios.post('/api/v1/group-orders', {
       name: name.value,
       phone: phone.value,
       email: email.value,

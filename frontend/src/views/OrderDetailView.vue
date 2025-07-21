@@ -38,14 +38,13 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import ServiceNavButtons from '@/components/ServiceNavButtons.vue'
 
-const API_BASE = 'http://127.0.0.1:8000';
 const route = useRoute()
 const order = ref<any>({})
 
 onMounted(async () => {
   try {
     const orderId = route.params.id
-    const res = await axios.get(`${API_BASE}/api/v1/orders/${orderId}`)
+    const res = await axios.get(`/api/v1/orders/${orderId}`)
     if (res.data.success) {
       order.value = res.data.order
     }
@@ -59,8 +58,8 @@ function getImageUrl(imagePath: string | { image_path: string } | undefined) {
   if (typeof imagePath === 'object' && imagePath.image_path) imagePath = imagePath.image_path
   if (typeof imagePath !== 'string') return null
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return API_BASE + imagePath
-  if (imagePath.startsWith('/')) return API_BASE + imagePath
+  if (imagePath.startsWith('/storage')) return '/storage' + imagePath
+  if (imagePath.startsWith('/')) return '/storage' + imagePath
   return imagePath
 }
 </script>

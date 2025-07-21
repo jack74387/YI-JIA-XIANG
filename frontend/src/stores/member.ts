@@ -88,7 +88,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/v1/member/statistics')
+      const response = await axios.get('/api/v1/member/statistics')
       
       if (response.data.success) {
         statistics.value = response.data.statistics
@@ -109,7 +109,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.put('http://127.0.0.1:8000/api/v1/member/profile', profileData)
+      const response = await axios.put('/api/v1/member/profile', profileData)
       
       if (response.data.success) {
         userProfile.value = response.data.user
@@ -133,7 +133,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.put('http://127.0.0.1:8000/api/v1/member/password', passwordData)
+      const response = await axios.put('/api/v1/member/password', passwordData)
       
       if (response.data.success) {
         return { success: true, message: '密碼修改成功' }
@@ -155,7 +155,7 @@ export const useMemberStore = defineStore('member', () => {
       const formData = new FormData()
       formData.append('avatar', file)
       
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/member/avatar', formData, {
+      const response = await axios.post('/api/v1/member/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -178,7 +178,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/v1/member/orders?page=${page}`)
+      const response = await axios.get(`/api/v1/member/orders?page=${page}`)
       
       if (response.data.success) {
         return response.data.orders
@@ -197,7 +197,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/v1/member/points/history?page=${page}`)
+      const response = await axios.get(`/api/v1/member/points/history?page=${page}`)
       
       if (response.data.success) {
         return response.data.transactions
@@ -215,7 +215,7 @@ export const useMemberStore = defineStore('member', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/v1/points', {
+      const response = await axios.get('/api/v1/points', {
         params: { page, pageSize },
         withCredentials: true
       })
@@ -241,7 +241,7 @@ export const useMemberStore = defineStore('member', () => {
     error.value = null
     
     try {
-      const response = await axios.delete('http://127.0.0.1:8000/api/v1/member/account', {
+      const response = await axios.delete('/api/v1/member/account', {
         data: {
           password,
           confirmation: 'DELETE'

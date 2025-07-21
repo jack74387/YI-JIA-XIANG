@@ -125,7 +125,7 @@ const form = ref({
 const fetchStores = async () => {
   try {
     const token = localStorage.getItem('admin_token')
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/admin/stores', { 
+    const res = await axios.get('/api/v1/admin/stores', { 
       headers: { Authorization: `Bearer ${token}` } 
     })
     stores.value = res.data.stores
@@ -163,10 +163,10 @@ const submitForm = async () => {
     const headers = { Authorization: `Bearer ${token}` }
     
     if (showEditModal.value && editingStore.value) {
-      await axios.put(`http://127.0.0.1:8000/api/v1/admin/stores/${editingStore.value.id}`, form.value, { headers })
+      await axios.put(`/api/v1/admin/stores/${editingStore.value.id}`, form.value, { headers })
       alert('門市更新成功')
     } else {
-      await axios.post('http://127.0.0.1:8000/api/v1/admin/stores', form.value, { headers })
+      await axios.post('/api/v1/admin/stores', form.value, { headers })
       alert('門市建立成功')
     }
     
@@ -184,7 +184,7 @@ const deleteStore = async (id: number) => {
   
   try {
     const token = localStorage.getItem('admin_token')
-    await axios.delete(`http://127.0.0.1:8000/api/v1/admin/stores/${id}`, { 
+    await axios.delete(`/api/v1/admin/stores/${id}`, { 
       headers: { Authorization: `Bearer ${token}` } 
     })
     alert('門市刪除成功')

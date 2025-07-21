@@ -232,7 +232,7 @@ const expiredCoupons = ref<any[]>([])
 const fetchCoupons = async () => {
   loading.value = true
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/coupons/user')
+    const response = await axios.get('/api/v1/coupons/user')
     if (response.data.success) {
       // 組裝三種狀態
       availableCoupons.value = response.data.data.available.map((item: any) => ({ ...item.coupon, claimed_at: item.claimed_at }))

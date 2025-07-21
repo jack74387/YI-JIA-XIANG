@@ -387,7 +387,7 @@ const getStatusText = (status: string): string => {
 const loadMemberData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/member/statistics')
+    const response = await axios.get('/api/v1/member/statistics')
     if (response.data.success) {
       statistics.value = response.data.statistics
       recentOrders.value = response.data.recent_orders
@@ -404,7 +404,7 @@ const loadMemberData = async () => {
 const fetchCoupons = async () => {
   loadingCoupons.value = true
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/coupons/user')
+    const res = await axios.get('/api/v1/coupons/user')
     if (res.data.success) {
       // 只顯示可用的優惠券
       coupons.value = res.data.data.available.map((item: any) => ({
@@ -422,7 +422,7 @@ const fetchCoupons = async () => {
 // 兌換優惠券
 const redeemCoupon = async (coupon: any) => {
   try {
-    await axios.post('http://127.0.0.1:8000/api/v1/coupons/redeem', { code: coupon.code })
+    await axios.post('/api/v1/coupons/redeem', { code: coupon.code })
     alert('優惠券已領取/兌換')
     fetchCoupons()
   } catch (e: any) {
@@ -439,7 +439,7 @@ const handleAvatarUpload = async (event: Event) => {
   formData.append('avatar', file)
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/member/avatar', formData, {
+    const response = await axios.post('/api/v1/member/avatar', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

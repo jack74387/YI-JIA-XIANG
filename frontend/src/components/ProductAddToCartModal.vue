@@ -66,8 +66,8 @@ function decrease() {
 function getImageUrl(imagePath: string | undefined) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return 'http://127.0.0.1:8000' + imagePath
-  if (imagePath.startsWith('/')) return 'http://127.0.0.1:8000' + imagePath
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 

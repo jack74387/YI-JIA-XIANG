@@ -89,7 +89,7 @@ const editForm = ref({ id: 0, name: '', email: '', password: '', password_confir
 
 const fetchAdmins = async () => {
   const token = localStorage.getItem('admin_token')
-  const res = await axios.get('http://127.0.0.1:8000/api/v1/admins', {
+  const res = await axios.get('/api/v1/admins', {
     headers: { Authorization: `Bearer ${token}` }
   })
   admins.value = res.data.admins || []
@@ -108,7 +108,7 @@ const addAdmin = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('admin_token')
-    await axios.post('http://127.0.0.1:8000/api/v1/admins', addForm.value, {
+    await axios.post('/api/v1/admins', addForm.value, {
       headers: { Authorization: `Bearer ${token}` }
     })
     showAddModal.value = false
@@ -137,7 +137,7 @@ const updateAdmin = async () => {
       payload.password = editForm.value.password
       payload.password_confirmation = editForm.value.password_confirmation
     }
-    await axios.put(`http://127.0.0.1:8000/api/v1/admins/${editForm.value.id}`, payload, {
+    await axios.put(`/api/v1/admins/${editForm.value.id}`, payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
     showEditModal.value = false
@@ -155,7 +155,7 @@ const deleteAdmin = async (admin: any) => {
   loading.value = true
   try {
     const token = localStorage.getItem('admin_token')
-    await axios.delete(`http://127.0.0.1:8000/api/v1/admins/${admin.id}`, {
+    await axios.delete(`/api/v1/admins/${admin.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     fetchAdmins()

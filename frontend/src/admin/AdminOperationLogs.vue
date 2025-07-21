@@ -57,7 +57,7 @@ import AdminSidebar from './AdminSidebar.vue'
 const logs = ref<any>({ data: [], current_page: 1, last_page: 1 })
 const fetchLogs = async (page = 1) => {
   const token = localStorage.getItem('admin_token')
-  const res = await axios.get(`http://127.0.0.1:8000/api/v1/operation-logs?page=${page}`, {
+  const res = await axios.get(`/api/v1/operation-logs?page=${page}`, {
     headers: { Authorization: `Bearer ${token}` }
   })
   logs.value = res.data.logs
@@ -68,7 +68,7 @@ const deleteLog = async (id: number) => {
   if (!confirm('確定要刪除此操作日誌？')) return
   const token = localStorage.getItem('admin_token')
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/v1/operation-logs/${id}`, {
+    await axios.delete(`/api/v1/operation-logs/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     await fetchLogs(logs.value.current_page)

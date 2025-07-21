@@ -23,8 +23,6 @@ export interface Product {
   specs?: string
 }
 
-const API_BASE = 'http://127.0.0.1:8000';
-
 export const useProductsStore = defineStore('products', {
   state: () => ({
     products: [] as Product[],
@@ -34,11 +32,19 @@ export const useProductsStore = defineStore('products', {
   }),
   actions: {
     async fetchProducts() {
-      this.loading = true
+      if (this.products.length > 0) return
+      
       try {
-        const res = await axios.get(`${API_BASE}/api/v1/products`)
-        if (res.data.success) {
-          this.products = res.data.data.data
+        this.loading = true
+        try {
+          const res = await axios.get(`/api/v1/products`)
+          if (res.data.success) {
+            this.products = res.data.data.data
+          }
+        } catch (e) {
+          this.error = '無法取得商品資料'
+        } finally {
+          this.loading = false
         }
       } catch (e) {
         this.error = '無法取得商品資料'
@@ -47,11 +53,19 @@ export const useProductsStore = defineStore('products', {
       }
     },
     async fetchProduct(id: number) {
-      this.loading = true
+      if (this.product && this.product.id === id) return
+      
       try {
-        const res = await axios.get(`${API_BASE}/api/v1/products/${id}`)
-        if (res.data.success) {
-          this.product = res.data.data
+        this.loading = true
+        try {
+          const res = await axios.get(`/api/v1/products/${id}`)
+          if (res.data.success) {
+            this.product = res.data.data
+          }
+        } catch (e) {
+          this.error = '無法取得商品詳情'
+        } finally {
+          this.loading = false
         }
       } catch (e) {
         this.error = '無法取得商品詳情'

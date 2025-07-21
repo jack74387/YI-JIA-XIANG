@@ -22,7 +22,7 @@ interface ProductRecommendItem {
 const products = ref<ProductRecommendItem[]>([])
 onMounted(async () => {
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/v1/recommend')
+    const res = await axios.get('/api/v1/recommend')
     if (res.data.success) {
       products.value = res.data.products
     }
