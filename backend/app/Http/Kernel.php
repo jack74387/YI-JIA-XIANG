@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Fruitcake\Cors\HandleCors::class,
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],

@@ -245,7 +245,7 @@ const loadProducts = async (page = 1) => {
       sort_order
     })
 
-    const response = await fetch(`/api/v1/products?${params}`)
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/products?${params}`)
     const data = await response.json()
 
    
