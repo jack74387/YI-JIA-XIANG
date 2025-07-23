@@ -68,10 +68,16 @@
             <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.75 20.25a8.25 8.25 0 1114.5 0v.25a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75v-.25z"/></svg>
             <span>會員中心</span>
           </router-link>
-          <router-link v-else to="/login" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-50 transition font-semibold text-amber-700" @click.native="closeSidebar">
-            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.75 20.25a8.25 8.25 0 1114.5 0v.25a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75v-.25z"/></svg>
-            <span>登入 / 註冊</span>
-          </router-link>
+          <template v-else>
+            <router-link to="/login" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-50 transition font-semibold text-amber-700" @click.native="closeSidebar">
+              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.75 20.25a8.25 8.25 0 1114.5 0v.25a.75.75 0 01-.75.75H5.5a.75.75 0 01-.75-.75v-.25z"/></svg>
+              <span>登入</span>
+            </router-link>
+            <router-link to="/register" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-50 transition font-semibold text-amber-700" @click.native="closeSidebar">
+              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+              <span>註冊</span>
+            </router-link>
+          </template>
           <router-link to="/cart" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-50 transition font-semibold text-amber-700 relative" @click.native="closeSidebar">
             <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L19 13M7 13V6a1 1 0 011-1h5a1 1 0 011 1v7"/></svg>
             <span>購物車</span>

@@ -201,18 +201,22 @@ th, td { padding: 0.5em 0.7em; }
   justify-content: center;
 }
 .shop-now-btn {
-  display: inline-block;
+  display: block;
+  margin: 0 auto;
   background: linear-gradient(90deg, #f3c77b 0%, #cb6a43 100%);
   color: #fff;
   font-weight: 700;
-  font-size: 1.1em;
+  font-size: 1em;
   border: none;
   border-radius: 25px;
-  padding: 0.8em 2.5em;
+  padding: 0.5em 1.8em;
   box-shadow: 0 4px 16px #f3c77b44;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
   text-decoration: none;
+  width: auto;
+  min-width: 120px;
+  max-width: 80vw;
 }
 .shop-now-btn:hover {
   background: linear-gradient(90deg, #ffe0b2 0%, #b85c38 100%);
@@ -256,6 +260,13 @@ th, td { padding: 0.5em 0.7em; }
   }
   .empty-cart-illustration {
     padding: 1rem;
+  }
+  .shop-now-btn {
+    width: auto;
+    min-width: 120px;
+    max-width: 80vw;
+    font-size: 0.98em;
+    padding: 0.5em 1.5em;
   }
 }
 @media (min-width: 601px) {
