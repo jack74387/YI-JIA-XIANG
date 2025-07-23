@@ -117,7 +117,7 @@
       </div>
 
       <!-- 編輯庫存 Modal -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" @click.self="showModal=false">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
           <h2 class="text-lg font-bold mb-4">調整庫存</h2>
           <div class="mb-4">商品：{{ editingItem?.product_name }}</div>

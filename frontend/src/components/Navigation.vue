@@ -172,129 +172,8 @@
           </div>
         </div>
 
-        <!-- 手機版選單按鈕 -->
-        <div class="-mr-2 flex items-center sm:hidden">
-          <button
-            @click="isMobileMenuOpen = !isMobileMenuOpen"
-            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500"
-          >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 手機版選單 -->
-    <div v-if="isMobileMenuOpen" class="sm:hidden">
-      <div class="pt-2 pb-3 space-y-1">
-        <router-link
-          to="/"
-          class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-          active-class="bg-amber-50 border-amber-500 text-amber-700"
-        >
-          首頁
-        </router-link>
-        <router-link
-          to="/products"
-          class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-          active-class="bg-amber-50 border-amber-500 text-amber-700"
-        >
-          商品
-        </router-link>
-        <!-- 服務專區手機版 -->
-        <div>
-          <div class="pl-3 pr-4 py-2 text-base font-medium text-gray-700">服務專區</div>
-          <div class="pl-6 flex flex-col gap-2 pb-2">
-            <router-link to="/line-friend" class="service-link">LINE好友專區</router-link>
-            <router-link to="/group-order" class="service-link">團購/企業訂購</router-link>
-            <router-link to="/gift" class="service-link">禮盒加值服務</router-link>
-            <router-link to="/food-trace" class="service-link">食品履歷查詢</router-link>
-            <router-link to="/store-locator" class="service-link">門市據點</router-link>
-            <div class="h-px bg-gray-200 my-2"></div>
-          </div>
-        </div>
-        <router-link
-          to="/contact"
-          class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-          active-class="bg-amber-50 border-amber-500 text-amber-700"
-        >
-          聯絡我們
-        </router-link>
-        <router-link
-          to="/faq"
-          class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-          active-class="bg-amber-50 border-amber-500 text-amber-700"
-        >
-          常見問題
-        </router-link>
-      </div>
-      
-      <div class="pt-4 pb-3 border-t border-gray-200">
-        <div v-if="authStore.isAuthenticated" class="flex items-center px-4">
-          <div class="flex-shrink-0">
-            <div class="h-10 w-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-medium">
-              {{ authStore.userInitials }}
-            </div>
-          </div>
-          <div class="ml-3">
-            <div class="text-base font-medium text-gray-800">{{ authStore.user?.name }}</div>
-            <div class="text-sm font-medium text-gray-500">{{ authStore.user?.email }}</div>
-          </div>
-        </div>
-        
-        <div class="mt-3 space-y-1">
-          <router-link
-            v-if="authStore.isAuthenticated"
-            to="/profile"
-            class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-            @click="isMobileMenuOpen = false"
-          >
-            個人資料
-          </router-link>
-          <router-link
-            v-if="authStore.isAuthenticated"
-            to="/orders"
-            class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-            @click="isMobileMenuOpen = false"
-          >
-            我的訂單
-          </router-link>
-          <router-link
-            v-if="authStore.isAuthenticated"
-            to="/member-center"
-            class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-            @click="isMobileMenuOpen = false"
-          >
-            會員中心
-          </router-link>
-          <button
-            v-if="authStore.isAuthenticated"
-            @click="handleLogout"
-            class="flex items-center w-full text-left px-4 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            登出
-          </button>
-          
-          <div v-else class="flex space-x-4 px-4">
-            <router-link
-              to="/login"
-              class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium"
-            >
-              登入
-            </router-link>
-            <router-link
-              to="/register"
-              class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-base font-medium"
-            >
-              註冊
-            </router-link>
-          </div>
-        </div>
+        <!-- 手機版選單按鈕，改為觸發 Sidebar.vue -->
+        <Sidebar />
       </div>
     </div>
 
@@ -312,15 +191,16 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import LogoutConfirmDialog from './LogoutConfirmDialog.vue'
+// 1. 匯入 Sidebar.vue
+import Sidebar from './Sidebar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 
 const isUserMenuOpen = ref(false)
-const isMobileMenuOpen = ref(false)
-const showLogoutDialog = ref(false)
 const isServiceMenuOpen = ref(false)
+const showLogoutDialog = ref(false)
 
 const toggleUserMenu = () => {
   isUserMenuOpen.value = !isUserMenuOpen.value
@@ -334,31 +214,17 @@ const handleLogout = () => {
   // 顯示登出確認對話框
   showLogoutDialog.value = true
   isUserMenuOpen.value = false
-  isMobileMenuOpen.value = false
 }
 
-// 點擊外部關閉選單
-const closeMenus = () => {
-  isUserMenuOpen.value = false
-  isMobileMenuOpen.value = false
-}
-
-// 監聽點擊事件
-const handleClickOutside = (event: Event) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.user-menu') && !target.closest('.mobile-menu')) {
-    closeMenus()
-  }
-}
-
+// 2. 刪除 isMobileMenuOpen 相關邏輯與 handleClickOutside 監聽
 // 在組件掛載時添加事件監聽器
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+  // 移除原本的 mobile-menu 監聽
 })
 
 // 在組件卸載時移除事件監聽器
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  // 移除原本的 mobile-menu 監聽
 })
 </script>
 

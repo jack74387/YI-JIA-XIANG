@@ -107,4 +107,12 @@ function getAllImages() {
   max-width: 1100px; 
   padding: 0 1rem;
 }
+
+@media (max-width: 600px) {
+  .product-detail {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    padding: 0 0.2rem;
+  }
+}
 </style>

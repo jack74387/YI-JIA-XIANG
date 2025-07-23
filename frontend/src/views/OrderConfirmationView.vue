@@ -188,11 +188,11 @@
 
         <!-- 操作按鈕 -->
         <div class="p-6 bg-white">
-          <div class="flex flex-col sm:flex-row gap-4">
-            <router-link to="/products" class="btn-secondary">
+          <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <router-link to="/products" class="btn-secondary order-btn">
               繼續購物
             </router-link>
-            <router-link to="/orders" class="btn-primary">
+            <router-link to="/orders" class="btn-primary order-btn">
               查看我的訂單
             </router-link>
           </div>
@@ -285,5 +285,28 @@ onMounted(async () => {
 
 .btn-secondary {
   @apply bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+}
+
+@media (max-width: 600px) {
+  .order-btn {
+    width: auto;
+    min-width: 120px;
+    font-size: 1.01rem;
+    padding: 0.6em 1.5em;
+    margin: 0;
+    border-radius: 0.7em;
+    box-sizing: border-box;
+    display: inline-block;
+  }
+  .order-btn + .order-btn {
+    margin-left: 0.7em;
+    margin-top: 0;
+  }
+  .order-action-group, .flex.flex-col.sm\:flex-row {
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 0;
+  }
 }
 </style> 

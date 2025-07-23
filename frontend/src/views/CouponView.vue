@@ -276,4 +276,27 @@ onMounted(() => {
 
 <style scoped>
 /* 使用 Tailwind CSS */
+@media (max-width: 600px) {
+  .max-w-7xl, .px-4, .sm\:px-6, .lg\:px-8 {
+    max-width: 100% !important;
+    padding-left: 0.2rem !important;
+    padding-right: 0.2rem !important;
+  }
+  .text-3xl, .text-lg {
+    font-size: 1.1rem !important;
+  }
+  .mb-8 {
+    margin-bottom: 0.5rem !important;
+  }
+  .rounded-lg, .shadow, .border {
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+  .px-6, .py-4, .p-6 {
+    padding: 0.5rem !important;
+  }
+  .grid-cols-1, .md\:grid-cols-3, .md\:grid-cols-2, .lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style> 

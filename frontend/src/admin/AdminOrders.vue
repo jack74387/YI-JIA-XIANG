@@ -79,7 +79,7 @@
       </div>
 
       <!-- 訂單詳情 Modal -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" @click.self="closeModal">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
           <h2 class="text-lg font-bold mb-4">訂單詳情</h2>
           <div v-if="loadingDetail" class="text-center py-8">載入中...</div>

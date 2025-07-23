@@ -590,4 +590,25 @@ onMounted(() => {
   color: #b8860b;
   transform: scale(1.04);
 }
+@media (max-width: 600px) {
+  .member-center {
+    padding: 1rem 0.5rem;
+  }
+  .profile {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  .orders h2 {
+    font-size: 1rem;
+  }
+  .order-item {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.95rem;
+  }
+}
 </style> 

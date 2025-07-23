@@ -1,69 +1,43 @@
 <template>
-  <div id="app">
-    <Navigation v-if="!isAdminRoute" />
-
-    <main class="min-h-screen">
+  <div>
+    <Navigation v-if="!isAdmin" />
+    <Sidebar v-if="!isAdmin" class="lg:hidden" />
+    <div class="main-content min-h-screen bg-[#f9f6f1] transition-all duration-300 pb-20">
       <router-view />
-    </main>
-
-    <footer v-if="!isAdminRoute" class="bg-gray-800 text-white py-8">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 class="text-lg font-semibold mb-4">一佳香</h3>
-            <p class="text-gray-300">
-              專業的肉乾製造商，提供高品質的肉乾產品。
-            </p>
-          </div>
-          <div>
-            <h4 class="text-md font-semibold mb-4">關於我們</h4>
-            <ul class="space-y-2 text-gray-300">
-              <li><router-link to="/about" class="hover:text-white">品牌故事</router-link></li>
-              <li><router-link to="/artisan-craft" class="hover:text-white">職人工藝</router-link></li>
-              <li><router-link to="/store-locator" class="hover:text-white">門市據點</router-link></li>
-              <li><router-link to="/contact" class="hover:text-white">聯絡我們</router-link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-md font-semibold mb-4">客戶服務</h4>
-            <ul class="space-y-2 text-gray-300">
-              <li><router-link to="/shopping-notice" class="hover:text-white">購物須知</router-link></li>
-              <li><router-link to="/return-policy" class="hover:text-white">退換貨政策</router-link></li>
-              <li><router-link to="/delivery-info" class="hover:text-white">配送說明</router-link></li>
-              <li><a href="/faq" class="hover:text-white">常見問題</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-md font-semibold mb-4">聯絡資訊</h4>
-            <ul class="space-y-2 text-gray-300">
-              <li>電話：(089) 357-996</li>
-              <li>信箱：yijiaxiang88@gmail.com</li>
-              <li>地址：台東縣台東市廣東路269號</li>
-            </ul>
-          </div>
-        </div>
-        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-          <p>&copy; 2025 一佳香. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
+    </div>
+    <Footer v-if="!isAdmin" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Navigation from '@/components/Navigation.vue'
+import Sidebar from '@/components/Sidebar.vue'
+import Footer from '@/components/Footer.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const route = useRoute()
-const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isAdmin = computed(() => route.path.startsWith('/admin'))
 
 onMounted(() => {
   // 初始化認證狀態
   authStore.initAuth()
 })
+
+watch(
+  () => route.fullPath,
+  () => {
+    window.scrollTo(0, 0)
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
+    const app = document.getElementById('app')
+    if (app) app.scrollTop = 0
+    const mainLayout = document.querySelector('.main-layout')
+    if (mainLayout) (mainLayout as HTMLElement).scrollTop = 0
+  }
+)
 </script>
 
 <style scoped>

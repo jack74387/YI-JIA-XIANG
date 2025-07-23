@@ -1304,4 +1304,36 @@ function getImageUrl(imagePath: string | undefined) {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
+
+@media (max-width: 600px) {
+  .checkout-page {
+    padding: 0.5rem 0.2rem;
+  }
+  .max-w-6xl, .py-8, .px-4 {
+    max-width: 100% !important;
+    padding-left: 0.2rem !important;
+    padding-right: 0.2rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .text-3xl, .text-lg, .text-xl {
+    font-size: 1.1rem !important;
+  }
+  .p-6, .mb-8 {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .grid-cols-1, .lg\:grid-cols-3, .md\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .w-16, .h-16 {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .btn-primary, .checkout-btn {
+    width: 100%;
+    font-size: 1em;
+    padding: 0.7em 0.5em;
+  }
+}
 </style> 

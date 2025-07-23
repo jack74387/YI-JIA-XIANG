@@ -72,11 +72,11 @@
               <div class="mb-4 sm:mb-0">
                 <span class="text-lg font-bold">總計：NT${{ order.final_amount ?? order.total }}</span>
               </div>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <router-link :to="`/orders/${order.id}`" class="btn-secondary">
+              <div class="flex flex-col sm:flex-row gap-2 order-action-group">
+                <router-link :to="`/orders/${order.id}`" class="btn-secondary order-btn">
                   查看詳情
                 </router-link>
-                <button v-if="order.status === 'pending'" @click="cancelOrder(order.id)" class="btn-danger">
+                <button v-if="order.status === 'pending'" @click="cancelOrder(order.id)" class="btn-danger order-btn">
                   取消訂單
                 </button>
               </div>
@@ -191,5 +191,78 @@ onMounted(() => {
 
 .btn-danger {
   @apply bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors;
+}
+
+@media (max-width: 600px) {
+  .orders-page {
+    padding: 0.5rem 0.2rem;
+  }
+  .order-item-img, .order-item img {
+    width: 90px !important;
+    height: 90px !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    margin-bottom: 6px;
+  }
+  .max-w-6xl, .py-8, .px-4 {
+    max-width: 100% !important;
+    padding-left: 0.2rem !important;
+    padding-right: 0.2rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .text-3xl, .text-lg, .text-xl {
+    font-size: 1.1rem !important;
+  }
+  .p-6, .mb-8 {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .grid-cols-1, .md\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+  .flex, .items-center, .justify-between {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .w-12, .h-12 {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .order-action-group {
+    flex-direction: column !important;
+    gap: 0.7em !important;
+  }
+  .order-btn {
+    width: 100%;
+    font-size: 1.13rem;
+    padding: 1.1em 0;
+    margin: 0;
+    border-radius: 1.2em;
+    box-sizing: border-box;
+  }
+  .order-btn + .order-btn {
+    margin-top: 0.7em;
+  }
+  .order-action-group {
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 0;
+  }
+  .order-btn {
+    width: auto;
+    min-width: 120px;
+    font-size: 1.01rem;
+    padding: 0.6em 1.5em;
+    margin: 0;
+    border-radius: 0.7em;
+    box-sizing: border-box;
+    display: inline-block;
+  }
+  .order-btn + .order-btn {
+    margin-left: 0.7em;
+    margin-top: 0;
+  }
 }
 </style> 

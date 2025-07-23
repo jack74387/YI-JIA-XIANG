@@ -81,7 +81,7 @@
       </div>
 
       <!-- 會員詳情 Modal -->
-      <div v-if="showMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div v-if="showMemberModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showMemberModal = false">
         <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">會員詳情</h2>
@@ -188,7 +188,7 @@
       </div>
 
       <!-- 編輯會員 Modal -->
-      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showEditModal = false">
         <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">編輯會員資料</h2>
@@ -246,7 +246,7 @@
       </div>
 
       <!-- 調整點數 Modal -->
-      <div v-if="showPointsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div v-if="showPointsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showPointsModal = false">
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">調整點數</h2>

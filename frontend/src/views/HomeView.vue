@@ -175,4 +175,36 @@
   .main-visual img { max-width: 100%; }
   .logo { width: 60px; height: 60px; }
 }
+@media (max-width: 600px) {
+  .brand-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .brand-ch {
+    font-size: 1.5rem;
+  }
+  .brand-en {
+    font-size: 0.8rem;
+  }
+  .brand-story {
+    padding: 18px 8px;
+  }
+  .main-visual {
+    margin: 24px auto 0 auto;
+  }
+  .featured-products {
+    padding: 18px 8px;
+  }
+  .product-list {
+    gap: 8px;
+  }
+  .product-card {
+    min-width: 140px;
+    max-width: 100%;
+    padding: 10px 4px;
+  }
+  .product-card img {
+    border-radius: 8px;
+  }
+}
 </style> 

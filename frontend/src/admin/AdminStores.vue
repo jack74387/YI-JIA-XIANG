@@ -45,7 +45,7 @@
       </div>
 
       <!-- 新增/編輯門市 Modal -->
-      <div v-if="showAddModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+      <div v-if="showAddModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" @click.self="closeModal">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
           <h2 class="text-lg font-bold mb-4">{{ showEditModal ? '編輯門市' : '新增門市' }}</h2>
           

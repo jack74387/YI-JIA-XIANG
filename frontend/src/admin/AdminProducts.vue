@@ -203,7 +203,7 @@
       </div>
 
       <!-- 新增/編輯商品 Modal -->
-      <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click.self="closeModal">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
           <div class="mt-3">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
@@ -764,8 +764,8 @@ const getStatusClass = (status) => {
 function getImageUrl(imagePath) {
   if (!imagePath) return null
   if (imagePath.startsWith('http')) return imagePath
+  // 統一只處理 /storage 路徑
   if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
-  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 

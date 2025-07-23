@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import HomeView from '../views/HomeView.vue'
 import ProductDetailView from '../views/ProductDetailView.vue'
+import BrandStoryView from '@/views/BrandStoryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -219,8 +220,16 @@ const router = createRouter({
       path: '/delivery-info',
       name: 'delivery-info',
       component: () => import('../views/DeliveryInfoView.vue')
+    },
+    {
+      path: '/brand-story',
+      name: 'BrandStory',
+      component: BrandStoryView
     }
-  ]
+  ],
+  scrollBehavior() {
+    return { top: 0 }
+  }
 })
 
 // 路由守衛

@@ -4,7 +4,7 @@
     <section class="bg-gray-100 py-8">
       <div class="max-w-7xl mx-auto px-4">
         <h1 class="text-3xl font-bold text-gray-900">商品列表</h1>
-        <p class="text-gray-600 mt-2">探索我們精選的香品產品</p>
+        <p class="text-gray-600 mt-2">探索我們精選的肉品產品</p>
       </div>
     </section>
 
@@ -55,7 +55,7 @@
         <!-- 商品網格 -->
         <div v-else-if="products.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <div
-            v-for="product in products"
+            v-for="product in sortedProducts"
             :key="product.id"
             class="card hover:shadow-lg transition-shadow cursor-pointer flex flex-col"
           >
@@ -172,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import ProductAddToCartModal from '@/components/ProductAddToCartModal.vue'
@@ -209,12 +209,11 @@ function selectSpec(product: any, spec: string) {
 }
 
 // 處理圖片 URL
-function getImageUrl(imagePath: string | undefined) {
-  if (!imagePath) return null
+function getImageUrl(imagePath: string | undefined): string | undefined {
+  if (!imagePath) return undefined
   if (imagePath.startsWith('http')) return imagePath
-  // 只要是 /storage 開頭就加 API_BASE
-  if (imagePath.startsWith('/storage')) return `/api${imagePath}`
-  if (imagePath.startsWith('/')) return `/api${imagePath}`
+  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
   return imagePath
 }
 
@@ -225,7 +224,7 @@ let searchTimeout: NodeJS.Timeout
 const loadProducts = async (page = 1) => {
   loading.value = true
   try {
-    let sort_field = 'created_at', sort_order = 'desc'
+    let sort_field = 'id', sort_order = 'asc' // 預設依 id 遞增
     if (sortBy.value === 'price_asc') {
       sort_field = 'price_small'; sort_order = 'asc'
     } else if (sortBy.value === 'price_desc') {
@@ -252,6 +251,7 @@ const loadProducts = async (page = 1) => {
     if (data.success) {
       products.value = data.data.data
       pagination.value = data.data
+      // 不再強制排序，直接依 API 回傳順序
     }
   } catch (error) {
     console.error('載入商品失敗:', error)
@@ -263,11 +263,20 @@ const loadProducts = async (page = 1) => {
 // 載入分類
 const loadCategories = async () => {
   try {
-    const response = await fetch(`/api/v1/categories`)
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/categories`)
     const data = await response.json()
 
     if (data.success) {
-      categories.value = data.data
+      // 指定順序
+      const order = ['經典系列', '肉乾系列', '海鮮系列', '休閒系列']
+      const sorted = []
+      for (const name of order) {
+        const found = data.data.find((c: any) => c.name === name)
+        if (found) sorted.push(found)
+      }
+      // 其餘分類
+      const rest = data.data.filter((c: any) => !order.includes(c.name))
+      categories.value = [...sorted, ...rest]
     }
   } catch (error) {
     console.error('載入分類失敗:', error)
@@ -345,6 +354,21 @@ function toggleFav(product: any) {
 function isFav(product: any) {
   return favSet.value.has(product.id)
 }
+
+// 排序後的商品列表
+const sortedProducts = computed(() => {
+  const order = ['經典系列', '肉乾系列', '海鮮系列', '休閒系列']
+  return products.value.slice().sort((a, b) => {
+    const aIdx = order.indexOf(a.category_name || a.category?.name || '')
+    const bIdx = order.indexOf(b.category_name || b.category?.name || '')
+    if (aIdx !== bIdx) {
+      // 未列入 order 的分類排在最後
+      return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx)
+    }
+    // 同分類則依 id 遞增
+    return a.id - b.id
+  })
+})
 
 // 頁面載入時執行
 onMounted(() => {
@@ -486,5 +510,48 @@ onMounted(() => {
 }
 .icon-btn-disabled svg {
   stroke: #999 !important;
+}
+@media (max-width: 600px) {
+  .products-grid, .grid, .card-list {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  .card {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding: 8px 2px !important;
+    margin: 0 auto 8px auto !important;
+    position: relative;
+  }
+  .card img, .card .w-full {
+    height: 160px !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+  }
+  .spec-btn, .spec-btn-small {
+    font-size: 1em !important;
+    padding: 0.18em 0.8em !important;
+  }
+  .icon-btn, .icon-btn-small {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .text-2xl, .text-3xl, .text-lg {
+    font-size: 1.1rem !important;
+  }
+  .mb-8 {
+    margin-bottom: 0.5rem !important;
+  }
+  .card .flex-row.gap-1.items-end {
+    position: absolute;
+    right: 10px;
+    bottom: 12px;
+    gap: 0.5em !important;
+    z-index: 2;
+    margin: 0;
+    padding: 0;
+  }
 }
 </style> 

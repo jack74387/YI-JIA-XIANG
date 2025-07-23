@@ -162,4 +162,18 @@ onMounted(() => {
     margin-top: 18px;
   }
 }
+@media (max-width: 600px) {
+  .main-layout {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 2px;
+  }
+  .products.grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .content {
+    margin-top: 8px;
+  }
+}
 </style> 

@@ -32,7 +32,7 @@
       </div>
 
       <!-- 新增管理員 Modal -->
-      <div v-if="showAddModal" class="modal-mask">
+      <div v-if="showAddModal" class="modal-mask" @click.self="showAddModal = false">
         <div class="modal-wrapper">
           <div class="modal-container">
             <h3 class="text-lg font-bold mb-4">新增管理員</h3>
@@ -52,7 +52,7 @@
       </div>
 
       <!-- 編輯管理員 Modal -->
-      <div v-if="showEditModal" class="modal-mask">
+      <div v-if="showEditModal" class="modal-mask" @click.self="showEditModal = false">
         <div class="modal-wrapper">
           <div class="modal-container">
             <h3 class="text-lg font-bold mb-4">編輯管理員</h3>

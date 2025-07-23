@@ -47,4 +47,20 @@
   background: #f3e9d2;
   object-fit: cover;
 }
+@media (max-width: 600px) {
+  .about-us {
+    padding: 1rem 0.5rem;
+  }
+  .about-us img {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+  }
+  .text-3xl, .text-xl {
+    font-size: 1.1rem !important;
+  }
+  .mb-8 {
+    margin-bottom: 0.5rem !important;
+  }
+}
 </style> 

@@ -742,4 +742,22 @@ const fetchUserProfile = async () => {
 
 <style scoped>
 /* 使用 Tailwind CSS */
+@media (max-width: 600px) {
+  .h-24, .w-24 {
+    height: 64px !important;
+    width: 64px !important;
+  }
+  .text-xl, .text-lg, .text-3xl {
+    font-size: 1.1rem !important;
+  }
+  .px-6, .py-6, .p-6 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .grid-cols-1, .sm\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style> 

@@ -178,4 +178,26 @@ function toggleFav() { isFav.value = !isFav.value }
   padding: 6px 10px;
   z-index: 10;
 }
+@media (max-width: 600px) {
+  .product-card {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 10px 4px;
+  }
+  .info h3 {
+    font-size: 1em;
+  }
+  .desc {
+    font-size: 0.9em;
+  }
+  .price-row {
+    gap: 4px;
+  }
+  .actions {
+    gap: 6px;
+  }
+  .image-wrapper {
+    height: 120px;
+  }
+}
 </style> 

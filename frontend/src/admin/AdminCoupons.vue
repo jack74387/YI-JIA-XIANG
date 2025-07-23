@@ -61,7 +61,7 @@
       </div>
 
       <!-- 新增/編輯優惠券 Modal -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" @click.self="closeModal">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
           <h2 class="text-lg font-bold mb-3">{{ editingCoupon ? '編輯優惠券' : '新增優惠券' }}</h2>
           <form @submit.prevent="submitCoupon">

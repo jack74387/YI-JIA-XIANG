@@ -31,3 +31,20 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
   }
 } 
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .btn-primary, .btn-secondary, .card, .input-field {
+    font-size: 1rem;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+  .card {
+    padding: 1em;
+  }
+} 

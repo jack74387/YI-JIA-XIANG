@@ -19,7 +19,7 @@
         <router-link to="/products" class="shop-now-btn">立即購物</router-link>
       </div>
       <div v-else>
-        <table class="w-full mb-8 border-separate border-spacing-y-3">
+        <table class="w-full mb-8 border-separate border-spacing-y-3 cart-table-desktop">
           <thead>
             <tr class="text-left text-gray-600 text-sm">
               <th></th>
@@ -60,6 +60,25 @@
             </tr>
           </tbody>
         </table>
+        <div class="cart-list">
+          <div v-for="item in cart.items" :key="item.id" class="cart-item-card">
+            <div class="flex gap-3 items-center">
+              <img :src="getImageUrl(item.product?.primary_image?.image_path || (item.product?.images && item.product.images[0]) || item.image) || '/images/placeholder.jpg'" alt="商品圖" class="cart-item-img" />
+              <div class="flex-1">
+                <div class="font-semibold text-base mb-1">{{ item.name }}</div>
+                <div class="text-xs text-gray-500 mb-1">{{ item.weight ? item.weight : getSpecLabel(item.spec || '') }}</div>
+                <div class="text-primary-600 font-bold mb-1">NT${{ item.price }}</div>
+                <div class="flex items-center gap-2 mb-1">
+                  <button @click="updateQty(item, item.quantity-1)" :disabled="item.quantity<=1" class="qty-btn">-</button>
+                  <span class="w-8 text-center">{{ item.quantity }}</span>
+                  <button @click="updateQty(item, item.quantity+1)" class="qty-btn">+</button>
+                </div>
+                <div class="font-bold mb-1">小計：NT${{ item.price * item.quantity }}</div>
+                <button @click="remove(item)" class="text-red-500 hover:underline text-sm">移除</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="flex justify-between items-center mb-8">
           <div></div>
           <div class="text-xl font-bold">總金額：<span class="text-primary-600">NT${{ cart.totalPrice }}</span></div>
@@ -200,5 +219,46 @@ th, td { padding: 0.5em 0.7em; }
   color: #b85c38;
   box-shadow: 0 8px 24px #f3c77b55;
   transform: translateY(-2px) scale(1.04);
+}
+@media (max-width: 600px) {
+  .cart-table-desktop { display: none !important; }
+  .cart-list { display: flex; flex-direction: column; gap: 1.1em; margin-bottom: 1.5em; }
+  .cart-item-card {
+    background: #fff;
+    border-radius: 1.1em;
+    box-shadow: 0 2px 12px #e2d6c2;
+    padding: 1.1em 1em 1em 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+  .cart-item-img {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    margin-bottom: 0.5em;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 1.7em;
+    height: 1.7em;
+    font-size: 1em;
+  }
+  .checkout-btn, .shop-now-btn {
+    width: 100%;
+    font-size: 1em;
+    padding: 0.7em 0.5em;
+  }
+  .empty-cart-modern {
+    min-height: 200px;
+    padding: 1rem 0.5rem;
+  }
+  .empty-cart-illustration {
+    padding: 1rem;
+  }
+}
+@media (min-width: 601px) {
+  .cart-list { display: none !important; }
 }
 </style> 
