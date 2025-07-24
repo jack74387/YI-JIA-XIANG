@@ -79,7 +79,7 @@
                 NT$ {{ selectedSpecs[product.id] === 'large' ? product.price_large : product.price_small }}
               </div>
               <div class="flex flex-row justify-between items-end mt-auto">
-                <div class="flex flex-col items-start gap-1">
+                <div class="flex flex-col items-start gap-1" v-if="!isMobile">
                   <button
                     v-for="spec in ['large', 'small']"
                     :key="spec"
@@ -89,7 +89,7 @@
                     {{ getSpecLabel(spec) }}
                   </button>
                 </div>
-                <div class="flex flex-row gap-1 items-end self-end pb-1 ml-auto pl-16 -mr-5">
+                <div class="flex flex-row items-end pb-1 icon-row-mobile">
                   <button class="icon-btn icon-btn-small" @click.stop="toggleFav(product)" :title="isFav(product) ? '取消收藏' : '加入收藏'">
                     <svg v-if="isFav(product)" class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -212,8 +212,8 @@ function selectSpec(product: any, spec: string) {
 function getImageUrl(imagePath: string | undefined): string | undefined {
   if (!imagePath) return undefined
   if (imagePath.startsWith('http')) return imagePath
-  if (imagePath.startsWith('/storage')) return import.meta.env.VITE_API_BASE_URL + imagePath
-  if (imagePath.startsWith('/')) return import.meta.env.VITE_API_BASE_URL + imagePath
+  if (imagePath.startsWith('/storage')) return `${window.location.protocol}//${window.location.hostname}:8000${imagePath}`
+  if (imagePath.startsWith('/')) return `${window.location.protocol}//${window.location.hostname}:8000${imagePath}`
   return imagePath
 }
 
@@ -244,7 +244,8 @@ const loadProducts = async (page = 1) => {
       sort_order
     })
 
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/products?${params}`)
+    const apiBase = `${window.location.protocol}//${window.location.hostname}:8000`
+    const response = await fetch(`${apiBase}/api/v1/products?${params}`)
     const data = await response.json()
 
    
@@ -263,7 +264,8 @@ const loadProducts = async (page = 1) => {
 // 載入分類
 const loadCategories = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/categories`)
+    const apiBase = `${window.location.protocol}//${window.location.hostname}:8000`
+    const response = await fetch(`${apiBase}/api/v1/categories`)
     const data = await response.json()
 
     if (data.success) {
@@ -369,6 +371,16 @@ const sortedProducts = computed(() => {
     return a.id - b.id
   })
 })
+
+// 判斷是否為手機
+const isMobile = ref(false)
+if (typeof window !== 'undefined') {
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth <= 600
+  }
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+}
 
 // 頁面載入時執行
 onMounted(() => {
@@ -513,45 +525,149 @@ onMounted(() => {
 }
 @media (max-width: 600px) {
   .products-grid, .grid, .card-list {
-    grid-template-columns: 1fr !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
     width: 100% !important;
     margin: 0 auto !important;
+    padding: 0 2px !important;
+    background: #f7f7f7 !important;
   }
   .card {
-    min-width: 100% !important;
+    min-width: 0 !important;
     max-width: 100% !important;
-    padding: 8px 2px !important;
-    margin: 0 auto 8px auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px #e2d6c2;
+    background: #fff !important;
     position: relative;
+    transition: box-shadow .2s, transform .2s;
+    border: 1px solid #f0e6d2;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
   .card img, .card .w-full {
-    height: 160px !important;
-    object-fit: cover !important;
-    border-radius: 10px !important;
+    height: 110px !important;
+    object-fit: contain !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+    width: 100% !important;
+    margin: 0 auto;
+    background: #f3f3f3;
   }
-  .spec-btn, .spec-btn-small {
+  .card .p-4 {
+    padding: 10px 8px 8px 8px !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card h3 {
     font-size: 1em !important;
-    padding: 0.18em 0.8em !important;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 4px !important;
+    min-height: 2.2em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
-  .icon-btn, .icon-btn-small {
-    width: 32px !important;
-    height: 32px !important;
+  .card .text-xl {
+    font-size: 1.08em !important;
+    color: #d0021b !important;
+    font-weight: bold;
+    margin-bottom: 2px !important;
   }
-  .text-2xl, .text-3xl, .text-lg {
-    font-size: 1.1rem !important;
+  .card .flex-row.justify-between.items-end.mt-auto {
+    margin-top: 2px !important;
+    border-top: 1px solid #f0e6d2;
+    padding-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px; /* icon 間距再縮小 */
+    padding-left: 2px; /* 再往左靠 */
   }
-  .mb-8 {
-    margin-bottom: 0.5rem !important;
+  .card .icon-btn, .card .icon-btn-small {
+    width: 28px !important;
+    height: 28px !important;
+    box-shadow: none;
+    background: #f7f7f7;
+    border-radius: 50%;
+    margin-left: 0 !important;
+    margin-right: 2px; /* 再縮小右側間距 */
   }
+  .card .icon-btn:hover {
+    background: #f3e2c7;
+  }
+  .card .flex-col.items-start.gap-1 {
+    gap: 2px !important;
+  }
+  .card .text-lg {
+    font-size: 0.95em !important;
+    color: #222 !important;
+    font-weight: 500;
+    margin-bottom: 0 !important;
+  }
+  .card .mb-4 {
+    margin-bottom: 0 !important;
+  }
+  .card .line-clamp-2 {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .card .text-primary-600 {
+    color: #d0021b !important;
+  }
+  .card .text-gray-600 {
+    color: #888 !important;
+    font-size: 0.92em !important;
+  }
+  .card .text-gray-400 {
+    color: #bbb !important;
+    font-size: 0.9em !important;
+  }
+  .card .text-base {
+    font-size: 0.95em !important;
+  }
+  .card .absolute.top-2.left-2 {
+    top: 6px !important;
+    left: 6px !important;
+    font-size: 0.85em !important;
+    padding: 2px 7px !important;
+    border-radius: 6px !important;
+  }
+  .card .absolute.inset-0.flex.items-center.justify-center.z-10 {
+    font-size: 1em !important;
+    border-radius: 0 !important;
+  }
+  .icon-row-mobile {
+    padding-right: 4px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    gap: 2px !important;
+    justify-content: flex-end !important;
+    width: 100%;
+  }
+}
+@media (min-width: 601px) {
   .card .flex-row.gap-1.items-end {
-    position: absolute;
-    right: 10px;
-    bottom: 12px;
-    gap: 0.5em !important;
-    z-index: 2;
-    margin: 0;
-    padding: 0;
+    justify-content: flex-end;
+    gap: 40px;
+    padding-right: 48px;
+  }
+}
+@media (min-width: 1024px) {
+  .icon-row-mobile {
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    margin-right: -15px !important;
   }
 }
 </style> 

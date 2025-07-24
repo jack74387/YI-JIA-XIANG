@@ -46,7 +46,7 @@
           <div>
             <button @click="showServiceMenu = !showServiceMenu" class="sidebar-link w-full flex items-center justify-between font-semibold text-amber-700">
               <span class="flex items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7V6a2 2 0 012-2h14a2 2 0 012 2v1M16 21H8a2 2 0 01-2-2V7h12v12a2 2 0 01-2 2z"/></svg>
                 <span>服務專區</span>
               </span>
               <svg :class="{'rotate-90': showServiceMenu}" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -147,5 +147,24 @@ onUnmounted(() => {
   background: #fffbe9;
   color: #b8860b;
   box-shadow: 0 2px 12px #ffe9b2aa;
+}
+@media (max-width: 600px) {
+  .sidebar-link,
+  .flex.flex-col.gap-2.px-4.py-4,
+  .pl-8.flex.flex-col.gap-1.mt-1,
+  .mt-auto.px-7.pb-7.pt-4.border-t.border-amber-100.bg-white\/70.rounded-b-3xl.shadow-inner.flex.flex-col.gap-3,
+  .flex.items-center.gap-3.px-3.py-2.rounded-xl,
+  .text-xs.font-light.uppercase.tracking-widest.text-amber-500,
+  .text-2xl.font-extrabold.text-amber-700.tracking-wide.leading-tight {
+    font-size: 0.9em !important;
+  }
+  .sidebar-link svg,
+  .flex.items-center.gap-3.px-3.py-2.rounded-xl svg,
+  .flex.items-center.gap-2 svg,
+  .w-6.h-6,
+  .w-7.h-7 {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
 }
 </style> 

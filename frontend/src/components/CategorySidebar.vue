@@ -50,4 +50,12 @@ li.active, li:hover {
   font-size: 0.95em;
   margin-left: 4px;
 }
+.category-sidebar, .sidebar, .sidebar-category, .sidebar-list, .sidebar-item {
+  font-size: 0.95em;
+}
+@media (max-width: 600px) {
+  .category-sidebar, .sidebar, .sidebar-category, .sidebar-list, .sidebar-item {
+    font-size: 0.85em;
+  }
+}
 </style> 

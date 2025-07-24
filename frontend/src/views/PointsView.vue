@@ -251,5 +251,22 @@ const formatDate = (dateString: string) => {
   .grid-cols-1, .md\:grid-cols-3, .md\:grid-cols-2 {
     grid-template-columns: 1fr !important;
   }
+  .grid.md\:grid-cols-3.gap-6.mb-8 {
+    gap: 8px !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .grid.md\:grid-cols-3.gap-6.mb-8 > div {
+    margin-bottom: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px #e2d6c2;
+    padding: 0.7rem 0.8rem !important;
+  }
+  .grid.md\:grid-cols-3.gap-6.mb-8 .text-3xl, .grid.md\:grid-cols-3.gap-6.mb-8 .text-2xl {
+    font-size: 1.2rem !important;
+    margin-bottom: 0 !important;
+  }
+  .grid.md\:grid-cols-3.gap-6.mb-8 .text-sm, .grid.md\:grid-cols-3.gap-6.mb-8 .font-medium {
+    font-size: 0.98em !important;
+  }
 }
 </style> 

@@ -112,7 +112,7 @@ function getAllImages() {
   .product-detail {
     flex-direction: column !important;
     gap: 1rem !important;
-    padding: 0 0.2rem;
+    padding: 0 1rem;
   }
 }
 </style>
