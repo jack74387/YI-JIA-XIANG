@@ -59,6 +59,7 @@
               <router-link to="/store-locator" class="sidebar-link" @click.native="closeSidebar">門市據點</router-link>
             </div>
           </div>
+          <SidebarLink icon="book-open" to="/articles" label="主題專欄" @close="closeSidebar" />
           <SidebarLink icon="chat-bubble-left-ellipsis" to="/faq" label="常見問題" @close="closeSidebar" />
           <SidebarLink icon="phone" to="/contact" label="聯絡我們" @close="closeSidebar" />
         </nav>

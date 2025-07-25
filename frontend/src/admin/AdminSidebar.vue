@@ -59,6 +59,18 @@
       </router-link>
       
       <router-link 
+        to="/admin/articles" 
+        class="flex items-center p-3 mb-2 rounded-lg hover:bg-amber-100 transition-colors group"
+        active-class="bg-amber-200 text-amber-800 font-semibold"
+      >
+        <svg class="w-5 h-5 mr-3 lg:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7V3a1 1 0 011-1h8a1 1 0 011 1v18a1 1 0 01-1 1H8a1 1 0 01-1-1v-4" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 11h10M7 15h6" />
+        </svg>
+        <span class="sidebar-label hidden lg:inline" v-show="!isCollapsed">文章管理</span>
+      </router-link>
+      
+      <router-link 
         to="/admin/members" 
         class="flex items-center p-3 mb-2 rounded-lg hover:bg-amber-100 transition-colors group"
         active-class="bg-amber-200 text-amber-800 font-semibold"

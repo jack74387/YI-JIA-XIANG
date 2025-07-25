@@ -202,6 +202,21 @@ const router = createRouter({
       component: () => import('../admin/AdminInventory.vue')
     },
     {
+      path: '/admin/articles',
+      name: 'admin-articles',
+      component: () => import('../admin/AdminArticles.vue')
+    },
+    {
+      path: '/articles',
+      name: 'articles-list',
+      component: () => import('../views/ArticlesListView.vue')
+    },
+    {
+      path: '/articles/:id',
+      name: 'article-detail',
+      component: () => import('../views/ArticleDetailView.vue')
+    },
+    {
       path: '/artisan-craft',
       name: 'artisan-craft',
       component: () => import('../views/ArtisanCraftView.vue')

@@ -54,6 +54,14 @@
                   <div class="h-px bg-gray-200 my-2"></div>
               </div>
             </div>
+            <!-- 主題專欄 -->
+            <router-link
+              to="/articles"
+              class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              active-class="border-amber-500 text-gray-900"
+            >
+              主題專欄
+            </router-link>
             <!-- 其他主選單 -->
             <router-link
               to="/contact"

@@ -22,5 +22,7 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 # 權限調整
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# 預設啟動指令（可依需求改為 php-fpm）
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"] 
+# 啟動腳本
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"] 

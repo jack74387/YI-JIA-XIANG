@@ -65,6 +65,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
+    // 文章（前台）
+    Route::get('/articles', [\App\Http\Controllers\ArticleController::class, 'index']);
+    Route::get('/articles/{id}', [\App\Http\Controllers\ArticleController::class, 'show']);
+
     // 需要認證的路由
     Route::middleware('auth:sanctum')->group(function () {
         // 用戶相關
@@ -115,6 +119,16 @@ Route::prefix('v1')->group(function () {
         Route::put('/user-addresses/{id}', [UserAddressController::class, 'update']);
         Route::delete('/user-addresses/{id}', [UserAddressController::class, 'destroy']);
         Route::post('/user-addresses/{id}/set-default', [UserAddressController::class, 'setDefault']);
+
+        // 文章（後台）
+        Route::prefix('admin')->group(function () {
+            Route::apiResource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+            Route::post('articles/upload-image', [\App\Http\Controllers\Admin\ArticleController::class, 'uploadImage']);
+            Route::post('articles/upload-video', [\App\Http\Controllers\Admin\ArticleController::class, 'uploadVideo']);
+            Route::post('articles/delete-image', [\App\Http\Controllers\Admin\ArticleController::class, 'deleteImage']);
+            Route::post('articles/delete-video', [\App\Http\Controllers\Admin\ArticleController::class, 'deleteVideo']);
+            Route::post('articles/{id}/publish-fb', [\App\Http\Controllers\Admin\ArticleController::class, 'publishToFacebook']);
+        });
 
         // 管理員專用
         Route::middleware('auth:sanctum')->group(function () {

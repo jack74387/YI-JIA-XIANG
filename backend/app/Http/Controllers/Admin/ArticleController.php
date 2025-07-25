@@ -1,0 +1,207 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Article;
+use Illuminate\Support\Facades\Storage;
+
+class ArticleController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $articles = Article::orderByDesc('published_at')->paginate(20);
+        return response()->json(['success' => true, 'data' => $articles]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
+            'videos' => 'nullable|array',
+            'videos.*' => 'string',
+            'status' => 'required|in:draft,published',
+            'published_at' => 'nullable|date',
+        ]);
+        $article = Article::create(array_merge($validated, [
+            'user_id' => $user->id,
+        ]));
+        return response()->json(['success' => true, 'data' => $article]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $article = Article::findOrFail($id);
+        return response()->json(['success' => true, 'data' => $article]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $article = Article::findOrFail($id);
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'content' => 'sometimes|required|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
+            'videos' => 'nullable|array',
+            'videos.*' => 'string',
+            'status' => 'sometimes|required|in:draft,published',
+            'published_at' => 'nullable|date',
+        ]);
+        $article->update($validated);
+        return response()->json(['success' => true, 'data' => $article]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $article = Article::findOrFail($id);
+        $article->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // 圖片上傳
+    public function uploadImage(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $request->validate([
+            'image' => 'required|image|max:5120', // 5MB
+        ]);
+        $path = $request->file('image')->store('articles/images', 'public');
+        return response()->json(['success' => true, 'url' => Storage::url($path)]);
+    }
+
+    // 影片上傳
+    public function uploadVideo(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $request->validate([
+            'video' => 'required|mimetypes:video/mp4,video/quicktime|max:51200', // 50MB
+        ]);
+        $path = $request->file('video')->store('articles/videos', 'public');
+        return response()->json(['success' => true, 'url' => Storage::url($path)]);
+    }
+
+    // 刪除圖片
+    public function deleteImage(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $request->validate(['url' => 'required|string']);
+        $url = $request->input('url');
+        $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
+        if (\Storage::disk('public')->exists($path)) {
+            \Storage::disk('public')->delete($path);
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false, 'message' => '檔案不存在'], 404);
+    }
+
+    // 刪除影片
+    public function deleteVideo(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $request->validate(['url' => 'required|string']);
+        $url = $request->input('url');
+        $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
+        if (\Storage::disk('public')->exists($path)) {
+            \Storage::disk('public')->delete($path);
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false, 'message' => '檔案不存在'], 404);
+    }
+
+    // 一鍵發布到 Facebook
+    public function publishToFacebook(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user || !$user->is_admin) {
+            return response()->json(['success' => false, 'message' => '無權限'], 403);
+        }
+        $article = Article::findOrFail($id);
+        if ($article->status !== 'published') {
+            return response()->json(['success' => false, 'message' => '僅能發布已發布的文章'], 400);
+        }
+        // Facebook API 設定
+        $fbPageId = env('FB_PAGE_ID');
+        $fbToken = env('FB_PAGE_TOKEN');
+        if (!$fbPageId || !$fbToken) {
+            return response()->json(['success' => false, 'message' => 'FB 設定不完整'], 500);
+        }
+        $message = $article->title . "\n" . strip_tags($article->content);
+        $link = url('/articles/' . $article->id);
+        $images = $article->images ?? [];
+        $videos = $article->videos ?? [];
+        // 只發第一張圖
+        $media = count($images) ? ['attached_media' => [['media_fbid' => $this->uploadFbPhoto($images[0], $fbPageId, $fbToken)]]] : [];
+        $params = array_merge([
+            'message' => $message . "\n" . $link,
+        ], $media);
+        $fbApi = "https://graph.facebook.com/{$fbPageId}/feed";
+        $response = \Http::withToken($fbToken)->post($fbApi, $params);
+        if ($response->successful()) {
+            return response()->json(['success' => true, 'message' => '已發布到 Facebook']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'FB 發布失敗', 'fb_response' => $response->json()], 500);
+        }
+    }
+    // 上傳圖片到 FB，取得 media_fbid
+    private function uploadFbPhoto($imageUrl, $pageId, $token)
+    {
+        $api = "https://graph.facebook.com/{$pageId}/photos";
+        $res = \Http::withToken($token)->post($api, [
+            'url' => url($imageUrl),
+            'published' => false
+        ]);
+        return $res->json('id') ?? null;
+    }
+}

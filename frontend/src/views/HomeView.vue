@@ -28,8 +28,13 @@
         </div>
       </div>
     </div>
+    <ArticleBlock />
   </div>
 </template>
+
+<script setup lang="ts">
+import ArticleBlock from '../components/ArticleBlock.vue'
+</script>
 
 <style scoped>
 .home-hero {
