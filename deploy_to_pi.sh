@@ -14,7 +14,7 @@ ssh-keygen -R $PI_IP
 sshpass -p $PI_PASS ssh -o StrictHostKeyChecking=no $PI_USER@$PI_IP "mkdir -p ~/$PI_DIR"
 
 # 3. 傳送檔案到 Pi 的 yijiaxiang 資料夾
-sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no yijiaxiang_arm64.tar $PI_USER@$PI_IP:~/$PI_DIR/
+sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no yijiaxiang-arm64_0.0.1.tar $PI_USER@$PI_IP:~/$PI_DIR/
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no docker-compose.yml $PI_USER@$PI_IP:~/$PI_DIR/
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no backend/.env.example $PI_USER@$PI_IP:~/$PI_DIR/.env
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no -r backend/database/migrations $PI_USER@$PI_IP:~/$PI_DIR/
@@ -35,7 +35,7 @@ ENDSSH
 # 5. 載入 image、啟動 compose、執行 migration/seed
 sshpass -p $PI_PASS ssh -o StrictHostKeyChecking=no $PI_USER@$PI_IP <<'ENDSSH'
 cd ~/yijiaxiang
-docker load -i yijiaxiang_arm64.tar
+docker load -i yijiaxiang-arm64_0.0.1.tar
 docker compose up -d
 sleep 20
 BACKEND_CONTAINER=$(docker compose ps -q backend)
