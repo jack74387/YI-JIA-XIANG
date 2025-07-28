@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片顯示測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .image-container {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .image-container h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 4px;
+        }
+        .object-cover {
+            object-fit: cover;
+            width: 200px;
+            height: 200px;
+        }
+        .object-contain {
+            object-fit: contain;
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            border: 1px solid #dee2e6;
+        }
+        .test-buttons {
+            margin: 20px 0;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>圖片顯示測試</h1>
+    
+    <div class="test-section">
+        <h2>圖片顯示模式比較</h2>
+        <p>左側：object-cover（會裁剪圖片） | 右側：object-contain（完整顯示圖片）</p>
+        
+        <div class="image-comparison">
+            <div class="image-container">
+                <h3>object-cover（裁剪模式）</h3>
+                <img src="https://picsum.photos/400/300" alt="測試圖片" class="object-cover" />
+                <div class="url-display">URL: https://picsum.photos/400/300</div>
+                <div class="status success">載入成功</div>
+            </div>
+            
+            <div class="image-container">
+                <h3>object-contain（完整模式）</h3>
+                <img src="https://picsum.photos/400/300" alt="測試圖片" class="object-contain" />
+                <div class="url-display">URL: https://picsum.photos/400/300</div>
+                <div class="status success">載入成功</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>後端圖片測試</h2>
+        <div class="test-buttons">
+            <button class="test-button" onclick="testBackendImages()">測試後端圖片</button>
+            <button class="test-button" onclick="testImageUpload()">測試圖片上傳</button>
+        </div>
+        
+        <div id="backend-test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>圖片 URL 處理測試</h2>
+        <div id="url-test-results"></div>
+    </div>
+    
+    <script>
+        // 模擬前端的 getImageUrl 函數
+        function getImageUrl(imagePath) {
+            if (!imagePath) return ''
+            if (imagePath.startsWith('http')) return imagePath
+            if (imagePath.startsWith('/storage')) {
+                return `http://localhost:8000${imagePath}`
+            }
+            return imagePath
+        }
+        
+        // 測試後端圖片
+        async function testBackendImages() {
+            const resultsDiv = document.getElementById('backend-test-results')
+            resultsDiv.innerHTML = '<div class="status loading">正在測試後端圖片...</div>'
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/admin/articles', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                
+                const data = await response.json()
+                
+                if (response.ok) {
+                    let html = '<h3>文章列表：</h3>'
+                    if (data.data && data.data.data && data.data.data.length > 0) {
+                        data.data.data.forEach(article => {
+                            html += `
+                                <div class="image-container" style="margin: 10px 0;">
+                                    <h4>${article.title}</h4>
+                                    ${article.images && article.images.length > 0 ? 
+                                        `<img src="${getImageUrl(article.images[0])}" class="object-contain" style="width: 150px; height: 150px;" onerror="this.parentElement.innerHTML += '<div class=status error>圖片載入失敗</div>'" onload="this.parentElement.innerHTML += '<div class=status success>圖片載入成功</div>'" />` : 
+                                        '<p>無圖片</p>'
+                                    }
+                                    <div class="url-display">圖片路徑: ${article.images ? article.images[0] : '無'}</div>
+                                </div>
+                            `
+                        })
+                    } else {
+                        html += '<p>暫無文章</p>'
+                    }
+                    resultsDiv.innerHTML = html
+                } else {
+                    resultsDiv.innerHTML = `<div class="status error">API 測試失敗: ${response.status}</div>`
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="status error">測試錯誤: ${error.message}</div>`
+            }
+        }
+        
+        // 測試圖片上傳
+        async function testImageUpload() {
+            const resultsDiv = document.getElementById('backend-test-results')
+            resultsDiv.innerHTML = '<div class="status loading">正在測試圖片上傳...</div>'
+            
+            // 創建一個測試圖片文件
+            const canvas = document.createElement('canvas')
+            canvas.width = 100
+            canvas.height = 100
+            const ctx = canvas.getContext('2d')
+            ctx.fillStyle = '#ff0000'
+            ctx.fillRect(0, 0, 100, 100)
+            ctx.fillStyle = '#ffffff'
+            ctx.font = '20px Arial'
+            ctx.fillText('TEST', 20, 50)
+            
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData()
+                formData.append('image', blob, 'test.png')
+                
+                try {
+                    const response = await fetch('http://localhost:8000/api/v1/admin/articles/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    
+                    const data = await response.json()
+                    
+                    if (response.ok && data.success) {
+                        resultsDiv.innerHTML = `
+                            <div class="status success">圖片上傳成功！</div>
+                            <div class="image-container">
+                                <h4>上傳的圖片</h4>
+                                <img src="${getImageUrl(data.url)}" class="object-contain" style="width: 150px; height: 150px;" />
+                                <div class="url-display">上傳 URL: ${data.url}</div>
+                                <div class="url-display">處理後 URL: ${getImageUrl(data.url)}</div>
+                            </div>
+                        `
+                    } else {
+                        resultsDiv.innerHTML = `<div class="status error">圖片上傳失敗: ${data.message || '未知錯誤'}</div>`
+                    }
+                } catch (error) {
+                    resultsDiv.innerHTML = `<div class="status error">上傳錯誤: ${error.message}</div>`
+                }
+            })
+        }
+        
+        // 測試 URL 處理
+        function testUrlProcessing() {
+            const resultsDiv = document.getElementById('url-test-results')
+            const testUrls = [
+                '/storage/articles/images/test.jpg',
+                'http://example.com/image.jpg',
+                'articles/images/test.jpg',
+                '',
+                null,
+                undefined
+            ]
+            
+            let html = '<h3>URL 處理測試：</h3>'
+            testUrls.forEach(url => {
+                const processed = getImageUrl(url)
+                html += `
+                    <div class="url-display">
+                        <strong>原始:</strong> ${url || '(空)'}<br>
+                        <strong>處理後:</strong> ${processed || '(空)'}
+                    </div>
+                `
+            })
+            resultsDiv.innerHTML = html
+        }
+        
+        // 頁面載入時執行測試
+        window.addEventListener('load', () => {
+            testUrlProcessing()
+        })
+    </script>
+</body>
+</html> 

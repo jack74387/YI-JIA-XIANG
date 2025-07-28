@@ -6,9 +6,9 @@
       <h1 class="text-3xl font-bold mb-2">{{ article.title }}</h1>
       <div class="text-gray-500 text-sm mb-4">{{ article.published_at ? article.published_at.split('T')[0] : '' }}</div>
       <div v-if="article.images && article.images.length" class="mb-4">
-        <img :src="getImageUrl(article.images[0])" class="w-full h-64 object-cover rounded mb-2" />
+        <img :src="getImageUrl(article.images[0])" class="w-full h-64 object-contain rounded mb-2 bg-gray-100" />
         <div class="flex gap-2 overflow-x-auto">
-          <img v-for="img in article.images.slice(1)" :key="img" :src="getImageUrl(img)" class="w-20 h-20 object-cover rounded border" />
+          <img v-for="img in article.images.slice(1)" :key="img" :src="getImageUrl(img)" class="w-20 h-20 object-contain rounded border bg-gray-100" />
         </div>
       </div>
       <div v-if="article.videos && article.videos.length" class="mb-4">
@@ -38,7 +38,10 @@ onMounted(async () => {
 function getImageUrl(path: string) {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  if (path.startsWith('/storage')) return `${window.location.protocol}//${window.location.hostname}:8000${path}`
+  if (path.startsWith('/storage')) {
+    // 前端運行在 3000 端口，後端運行在 8000 端口
+    return `http://localhost:8000${path}`
+  }
   return path
 }
 </script> 

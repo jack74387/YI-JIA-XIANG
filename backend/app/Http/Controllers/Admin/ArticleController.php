@@ -163,45 +163,81 @@ class ArticleController extends Controller
     // 一鍵發布到 Facebook
     public function publishToFacebook(Request $request, $id)
     {
-        $user = $request->user();
-        if (!$user || !$user->is_admin) {
-            return response()->json(['success' => false, 'message' => '無權限'], 403);
-        }
-        $article = Article::findOrFail($id);
-        if ($article->status !== 'published') {
-            return response()->json(['success' => false, 'message' => '僅能發布已發布的文章'], 400);
-        }
-        // Facebook API 設定
-        $fbPageId = env('FB_PAGE_ID');
-        $fbToken = env('FB_PAGE_TOKEN');
-        if (!$fbPageId || !$fbToken) {
-            return response()->json(['success' => false, 'message' => 'FB 設定不完整'], 500);
-        }
-        $message = $article->title . "\n" . strip_tags($article->content);
-        $link = url('/articles/' . $article->id);
-        $images = $article->images ?? [];
-        $videos = $article->videos ?? [];
-        // 只發第一張圖
-        $media = count($images) ? ['attached_media' => [['media_fbid' => $this->uploadFbPhoto($images[0], $fbPageId, $fbToken)]]] : [];
-        $params = array_merge([
-            'message' => $message . "\n" . $link,
-        ], $media);
-        $fbApi = "https://graph.facebook.com/{$fbPageId}/feed";
-        $response = \Http::withToken($fbToken)->post($fbApi, $params);
-        if ($response->successful()) {
-            return response()->json(['success' => true, 'message' => '已發布到 Facebook']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'FB 發布失敗', 'fb_response' => $response->json()], 500);
+        try {
+            $user = $request->user();
+            if (!$user || !$user->is_admin) {
+                return response()->json(['success' => false, 'message' => '無權限'], 403);
+            }
+            
+            $article = Article::findOrFail($id);
+            if ($article->status !== 'published') {
+                return response()->json(['success' => false, 'message' => '僅能發布已發布的文章'], 400);
+            }
+            
+            // Facebook API 設定
+            $fbPageId = env('FACEBOOK_PAGE_ID');
+            $fbToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
+            
+            if (!$fbPageId || !$fbToken) {
+                return response()->json(['success' => false, 'message' => 'Facebook 設定不完整'], 500);
+            }
+            
+            // 記錄環境變數用於除錯
+            \Log::info('Facebook Environment Variables', [
+                'page_id' => $fbPageId,
+                'token_length' => strlen($fbToken),
+                'token_start' => substr($fbToken, 0, 20) . '...'
+            ]);
+            
+            // 準備發布內容
+            $message = $article->title . "\n\n" . strip_tags($article->content);
+            $link = url('/articles/' . $article->id);
+            
+            $params = [
+                'message' => $message . "\n\n" . $link,
+            ];
+            
+            $fbApi = "https://graph.facebook.com/{$fbPageId}/feed";
+            
+            // 記錄請求參數用於除錯
+            \Log::info('Facebook API Request', [
+                'url' => $fbApi,
+                'params' => $params,
+                'page_id' => $fbPageId
+            ]);
+            
+            // 發送請求到 Facebook
+            $response = \Http::withToken($fbToken)
+                ->withOptions(['verify' => false]) // 禁用 SSL 驗證
+                ->post($fbApi, $params);
+                
+            // 記錄回應用於除錯
+            \Log::info('Facebook API Response', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'json' => $response->json()
+            ]);
+            
+            if ($response->successful()) {
+                return response()->json(['success' => true, 'message' => '已發布到 Facebook']);
+            } else {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Facebook 發布失敗', 
+                    'fb_response' => $response->json(),
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ], 500);
+            }
+            
+        } catch (\Exception $e) {
+            \Log::error('Facebook publish error: ' . $e->getMessage());
+            \Log::error('Facebook publish error trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false, 
+                'message' => '發布過程中發生錯誤: ' . $e->getMessage()
+            ], 500);
         }
     }
-    // 上傳圖片到 FB，取得 media_fbid
-    private function uploadFbPhoto($imageUrl, $pageId, $token)
-    {
-        $api = "https://graph.facebook.com/{$pageId}/photos";
-        $res = \Http::withToken($token)->post($api, [
-            'url' => url($imageUrl),
-            'published' => false
-        ]);
-        return $res->json('id') ?? null;
-    }
+
 }

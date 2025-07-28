@@ -6,7 +6,7 @@
     <div v-else class="grid md:grid-cols-3 gap-8">
       <router-link v-for="a in articles.slice(0, 3)" :key="a.id" :to="`/articles/${a.id}`" class="article-card group">
         <div v-if="a.images && a.images.length" class="aspect-w-16 aspect-h-10 rounded-xl overflow-hidden mb-3 bg-gray-100">
-          <img :src="getImageUrl(a.images[0])" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
+          <img :src="getImageUrl(a.images[0])" class="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300" />
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-amber-700 transition">{{ a.title }}</h3>
         <div class="text-xs text-gray-400 mb-2 flex items-center gap-1">
@@ -35,7 +35,10 @@ onMounted(async () => {
 function getImageUrl(path: string) {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  if (path.startsWith('/storage')) return `${window.location.protocol}//${window.location.hostname}:8000${path}`
+  if (path.startsWith('/storage')) {
+    // 前端運行在 3000 端口，後端運行在 8000 端口
+    return `http://localhost:8000${path}`
+  }
   return path
 }
 </script>

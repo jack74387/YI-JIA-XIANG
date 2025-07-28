@@ -29,7 +29,10 @@ onMounted(async () => {
 function getImageUrl(path: string) {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  if (path.startsWith('/storage')) return `${window.location.protocol}//${window.location.hostname}:8000${path}`
+  if (path.startsWith('/storage')) {
+    // 前端運行在 3000 端口，後端運行在 8000 端口
+    return `http://localhost:8000${path}`
+  }
   return path
 }
 </script>

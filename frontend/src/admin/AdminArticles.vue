@@ -30,8 +30,8 @@
           </tr>
         </tbody>
       </table>
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg w-full max-w-2xl relative">
+      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50" @click="closeModal">
+        <div class="bg-white p-6 rounded-lg w-full max-w-2xl relative" @click.stop>
           <h2 class="text-xl font-bold mb-4">{{ editing ? '編輯' : '新增' }}文章</h2>
           <form @submit.prevent="save">
             <div class="mb-3">
@@ -47,7 +47,7 @@
               <input type="file" multiple accept="image/*" @change="uploadImages" />
               <div class="flex flex-wrap gap-2 mt-2">
                 <div v-for="(img, idx) in form.images" :key="img" class="relative group">
-                  <img :src="getImageUrl(img)" class="w-20 h-20 object-cover rounded border" />
+                  <img :src="getImageUrl(img)" class="w-20 h-20 object-contain rounded border bg-gray-100" />
                   <button type="button"
                     class="absolute top-0 right-0 bg-white bg-opacity-80 rounded-full p-1 m-1 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow"
                     style="display: none;"
@@ -70,7 +70,6 @@
                   <video :src="getImageUrl(vid)" class="w-24 h-16 rounded border" controls />
                   <button type="button"
                     class="absolute top-0 right-0 bg-white bg-opacity-80 rounded-full p-1 m-1 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow"
-                    style="display: none;"
                     @click="removeVideo(idx)"
                     :disabled="vidLoadingIdx === idx"
                     v-show="true"
@@ -107,6 +106,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import AdminSidebar from './AdminSidebar.vue'
+import { getImageUrl } from '@/utils/imageUtils'
 const articles = ref<any[]>([])
 const showModal = ref(false)
 const editing = ref(false)
@@ -205,13 +205,7 @@ function publishFB(id: number) {
     })
   }
 }
-function getImageUrl(imagePath: string) {
-  if (!imagePath) return ''
-  if (imagePath.startsWith('http')) return imagePath
-  // 統一只處理 /storage 路徑
-  if (imagePath.startsWith('/storage')) return `${window.location.protocol}//${window.location.hostname}:8000${imagePath}`
-  return imagePath
-}
+
 onMounted(fetchArticles)
 </script>
 <style scoped>
