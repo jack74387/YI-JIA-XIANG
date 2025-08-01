@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: yi_jia_xiang
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: yi_jia_xiang_user
+      MYSQL_PASSWORD: yi_jia_xiang_password_2024
+    ports:
+      - "3308:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: yijiaxiang-arm64:0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: yi_jia_xiang
+      DB_USERNAME: yi_jia_xiang_user
+      DB_PASSWORD: yi_jia_xiang_password_2024
+      CLOUDINARY_URL: cloudinary://815926459439819:4wRbJUBxsfJdQCR1OZk_o4_fu94@daeb3goxf
+      CLOUDINARY_CLOUD_NAME: daeb3goxf
+      CLOUDINARY_API_KEY: 815926459439819
+      CLOUDINARY_API_SECRET: 4wRbJUBxsfJdQCR1OZk_o4_fu94
+    ports:
+      - "8000:8000"
+    working_dir: /var/www
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5180:5173"
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+
+volumes:
+  db_data: 

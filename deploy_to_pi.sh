@@ -1,5 +1,5 @@
 #!/bin/bash
-PI_IP=192.168.99.27
+PI_IP=192.168.99.45
 PI_USER=pi
 PI_PASS=0000
 PI_DIR="yijiaxiang"
@@ -16,7 +16,7 @@ sshpass -p $PI_PASS ssh -o StrictHostKeyChecking=no $PI_USER@$PI_IP "mkdir -p ~/
 # 3. 傳送檔案到 Pi 的 yijiaxiang 資料夾
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no yijiaxiang-arm64_0.0.1.tar $PI_USER@$PI_IP:~/$PI_DIR/
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no docker-compose.yml $PI_USER@$PI_IP:~/$PI_DIR/
-sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no backend/.env.example $PI_USER@$PI_IP:~/$PI_DIR/.env
+sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no backend/.env $PI_USER@$PI_IP:~/$PI_DIR/.env
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no -r backend/database/migrations $PI_USER@$PI_IP:~/$PI_DIR/
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no -r backend/database/seeders $PI_USER@$PI_IP:~/$PI_DIR/
 sshpass -p $PI_PASS scp -o StrictHostKeyChecking=no -r frontend $PI_USER@$PI_IP:~/$PI_DIR/
@@ -40,9 +40,13 @@ docker compose up -d
 sleep 20
 BACKEND_CONTAINER=$(docker compose ps -q backend)
 if [ -n "$BACKEND_CONTAINER" ]; then
+  docker compose exec backend php artisan config:clear
+  docker compose exec backend php artisan route:clear
+  docker compose exec backend php artisan cache:clear
+  docker compose exec backend php artisan config:cache
   docker compose exec backend php artisan migrate --force
   docker compose exec backend php artisan db:seed --force
 else
   echo "找不到 backend 容器，無法執行 migration/seed"
 fi
-ENDSSH 
+ENDSSH
