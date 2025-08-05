@@ -235,6 +235,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/admin/cloudinary-test', [\App\Http\Controllers\Admin\CloudinaryController::class, 'testConnection']);
             // 測試 Cloudinary 連接
             Route::get('/admin/test-cloudinary', [\App\Http\Controllers\AdminController::class, 'testCloudinaryConnection']);
+        });
+        
+        // 不需要認證的測試路由
+        Route::get('/test-cloudinary-simple', [\App\Http\Controllers\AdminController::class, 'testCloudinarySimple']);
             
             // 後台優惠券管理
             Route::get('/admin/coupons', [\App\Http\Controllers\AdminController::class, 'adminCoupons']);
@@ -260,9 +264,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/food-trace', [\App\Http\Controllers\FoodTraceController::class, 'show']);
     Route::post('/group-orders', [\App\Http\Controllers\GroupOrderController::class, 'store']);
     Route::get('/recommend', [\App\Http\Controllers\RecommendController::class, 'index']);
-    
-    // 不需要認證的測試路由
-    Route::get('/test-cloudinary-simple', [\App\Http\Controllers\AdminController::class, 'testCloudinarySimple']);
 }); 
 
 // Admin 庫存管理

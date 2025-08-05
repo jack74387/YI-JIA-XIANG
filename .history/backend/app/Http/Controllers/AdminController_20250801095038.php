@@ -1720,62 +1720,22 @@ class AdminController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Cloudinary 連接成功',
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'image_count' => count($result['resources'] ?? []),
-                'resources' => $result['resources'] ?? []
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cloudinary 連接失敗: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * 簡單的 Cloudinary 測試（不需認證）
-     */
-    public function testCloudinarySimple()
-    {
-        try {
-            // 測試 Cloudinary 連接
-            $cloudinary = new Cloudinary([
-                'cloud' => [
+                'config' => [
                     'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                    'api_key' => env('CLOUDINARY_API_KEY'),
-                    'api_secret' => env('CLOUDINARY_API_SECRET')
-                ]
-            ]);
-
-            // 測試取得資源列表
-            $result = $cloudinary->adminApi()->resources([
-                'resource_type' => 'image',
-                'max_results' => 3
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cloudinary 連接成功',
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'image_count' => count($result['resources'] ?? []),
-                'sample_images' => array_map(function($resource) {
-                    return [
-                        'public_id' => $resource['public_id'],
-                        'url' => $resource['secure_url'],
-                        'format' => $resource['format']
-                    ];
-                }, array_slice($result['resources'] ?? [], 0, 3))
+                    'api_key' => env('CLOUDINARY_API_KEY') ? '***' . substr(env('CLOUDINARY_API_KEY'), -4) : null,
+                    'api_secret' => env('CLOUDINARY_API_SECRET') ? '***' . substr(env('CLOUDINARY_API_SECRET'), -4) : null,
+                ],
+                'resources_count' => count($result['resources'] ?? [])
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cloudinary 連接失敗: ' . $e->getMessage(),
-                'env_check' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME') ? 'set' : 'missing',
-                    'api_key' => env('CLOUDINARY_API_KEY') ? 'set' : 'missing',
-                    'api_secret' => env('CLOUDINARY_API_SECRET') ? 'set' : 'missing'
+                'message' => 'Cloudinary 連接失敗：' . $e->getMessage(),
+                'config' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key' => env('CLOUDINARY_API_KEY') ? '***' . substr(env('CLOUDINARY_API_KEY'), -4) : null,
+                    'api_secret' => env('CLOUDINARY_API_SECRET') ? '***' . substr(env('CLOUDINARY_API_SECRET'), -4) : null,
                 ]
             ], 500);
         }

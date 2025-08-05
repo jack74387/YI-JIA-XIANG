@@ -11,7 +11,6 @@ use App\Models\Order;
 use App\Models\Coupon;
 use App\Models\UserCoupon;
 use App\Models\OperationLog;
-use Cloudinary\Cloudinary;
 
 class AdminController extends Controller
 {
@@ -1214,34 +1213,22 @@ class AdminController extends Controller
 
             // 取得原本的圖片路徑
             $oldImage = $product->image ?? null;
-            $oldImages = $product->images ?? [];
 
-            // 如果 image 欄位被清空，且原本有圖片，則刪除圖片
+            // 如果 image 欄位被清空，且原本有圖片，則刪除實體檔案
             if (
                 array_key_exists('image', $validated) &&
                 empty($validated['image']) &&
-                $oldImage
+                $oldImage &&
+                (str_starts_with($oldImage, '/storage/products/') || str_starts_with($oldImage, 'storage/products/'))
             ) {
-                // 刪除 Cloudinary 圖片
-                $this->deleteCloudinaryImageByUrl($oldImage);
-                
-                // 如果是本地檔案，也刪除實體檔案
-                if (str_starts_with($oldImage, '/storage/products/') || str_starts_with($oldImage, 'storage/products/')) {
-                    $relativePath = ltrim(preg_replace('#^/?storage/#', '', $oldImage), '/');
-                    \Storage::disk('public')->delete($relativePath);
-                }
-            }
-
-            // 檢查 images 陣列是否有刪除的圖片
-            if (array_key_exists('images', $validated)) {
-                $newImages = $validated['images'] ?? [];
-                $currentImages = is_string($oldImages) ? json_decode($oldImages, true) ?? [] : $oldImages;
-                
-                // 找出被刪除的圖片
-                $deletedImages = array_diff($currentImages, $newImages);
-                foreach ($deletedImages as $deletedImage) {
-                    $this->deleteCloudinaryImageByUrl($deletedImage);
-                }
+                // 處理路徑，移除開頭的 /storage/ 或 storage/
+                $relativePath = ltrim(preg_replace('#^/?storage/#', '', $oldImage), '/');
+                \Log::info('嘗試刪除圖片', [
+                    'oldImage' => $oldImage,
+                    'relativePath' => $relativePath,
+                    'exists' => \Storage::disk('public')->exists($relativePath)
+                ]);
+                \Storage::disk('public')->delete($relativePath);
             }
 
             $product->update($validated);
@@ -1473,70 +1460,25 @@ class AdminController extends Controller
         if (!$user || !$user->is_admin) {
             return response()->json(['success' => false, 'message' => '無權限'], 403);
         }
-        
         $product = \App\Models\Product::find($id);
         if (!$product) {
             return response()->json(['success' => false, 'message' => '產品不存在'], 404);
         }
-        
         $imagePath = $request->input('image');
-        $imageType = $request->input('type', 'extra'); // 'main' 或 'extra'
-        
         if (!$imagePath) {
             return response()->json(['success' => false, 'message' => '未指定圖片路徑'], 400);
         }
+        // 刪除實體檔案
+        $relativePath = ltrim(preg_replace('#^/?storage/#', '', $imagePath), '/');
+        \Storage::disk('public')->delete($relativePath);
 
-        try {
-            // 刪除 Cloudinary 圖片
-            $this->deleteCloudinaryImageByUrl($imagePath);
+        // 從 images 陣列移除
+        $images = $product->images ?? [];
+        $images = array_values(array_filter($images, fn($img) => $img !== $imagePath));
+        $product->images = $images;
+        $product->save();
 
-            // 刪除本地檔案（如果是本地檔案）
-            if (str_starts_with($imagePath, '/storage/') || str_starts_with($imagePath, 'storage/')) {
-                $relativePath = ltrim(preg_replace('#^/?storage/#', '', $imagePath), '/');
-                \Storage::disk('public')->delete($relativePath);
-            }
-
-            if ($imageType === 'main') {
-                // 刪除主要圖片
-                $product->image = null;
-            } else {
-                // 從 images 陣列移除
-                $images = $product->images ?? [];
-                if (is_string($images)) {
-                    $images = json_decode($images, true) ?? [];
-                }
-                $images = array_values(array_filter($images, fn($img) => $img !== $imagePath));
-                $product->images = $images;
-            }
-            
-            $product->save();
-
-            // 記錄操作日誌
-            OperationLog::create([
-                'admin_id' => $user->id,
-                'action' => 'delete_product_image',
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'data' => json_encode([
-                    'product_id' => $id,
-                    'image_path' => $imagePath,
-                    'image_type' => $imageType
-                ])
-            ]);
-
-            return response()->json([
-                'success' => true, 
-                'message' => '圖片刪除成功',
-                'images' => $product->images,
-                'main_image' => $product->image
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false, 
-                'message' => '圖片刪除失敗：' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['success' => true, 'images' => $images]);
     }
 
     /**
@@ -1545,8 +1487,6 @@ class AdminController extends Controller
     private function deleteCloudinaryImages($product)
     {
         try {
-            \Log::info('Starting Cloudinary image deletion for product: ' . $product->id);
-            
             // 初始化 Cloudinary
             $cloudinary = new Cloudinary([
                 'cloud' => [
@@ -1556,20 +1496,11 @@ class AdminController extends Controller
                 ]
             ]);
 
-            $deletedCount = 0;
-
             // 刪除主要圖片
             if (!empty($product->image)) {
-                \Log::info('Deleting main image: ' . $product->image);
                 $publicId = $this->extractPublicIdFromUrl($product->image);
                 if ($publicId) {
-                    $result = $cloudinary->uploadApi()->destroy($publicId);
-                    \Log::info('Main image deletion result: ' . json_encode($result));
-                    if (isset($result['result']) && $result['result'] === 'ok') {
-                        $deletedCount++;
-                    }
-                } else {
-                    \Log::warning('Failed to extract public_id from main image: ' . $product->image);
+                    $cloudinary->uploadApi()->destroy($publicId);
                 }
             }
 
@@ -1577,31 +1508,18 @@ class AdminController extends Controller
             if (!empty($product->images)) {
                 $images = is_string($product->images) ? json_decode($product->images, true) : $product->images;
                 if (is_array($images)) {
-                    \Log::info('Deleting ' . count($images) . ' additional images');
                     foreach ($images as $imageUrl) {
-                        if (!empty($imageUrl)) {
-                            \Log::info('Deleting additional image: ' . $imageUrl);
-                            $publicId = $this->extractPublicIdFromUrl($imageUrl);
-                            if ($publicId) {
-                                $result = $cloudinary->uploadApi()->destroy($publicId);
-                                \Log::info('Additional image deletion result: ' . json_encode($result));
-                                if (isset($result['result']) && $result['result'] === 'ok') {
-                                    $deletedCount++;
-                                }
-                            } else {
-                                \Log::warning('Failed to extract public_id from additional image: ' . $imageUrl);
-                            }
+                        $publicId = $this->extractPublicIdFromUrl($imageUrl);
+                        if ($publicId) {
+                            $cloudinary->uploadApi()->destroy($publicId);
                         }
                     }
                 }
             }
 
-            \Log::info('Cloudinary deletion completed. Deleted ' . $deletedCount . ' images for product: ' . $product->id);
-
         } catch (\Exception $e) {
             // 記錄錯誤但不阻止商品刪除
-            \Log::error('Cloudinary image deletion failed for product ' . $product->id . ': ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            \Log::error('Cloudinary image deletion failed: ' . $e->getMessage());
         }
     }
 
@@ -1614,171 +1532,12 @@ class AdminController extends Controller
             return null;
         }
 
-        // 記錄原始 URL 以便調試
-        \Log::info('Extracting public_id from URL: ' . $url);
-
-        // 支援多種 Cloudinary URL 格式
-        $patterns = [
-            // 標準格式: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/image_name.jpg
-            '/\/image\/upload\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i',
-            // 無版本號格式: https://res.cloudinary.com/cloud_name/image/upload/folder/image_name.jpg
-            '/\/image\/upload\/(.+)\.(jpg|jpeg|png|gif|webp)$/i',
-            // 轉換格式: https://res.cloudinary.com/cloud_name/image/upload/c_fill,w_200,h_200/v1234567890/folder/image_name.jpg
-            '/\/image\/upload\/[^\/]+\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i',
-            // 轉換格式無版本號: https://res.cloudinary.com/cloud_name/image/upload/c_fill,w_200,h_200/folder/image_name.jpg
-            '/\/image\/upload\/[^\/]+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i'
-        ];
-
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $url, $matches)) {
-                $publicId = $matches[1];
-                \Log::info('Extracted public_id: ' . $publicId);
-                return $publicId;
-            }
+        // 匹配 Cloudinary URL 格式
+        if (preg_match('/\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i', $url, $matches)) {
+            return $matches[1];
         }
 
-        // 如果都不匹配，記錄錯誤
-        \Log::warning('Failed to extract public_id from URL: ' . $url);
         return null;
-    }
-
-    /**
-     * 刪除單個 Cloudinary 圖片
-     */
-    private function deleteCloudinaryImageByUrl($url)
-    {
-        try {
-            if (empty($url)) {
-                \Log::warning('Empty URL provided for Cloudinary deletion');
-                return;
-            }
-
-            \Log::info('Attempting to delete Cloudinary image: ' . $url);
-
-            // 初始化 Cloudinary
-            $cloudinary = new Cloudinary([
-                'cloud' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                    'api_key' => env('CLOUDINARY_API_KEY'),
-                    'api_secret' => env('CLOUDINARY_API_SECRET')
-                ]
-            ]);
-
-            $publicId = $this->extractPublicIdFromUrl($url);
-            if ($publicId) {
-                $result = $cloudinary->uploadApi()->destroy($publicId);
-                \Log::info('Cloudinary deletion result: ' . json_encode($result), [
-                    'url' => $url, 
-                    'public_id' => $publicId,
-                    'result' => $result
-                ]);
-                
-                if (isset($result['result']) && $result['result'] === 'ok') {
-                    \Log::info('Cloudinary 圖片刪除成功', ['url' => $url, 'public_id' => $publicId]);
-                } else {
-                    \Log::warning('Cloudinary 圖片刪除可能失敗', ['url' => $url, 'public_id' => $publicId, 'result' => $result]);
-                }
-            } else {
-                \Log::error('無法從 URL 提取 public_id', ['url' => $url]);
-            }
-
-        } catch (\Exception $e) {
-            // 記錄錯誤但不阻止操作
-            \Log::error('Cloudinary 圖片刪除失敗: ' . $e->getMessage(), [
-                'url' => $url,
-                'exception' => $e->getTraceAsString()
-            ]);
-        }
-    }
-
-    /**
-     * 測試 Cloudinary 連接和刪除功能
-     */
-    public function testCloudinaryConnection(Request $request)
-    {
-        $user = $request->user();
-        if (!$user || !$user->is_admin) {
-            return response()->json(['success' => false, 'message' => '無權限'], 403);
-        }
-
-        try {
-            // 測試 Cloudinary 連接
-            $cloudinary = new Cloudinary([
-                'cloud' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                    'api_key' => env('CLOUDINARY_API_KEY'),
-                    'api_secret' => env('CLOUDINARY_API_SECRET')
-                ]
-            ]);
-
-            // 測試取得資源列表
-            $result = $cloudinary->adminApi()->resources([
-                'resource_type' => 'image',
-                'max_results' => 5
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cloudinary 連接成功',
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'image_count' => count($result['resources'] ?? []),
-                'resources' => $result['resources'] ?? []
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cloudinary 連接失敗: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * 簡單的 Cloudinary 測試（不需認證）
-     */
-    public function testCloudinarySimple()
-    {
-        try {
-            // 測試 Cloudinary 連接
-            $cloudinary = new Cloudinary([
-                'cloud' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                    'api_key' => env('CLOUDINARY_API_KEY'),
-                    'api_secret' => env('CLOUDINARY_API_SECRET')
-                ]
-            ]);
-
-            // 測試取得資源列表
-            $result = $cloudinary->adminApi()->resources([
-                'resource_type' => 'image',
-                'max_results' => 3
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cloudinary 連接成功',
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'image_count' => count($result['resources'] ?? []),
-                'sample_images' => array_map(function($resource) {
-                    return [
-                        'public_id' => $resource['public_id'],
-                        'url' => $resource['secure_url'],
-                        'format' => $resource['format']
-                    ];
-                }, array_slice($result['resources'] ?? [], 0, 3))
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cloudinary 連接失敗: ' . $e->getMessage(),
-                'env_check' => [
-                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME') ? 'set' : 'missing',
-                    'api_key' => env('CLOUDINARY_API_KEY') ? 'set' : 'missing',
-                    'api_secret' => env('CLOUDINARY_API_SECRET') ? 'set' : 'missing'
-                ]
-            ], 500);
-        }
     }
 
     /**

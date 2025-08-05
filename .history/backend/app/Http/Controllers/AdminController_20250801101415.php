@@ -1780,6 +1780,28 @@ class AdminController extends Controller
             ], 500);
         }
     }
+                'success' => true,
+                'message' => 'Cloudinary 連接成功',
+                'config' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key' => env('CLOUDINARY_API_KEY') ? '***' . substr(env('CLOUDINARY_API_KEY'), -4) : null,
+                    'api_secret' => env('CLOUDINARY_API_SECRET') ? '***' . substr(env('CLOUDINARY_API_SECRET'), -4) : null,
+                ],
+                'resources_count' => count($result['resources'] ?? [])
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cloudinary 連接失敗：' . $e->getMessage(),
+                'config' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key' => env('CLOUDINARY_API_KEY') ? '***' . substr(env('CLOUDINARY_API_KEY'), -4) : null,
+                    'api_secret' => env('CLOUDINARY_API_SECRET') ? '***' . substr(env('CLOUDINARY_API_SECRET'), -4) : null,
+                ]
+            ], 500);
+        }
+    }
 
     /**
      * 取得操作文字說明

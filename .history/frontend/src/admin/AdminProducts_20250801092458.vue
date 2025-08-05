@@ -531,13 +531,13 @@ async function removeExtraImage(idx) {
       
       if (response.data.success) {
         form.value.images.splice(idx, 1)
-        alert('圖片刪除成功')
+        ElMessage.success('圖片刪除成功')
       } else {
-        alert('圖片刪除失敗：' + response.data.message)
+        ElMessage.error('圖片刪除失敗：' + response.data.message)
       }
     } catch (error) {
       console.error('刪除圖片失敗:', error)
-      alert('圖片刪除失敗，請稍後再試')
+      ElMessage.error('圖片刪除失敗，請稍後再試')
     }
   } else {
     // 新增模式，直接從陣列移除
@@ -561,13 +561,13 @@ async function removeImage() {
         form.value.image = ''
         imagePreview.value = ''
         selectedFile.value = null
-        alert('主要圖片刪除成功')
+        ElMessage.success('主要圖片刪除成功')
       } else {
-        alert('圖片刪除失敗：' + response.data.message)
+        ElMessage.error('圖片刪除失敗：' + response.data.message)
       }
     } catch (error) {
       console.error('刪除主要圖片失敗:', error)
-      alert('圖片刪除失敗，請稍後再試')
+      ElMessage.error('圖片刪除失敗，請稍後再試')
     }
   } else {
     // 新增模式，直接清空
