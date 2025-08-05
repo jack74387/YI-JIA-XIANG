@@ -4,7 +4,7 @@
     <section class="mb-8">
       <h2 class="text-xl font-semibold text-amber-600 mb-2">門市資訊</h2>
       <ul class="text-gray-700">
-        <li>地址：台東縣台東市廣東路269號</li>
+        <li>地址：台東縣台東市廣東路265號</li>
         <li>電話：(089) 357-996</li>
         <li>營業時間：09:00-20:00</li>
         <li>

@@ -381,6 +381,15 @@ class AuthController extends Controller
             ], 500);
         }
     }
+                'message' => '密碼重設成功'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '密碼重設失敗，請稍後再試'
+            ], 500);
+        }
+    }
 
     public function adminLogin(Request $request)
     {

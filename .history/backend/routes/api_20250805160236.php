@@ -10,7 +10,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UserAddressController;
-use App\Http\Controllers\ContactController;
 use Illuminate\Http\Request;
 
 // 測試路由

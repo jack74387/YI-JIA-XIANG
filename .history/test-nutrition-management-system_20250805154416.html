@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品營養資訊管理系統</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .system-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+        }
+        .feature-list {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .field-description {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        .field-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        .field-desc {
+            color: #6c757d;
+        }
+        .field-type {
+            color: #007bff;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .json-example {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        .api-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .database-section {
+            background: #cce5ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            margin: 15px 0;
+        }
+        .frontend-section {
+            background: #f0e6ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6f42c1;
+            margin: 15px 0;
+        }
+        .instruction {
+            background: #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #fdcb6e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="system-container">
+        <h1>🍖 商品營養資訊管理系統</h1>
+        
+        <h2>系統功能概述</h2>
+        <div class="feature-list">
+            <strong>已實現功能：</strong><br>
+            ✅ 資料庫欄位新增（營養資訊、成分資訊、保存期限等）<br>
+            ✅ 後端 API 驗證和儲存邏輯<br>
+            ✅ 前端商品規格頁面資料顯示<br>
+            ✅ 支援 JSON 格式營養資訊和包裝規格<br>
+            ✅ 後台管理介面數據支援
+        </div>
+
+        <h2>資料庫結構</h2>
+        <div class="database-section">
+            <h3>新增的欄位</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>欄位名稱</th>
+                        <th>資料類型</th>
+                        <th>說明</th>
+                        <th>範例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>nutrition_info</td>
+                        <td>JSON</td>
+                        <td>營養資訊（熱量、蛋白質等）</td>
+                        <td>{"calories": "320大卡", "protein": "25公克"}</td>
+                    </tr>
+                    <tr>
+                        <td>ingredients</td>
+                        <td>TEXT</td>
+                        <td>主要成分</td>
+                        <td>豬肉、糖、鹽、醬油、香料</td>
+                    </tr>
+                    <tr>
+                        <td>allergens</td>
+                        <td>TEXT</td>
+                        <td>過敏原資訊</td>
+                        <td>本產品含有大豆製品</td>
+                    </tr>
+                    <tr>
+                        <td>shelf_life</td>
+                        <td>VARCHAR(100)</td>
+                        <td>保存期限</td>
+                        <td>60天（未開封）</td>
+                    </tr>
+                    <tr>
+                        <td>storage_instructions</td>
+                        <td>TEXT</td>
+                        <td>保存方式</td>
+                        <td>常溫保存，開封後請冷藏</td>
+                    </tr>
+                    <tr>
+                        <td>origin</td>
+                        <td>VARCHAR(100)</td>
+                        <td>產地</td>
+                        <td>台灣</td>
+                    </tr>
+                    <tr>
+                        <td>package_info</td>
+                        <td>JSON</td>
+                        <td>包裝規格資訊</td>
+                        <td>[{"name": "600g 大包裝", "description": "適合家庭分享"}]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>營養資訊 JSON 格式</h2>
+        <div class="json-example">
+{
+  "calories": "320大卡",
+  "protein": "25公克", 
+  "fat": "18公克",
+  "carbohydrates": "12公克",
+  "sodium": "850毫克",
+  "sugar": "8公克",
+  "fiber": "2公克",
+  "calcium": "50毫克",
+  "iron": "3毫克",
+  "vitaminC": "5毫克"
+}
+        </div>
+
+        <h2>包裝規格 JSON 格式</h2>
+        <div class="json-example">
+[
+  {
+    "name": "600g 大包裝",
+    "description": "適合家庭分享"
+  },
+  {
+    "name": "300g 中包裝", 
+    "description": "適合小家庭"
+  },
+  {
+    "name": "150g 隨手包",
+    "description": "適合個人享用"
+  }
+]
+        </div>
+
+        <h2>後端 API 更新</h2>
+        <div class="api-section">
+            <h3>產品創建/更新 API</h3>
+            <strong>端點：</strong> POST /admin/products 或 PUT /admin/products/{id}<br>
+            <strong>新增支援的欄位：</strong>
+            <div class="code">
+// 營養和成分資訊欄位
+'nutrition_info' => 'nullable|array',
+'ingredients' => 'nullable|string',
+'allergens' => 'nullable|string',
+'shelf_life' => 'nullable|string|max:100',
+'storage_instructions' => 'nullable|string',
+'origin' => 'nullable|string|max:100',
+'package_info' => 'nullable|array'
+            </div>
+        </div>
+
+        <h3>請求範例</h3>
+        <div class="code">
+POST /admin/products
+Content-Type: application/json
+
+{
+  "name": "黃金豬典豬肉鬆",
+  "category_id": 1,
+  "description": "經典風味豬肉鬆...",
+  "nutrition_info": {
+    "calories": "320大卡",
+    "protein": "25公克",
+    "fat": "18公克",
+    "carbohydrates": "12公克",
+    "sodium": "850毫克"
+  },
+  "ingredients": "豬肉、糖、鹽、醬油、香料",
+  "allergens": "本產品含有大豆製品",
+  "shelf_life": "60天（未開封）",
+  "storage_instructions": "常溫保存，開封後請冷藏",
+  "origin": "台灣",
+  "package_info": [
+    {
+      "name": "600g 大包裝",
+      "description": "適合家庭分享"
+    }
+  ]
+}
+        </div>
+
+        <h2>前端顯示</h2>
+        <div class="frontend-section">
+            <h3>ProductTabs 組件更新</h3>
+            <strong>功能：</strong><br>
+            ✅ 動態顯示營養資訊（如果資料庫有資料則顯示，否則顯示預設值）<br>
+            ✅ 動態顯示成分資訊和過敏原<br>
+            ✅ 動態顯示保存期限和保存方式<br>
+            ✅ 動態顯示包裝規格<br>
+            ✅ 支援多語言營養標籤轉換
+        </div>
+
+        <h2>後台管理界面建議</h2>
+        <div class="instruction">
+            <h3>🎯 需要在後台添加的編輯區域：</h3>
+            
+            <h4>1. 營養資訊編輯器</h4>
+            <p>建議使用動態表單，支援添加/刪除營養項目：</p>
+            <ul>
+                <li>熱量（大卡）</li>
+                <li>蛋白質（公克）</li>
+                <li>脂肪（公克）</li>
+                <li>碳水化合物（公克）</li>
+                <li>鈉（毫克）</li>
+                <li>其他營養素...</li>
+            </ul>
+
+            <h4>2. 成分資訊區域</h4>
+            <ul>
+                <li>主要成分（文字輸入框）</li>
+                <li>過敏原資訊（文字輸入框）</li>
+                <li>產地（下拉選單或文字輸入）</li>
+            </ul>
+
+            <h4>3. 保存資訊區域</h4>
+            <ul>
+                <li>保存期限（文字輸入框，如："60天（未開封）"）</li>
+                <li>保存方式（文字區域，支援多行）</li>
+            </ul>
+
+            <h4>4. 包裝規格編輯器</h4>
+            <p>動態列表，支援添加多個包裝選項：</p>
+            <ul>
+                <li>包裝名稱（如：600g 大包裝）</li>
+                <li>包裝描述（如：適合家庭分享）</li>
+            </ul>
+        </div>
+
+        <h2>實現步驟</h2>
+        <div class="api-section">
+            <strong>後端已完成：</strong><br>
+            ✅ 資料庫遷移檔案<br>
+            ✅ Product 模型更新<br>
+            ✅ AdminController 驗證規則<br>
+            ✅ API 端點支援新欄位<br><br>
+            
+            <strong>前端已完成：</strong><br>
+            ✅ ProductTabs 組件資料顯示<br>
+            ✅ 營養資訊動態渲染<br>
+            ✅ 成分和保存資訊顯示<br>
+            ✅ 包裝規格動態列表<br><br>
+            
+            <strong>待完成：</strong><br>
+            🔄 後台管理界面的表單設計<br>
+            🔄 營養資訊編輯器組件<br>
+            🔄 包裝規格編輯器組件<br>
+            🔄 資料驗證和錯誤處理
+        </div>
+
+        <h2>測試方法</h2>
+        <div class="instruction">
+            <h3>1. 資料庫測試</h3>
+            <div class="code">
+php artisan tinker
+$product = App\Models\Product::find(1);
+$product->nutrition_info = ["calories" => "320大卡", "protein" => "25公克"];
+$product->ingredients = "豬肉、糖、鹽、醬油、香料";
+$product->shelf_life = "60天（未開封）";
+$product->save();
+            </div>
+
+            <h3>2. API 測試</h3>
+            <p>使用 Postman 或 curl 測試產品更新 API</p>
+
+            <h3>3. 前端測試</h3>
+            <p>訪問商品詳情頁面 → 點擊「商品規格」標籤 → 查看營養資訊顯示</p>
+        </div>
+
+        <h2>相關檔案</h2>
+        <div class="code">
+# 後端
+backend/database/migrations/2025_08_05_065926_add_nutrition_and_ingredients_to_products_table.php
+backend/app/Models/Product.php
+backend/app/Http/Controllers/AdminController.php
+
+# 前端  
+frontend/src/components/ProductTabs.vue
+        </div>
+    </div>
+
+    <script>
+        console.log('商品營養資訊管理系統說明已載入');
+        console.log('請依照說明進行後台管理界面的開發');
+    </script>
+</body>
+</html>

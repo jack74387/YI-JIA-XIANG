@@ -4,11 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -314,67 +309,13 @@ class AuthController extends Controller
         }
 
         try {
-            $email = $request->email;
-            $token = $request->token;
-            
-            // 查找重設記錄
-            $resetRecord = DB::table('password_reset_tokens')
-                ->where('email', $email)
-                ->first();
-            
-            if (!$resetRecord) {
-                return response()->json([
-                    'success' => false,
-                    'message' => '重設連結無效或已過期'
-                ], 400);
-            }
-            
-            // 檢查 token 是否正確
-            if (!Hash::check($token, $resetRecord->token)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => '重設連結無效'
-                ], 400);
-            }
-            
-            // 檢查是否過期（60分鐘）
-            $createdAt = Carbon::parse($resetRecord->created_at);
-            if ($createdAt->addMinutes(60)->isPast()) {
-                // 刪除過期的記錄
-                DB::table('password_reset_tokens')->where('email', $email)->delete();
-                
-                return response()->json([
-                    'success' => false,
-                    'message' => '重設連結已過期，請重新申請'
-                ], 400);
-            }
-            
-            // 更新用戶密碼
-            $user = User::where('email', $email)->first();
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => '用戶不存在'
-                ], 404);
-            }
-            
-            $user->password = Hash::make($request->password);
-            $user->save();
-            
-            // 刪除重設記錄
-            DB::table('password_reset_tokens')->where('email', $email)->delete();
-            
+            // 這裡應該實作密碼重設邏輯
+            // 目前僅回傳成功訊息作為範例
             return response()->json([
                 'success' => true,
-                'message' => '密碼重設成功，請使用新密碼登入'
+                'message' => '密碼重設成功'
             ]);
-            
         } catch (\Exception $e) {
-            Log::error('Password reset failed', [
-                'email' => $request->email,
-                'error' => $e->getMessage()
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => '密碼重設失敗，請稍後再試'

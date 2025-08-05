@@ -155,7 +155,7 @@ const faqs = ref([
     id: 2,
     category: 'shipping',
     question: '運費如何計算？',
-    answer: '單筆訂單滿2000元免運費，未滿2000元收取運費150元。',
+    answer: '單筆訂單滿1000元免運費，未滿1000元收取運費150元。',
     additionalInfo: '離島地區運費另計，詳情請參考配送說明。'
   },
   {
@@ -163,13 +163,13 @@ const faqs = ref([
     category: 'payment',
     question: '支援哪些付款方式？',
     answer: '我們支援信用卡、銀行轉帳、貨到付款等多種付款方式。',
-    // additionalInfo: '信用卡付款支援分期付款，最多可分12期。'
+    additionalInfo: '信用卡付款支援分期付款，最多可分12期。'
   },
   {
     id: 4,
     category: 'product',
     question: '商品有保存期限嗎？',
-    answer: '我們的肉乾產品在未開封的情況下，常溫可保存2個月，開封後請冷藏保存並在7天內食用完畢。',
+    answer: '我們的肉乾產品在未開封的情況下，常溫可保存6個月，開封後請冷藏保存並在7天內食用完畢。',
     additionalInfo: '請注意包裝上的保存期限標示。'
   },
   {

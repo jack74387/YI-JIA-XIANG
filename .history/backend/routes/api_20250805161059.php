@@ -271,6 +271,33 @@ Route::prefix('v1')->group(function () {
     // 聯絡表單
     Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit']);
     
+    // 聯絡表單測試
+    Route::get('/test-contact', function () {
+        try {
+            $testData = [
+                'name' => '測試客戶',
+                'email' => 'test@example.com',
+                'message' => '這是一個測試訊息',
+                'to_email' => 'yijiaxiang88@gmail.com'
+            ];
+            
+            $controller = new \App\Http\Controllers\ContactController();
+            $request = new \Illuminate\Http\Request($testData);
+            $response = $controller->submit($request);
+            
+            return response()->json([
+                'test_result' => 'success',
+                'response' => $response->getData()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'test_result' => 'error',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    });
+    
     // 不需要認證的測試路由
     Route::get('/test-cloudinary-simple', [\App\Http\Controllers\AdminController::class, 'testCloudinarySimple']);
 }); 

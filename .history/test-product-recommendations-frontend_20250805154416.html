@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品推薦系統測試頁面</title>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #b8860b;
+            border-bottom: 2px solid #e0c68a;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .api-test-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        .api-test-form input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            flex: 1;
+        }
+        .api-test-form button {
+            background: #b8860b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .api-test-form button:hover {
+            background: #a67c00;
+        }
+        .results {
+            margin-top: 16px;
+        }
+        .recommendation-card {
+            background: #fffbe8;
+            border: 1px solid #e0c68a;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .recommendation-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+        .recommendation-info {
+            flex: 1;
+        }
+        .product-name {
+            font-weight: 600;
+            color: #8b5a00;
+            margin-bottom: 4px;
+        }
+        .product-meta {
+            font-size: 14px;
+            color: #a67c00;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+        .success {
+            background: #efe;
+            color: #3a3;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+        .loading {
+            background: #f0f8ff;
+            color: #0066cc;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            text-align: center;
+        }
+        .api-info {
+            background: #f8f9fa;
+            border-left: 4px solid #b8860b;
+            padding: 12px;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍖 一佳香肉脯行 - 商品推薦系統測試</h1>
+    
+    <div class="test-section">
+        <h2>📋 測試說明</h2>
+        <p>此頁面用於測試 Phase 1 商品推薦系統的功能，包含三種推薦策略：</p>
+        <ul>
+            <li><strong>分類推薦</strong>：推薦同分類的商品</li>
+            <li><strong>價格推薦</strong>：推薦相似價格區間的商品（±30%）</li>
+            <li><strong>熱門推薦</strong>：推薦熱門商品作為備用</li>
+        </ul>
+        
+        <div class="api-info">
+            <strong>API 端點：</strong> GET /api/v1/products/{id}/recommendations<br>
+            <strong>參數：</strong> ?limit=N (預設: 8)<br>
+            <strong>回應格式：</strong> JSON with recommendations array
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 API 測試工具</h2>
+        <div class="api-test-form">
+            <label for="productId">商品 ID:</label>
+            <input type="number" id="productId" value="1" min="1" placeholder="輸入商品 ID">
+            <label for="limit">推薦數量:</label>
+            <input type="number" id="limit" value="6" min="1" max="20" placeholder="推薦數量">
+            <button onclick="testRecommendations()">測試推薦</button>
+        </div>
+        
+        <div id="results" class="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 常用測試案例</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+            <button onclick="testCase(1, 6)" class="api-test-form button">測試商品 #1 (6個推薦)</button>
+            <button onclick="testCase(2, 4)" class="api-test-form button">測試商品 #2 (4個推薦)</button>
+            <button onclick="testCase(5, 8)" class="api-test-form button">測試商品 #5 (8個推薦)</button>
+            <button onclick="testCase(10, 3)" class="api-test-form button">測試商品 #10 (3個推薦)</button>
+        </div>
+    </div>
+
+    <script>
+        async function testRecommendations() {
+            const productId = document.getElementById('productId').value;
+            const limit = document.getElementById('limit').value || 6;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!productId) {
+                showError('請輸入商品 ID');
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading">🔄 載入推薦商品中...</div>';
+            
+            try {
+                const response = await fetch(`/api/v1/products/${productId}/recommendations?limit=${limit}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayRecommendations(data.data);
+                } else {
+                    showError(data.message || '取得推薦失敗');
+                }
+            } catch (error) {
+                showError('API 請求失敗: ' + error.message);
+            }
+        }
+        
+        function testCase(productId, limit) {
+            document.getElementById('productId').value = productId;
+            document.getElementById('limit').value = limit;
+            testRecommendations();
+        }
+        
+        function displayRecommendations(data) {
+            const resultsDiv = document.getElementById('results');
+            const recommendations = data.recommendations;
+            const strategies = data.strategies_used;
+            
+            let html = `
+                <div class="success">
+                    ✅ 成功取得 ${data.recommendation_count} 個推薦商品
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin: 12px 0;">
+                    <strong>📈 推薦策略使用狀況：</strong><br>
+                    🏷️ 分類推薦: ${strategies.category_based ? '✅ 已使用' : '❌ 未使用'}<br>
+                    💰 價格推薦: ${strategies.price_based ? '✅ 已使用' : '❌ 未使用'}<br>
+                    🔥 熱門推薦: ${strategies.popular_fallback ? '✅ 已使用' : '❌ 未使用'}
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <strong>🎯 目標商品：</strong> ${data.product_name} (ID: ${data.product_id})
+                    ${data.product_price ? ` - NT$ ${formatPrice(data.product_price)}` : ''}
+                </div>
+            `;
+            
+            if (recommendations.length > 0) {
+                html += '<h3>📝 推薦商品列表：</h3>';
+                recommendations.forEach((product, index) => {
+                    const price = product.display_price || product.price_large || product.price_small || 0;
+                    const imageUrl = getProductImage(product);
+                    
+                    html += `
+                        <div class="recommendation-card">
+                            <img src="${imageUrl}" alt="${product.name}" onerror="this.src='/images/placeholder.jpg'">
+                            <div class="recommendation-info">
+                                <div class="product-name">${index + 1}. ${product.name}</div>
+                                <div class="product-meta">
+                                    🏷️ ${product.category_name || '無分類'} | 
+                                    💰 NT$ ${formatPrice(price)} | 
+                                    📦 ${getStatusText(product.status)} |
+                                    ${product.can_add_to_cart ? '🛒 可購買' : '⏰ 不可購買'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<div class="error">❌ 沒有找到推薦商品</div>';
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+        
+        function getProductImage(product) {
+            if (product.primary_image && product.primary_image.image_path) {
+                return product.primary_image.image_path;
+            }
+            if (product.image) {
+                return product.image.startsWith('/') ? product.image : '/' + product.image;
+            }
+            if (product.images && product.images.length > 0) {
+                const firstImage = product.images[0];
+                if (typeof firstImage === 'string') {
+                    return firstImage.startsWith('/') ? firstImage : '/' + firstImage;
+                }
+                if (firstImage.image_path) {
+                    return firstImage.image_path.startsWith('/') ? firstImage.image_path : '/' + firstImage.image_path;
+                }
+            }
+            return '/images/placeholder.jpg';
+        }
+        
+        function formatPrice(price) {
+            return new Intl.NumberFormat('zh-TW').format(price);
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'published': '上架',
+                'notification': '通知',
+                'draft': '草稿',
+                'archived': '封存'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 頁面載入後自動測試第一個商品
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testRecommendations();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

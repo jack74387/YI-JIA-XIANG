@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試推薦商品導航功能</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .test-step {
+            background: #ecf0f1;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        .result {
+            background: #d5f5d5;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .error {
+            background: #f5d5d5;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #e74c3c;
+        }
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .url {
+            color: #3498db;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔗 推薦商品導航功能測試</h1>
+        
+        <h2>測試目標</h2>
+        <p>驗證在商品詳情頁面的「相關推薦」標籤中，點擊「查看詳情」按鈕是否能正確跳轉到對應的商品頁面。</p>
+
+        <h2>功能說明</h2>
+        <div class="test-step">
+            <strong>推薦功能整合位置：</strong><br>
+            - 原本的獨立 ProductRecommend 組件已移除<br>
+            - 推薦功能已整合到 ProductTabs 組件的「相關推薦」標籤中<br>
+            - 使用真實 API 數據替代模擬數據
+        </div>
+
+        <h2>路由配置</h2>
+        <div class="code">
+{
+  path: '/products/:id',
+  name: 'product-detail',
+  component: ProductDetailView
+}
+        </div>
+
+        <h2>跳轉函數</h2>
+        <div class="code">
+const viewProduct = (productId: number) => {
+  router.push({ name: 'product-detail', params: { id: productId } });
+};
+        </div>
+
+        <h2>測試步驟</h2>
+        
+        <div class="test-step">
+            <strong>步驟 1：</strong> 啟動開發服務器
+            <div class="code">
+cd frontend
+npm run dev
+            </div>
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 2：</strong> 訪問商品詳情頁面
+            <br>例如：<span class="url">http://localhost:5173/products/1</span>
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 3：</strong> 點擊「相關推薦」標籤
+            <br>確認推薦商品列表正確顯示
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 4：</strong> 點擊任一推薦商品的「查看詳情」按鈕
+            <br>驗證是否正確跳轉到對應商品頁面
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 5：</strong> 檢查 URL 變化
+            <br>確認 URL 格式為 <span class="url">/products/{商品ID}</span>
+        </div>
+
+        <h2>預期結果</h2>
+        <div class="result">
+            ✅ 推薦商品正確顯示（僅顯示已發布商品）<br>
+            ✅ 點擊「查看詳情」按鈕能成功跳轉<br>
+            ✅ URL 正確更新為目標商品頁面<br>
+            ✅ 新頁面正確載入目標商品資訊<br>
+            ✅ 新頁面的推薦列表重新載入相關商品
+        </div>
+
+        <h2>問題排查</h2>
+        
+        <div class="test-step">
+            <strong>如果跳轉不成功：</strong><br>
+            1. 檢查瀏覽器控制台是否有錯誤訊息<br>
+            2. 確認 router 是否正確導入<br>
+            3. 檢查路由名稱是否匹配<br>
+            4. 驗證商品 ID 是否正確傳遞
+        </div>
+
+        <div class="test-step">
+            <strong>如果推薦商品不顯示：</strong><br>
+            1. 檢查 API 端點是否運行<br>
+            2. 確認資料庫中有已發布的商品<br>
+            3. 查看網路請求是否成功<br>
+            4. 檢查組件掛載時是否正確調用 API
+        </div>
+
+        <h2>技術實現細節</h2>
+        
+        <div class="test-step">
+            <strong>API 端點：</strong> GET /api/v1/products/{id}/recommendations<br>
+            <strong>推薦策略：</strong> 同類別 → 價格相近 → 熱門商品<br>
+            <strong>過濾條件：</strong> 僅顯示 published = 1 的商品<br>
+            <strong>預設數量：</strong> 最多 6 個推薦商品
+        </div>
+
+        <h2>相關檔案</h2>
+        <div class="code">
+frontend/src/components/ProductTabs.vue (推薦功能整合)
+frontend/src/views/ProductDetailView.vue (已移除 ProductRecommend)
+backend/app/Http/Controllers/ProductController.php (API 實現)
+frontend/src/router/index.ts (路由配置)
+        </div>
+    </div>
+
+    <script>
+        // 檢查當前頁面 URL
+        console.log('當前測試頁面 URL:', window.location.href);
+        
+        // 模擬點擊測試
+        function simulateNavigation() {
+            console.log('模擬導航測試 - 目標: /products/2');
+            // 實際應用中會使用 Vue Router
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('推薦商品導航功能測試頁面已載入');
+        });
+    </script>
+</body>
+</html>

@@ -10,7 +10,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UserAddressController;
-use App\Http\Controllers\ContactController;
 use Illuminate\Http\Request;
 
 // 測試路由
@@ -267,9 +266,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/food-trace', [\App\Http\Controllers\FoodTraceController::class, 'show']);
     Route::post('/group-orders', [\App\Http\Controllers\GroupOrderController::class, 'store']);
     Route::get('/recommend', [\App\Http\Controllers\RecommendController::class, 'index']);
-    
-    // 聯絡表單
-    Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit']);
     
     // 不需要認證的測試路由
     Route::get('/test-cloudinary-simple', [\App\Http\Controllers\AdminController::class, 'testCloudinarySimple']);

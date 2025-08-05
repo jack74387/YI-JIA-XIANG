@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推薦商品導航修復驗證</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .fix-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .problem {
+            background: #f8d7da;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+            border-radius: 4px;
+        }
+        .solution {
+            background: #d4edda;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+        }
+        .test-step {
+            background: #e2e3e5;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #6c757d;
+            border-radius: 4px;
+        }
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d1ecf1;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="fix-container">
+        <h1>🔧 推薦商品導航問題修復報告</h1>
+        
+        <h2>問題描述</h2>
+        <div class="problem">
+            <strong>現象：</strong> 點擊推薦商品的「查看詳情」按鈕後，頁面只會跳到最上面，並沒有跳轉到對應的商品頁面。
+        </div>
+
+        <h2>問題原因分析</h2>
+        <div class="test-step">
+            <strong>根本原因：</strong><br>
+            ProductDetailView 組件在路由參數變化時沒有重新載入商品數據。當從商品1跳轉到商品2時，雖然 URL 改變了，但組件沒有重新載入新商品的資料，所以看起來像是沒有跳轉。
+        </div>
+
+        <h2>修復方案</h2>
+        
+        <div class="solution">
+            <strong>解決方案 1：</strong> 在 ProductDetailView 中添加路由監聽<br>
+            <div class="code">
+// 監聽路由變化，當商品 ID 改變時重新載入
+watch(() => route.params.id, async (newId) => {
+  if (newId) {
+    await loadProduct()
+  }
+})
+            </div>
+        </div>
+
+        <div class="solution">
+            <strong>解決方案 2：</strong> 重構商品載入邏輯<br>
+            <div class="code">
+// 載入商品數據
+const loadProduct = async () => {
+  const id = route.params.id
+  try {
+    const res = await axios.get(`/api/v1/products/${id}`)
+    product.value = res.data.product
+  } catch (error) {
+    console.error('Failed to load product:', error)
+  }
+}
+            </div>
+        </div>
+
+        <div class="solution">
+            <strong>解決方案 3：</strong> 添加調試信息<br>
+            <div class="code">
+// 查看商品詳情（增強版）
+const viewProduct = (productId: number) => {
+  console.log('viewProduct called with ID:', productId);
+  console.log('Current route:', router.currentRoute.value);
+  
+  const id = Number(productId);
+  if (!id || isNaN(id)) {
+    console.error('Invalid product ID:', productId);
+    return;
+  }
+  
+  try {
+    router.push({ name: 'product-detail', params: { id: id.toString() } });
+    console.log('Navigation attempted to product-detail with id:', id);
+  } catch (error) {
+    console.error('Navigation error:', error);
+  }
+}
+            </div>
+        </div>
+
+        <h2>修復後的測試步驟</h2>
+        
+        <div class="test-step">
+            <strong>步驟 1：</strong> 打開瀏覽器開發者工具的 Console 標籤
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 2：</strong> 訪問商品頁面
+            <br>例如：http://localhost:5174/products/1
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 3：</strong> 點擊「相關推薦」標籤
+            <br>觀察 Console 中的推薦商品數據載入日誌
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 4：</strong> 點擊任一推薦商品的「查看詳情」按鈕
+            <br>觀察 Console 中的導航日誌
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 5：</strong> 確認頁面內容變化
+            <br>檢查商品名稱、圖片、價格等是否更新為新商品的資訊
+        </div>
+
+        <h2>預期修復結果</h2>
+        
+        <div class="success">
+            ✅ Console 顯示正確的商品 ID 和導航信息<br>
+            ✅ URL 正確更新為新商品路徑<br>
+            ✅ 頁面內容完全更新為新商品資訊<br>
+            ✅ 新頁面的推薦列表重新載入相關商品<br>
+            ✅ 頁面滾動位置正確（不會只是跳到頂部）
+        </div>
+
+        <h2>API 測試數據</h2>
+        <div class="test-step">
+            <strong>可用的測試商品 ID：</strong><br>
+            - 商品 1：黃金豬典豬肉脯<br>
+            - 商品 2：海苔芝麻豬肉脯<br>
+            - 商品 4：五香豬肉條<br>
+            - 商品 5：五香豬肉絲
+        </div>
+
+        <h2>除錯提示</h2>
+        
+        <div class="test-step">
+            <strong>如果仍有問題：</strong><br>
+            1. 檢查瀏覽器 Console 是否有 JavaScript 錯誤<br>
+            2. 確認 API 端點是否正常回應（http://localhost:8000）<br>
+            3. 檢查前端服務器是否正常運行（http://localhost:5174）<br>
+            4. 確認路由配置是否正確<br>
+            5. 檢查組件是否正確掛載和更新
+        </div>
+
+        <h2>技術改進</h2>
+        
+        <div class="success">
+            <strong>核心改進：</strong><br>
+            - 添加了路由參數監聽功能<br>
+            - 重構了商品載入邏輯<br>
+            - 增強了錯誤處理和調試信息<br>
+            - 確保 SPA 路由正確運作<br>
+            - 提升了用戶體驗的流暢度
+        </div>
+    </div>
+
+    <script>
+        console.log('推薦商品導航修復驗證頁面已載入');
+        console.log('請依照測試步驟進行驗證');
+    </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <section class="mb-8">
       <h2 class="text-xl font-semibold text-amber-600 mb-2">門市資訊</h2>
       <ul class="text-gray-700">
-        <li>地址：台東縣台東市廣東路269號</li>
+        <li>地址：台東縣台東市廣東路265號</li>
         <li>電話：(089) 357-996</li>
         <li>營業時間：09:00-20:00</li>
         <li>
@@ -72,57 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import axios from 'axios'
-
-// 表單數據
-const form = ref({
-  name: '',
-  email: '',
-  message: ''
-})
-
-// 狀態管理
-const isSubmitting = ref(false)
-const showSuccess = ref(false)
-const showError = ref(false)
-
-// 提交表單
-const submitForm = async () => {
-  if (!form.value.name || !form.value.email || !form.value.message) {
-    return
-  }
-
-  isSubmitting.value = true
-  showSuccess.value = false
-  showError.value = false
-
-  try {
-    const response = await axios.post('/api/v1/contact', {
-      name: form.value.name,
-      email: form.value.email,
-      message: form.value.message,
-      to_email: 'yijiaxiang88@gmail.com'
-    })
-
-    if (response.data.success) {
-      showSuccess.value = true
-      // 清空表單
-      form.value = {
-        name: '',
-        email: '',
-        message: ''
-      }
-    } else {
-      showError.value = true
-    }
-  } catch (error) {
-    console.error('Contact form submission failed:', error)
-    showError.value = true
-  } finally {
-    isSubmitting.value = false
-  }
-}
+// 無需邏輯
 </script>
 
 <style scoped>
