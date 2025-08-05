@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推薦商品圖片完整顯示改進</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #e67e22;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .before {
+            background: #fdf2f2;
+            border: 2px solid #fc8181;
+        }
+        .after {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+        }
+        .image-demo {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            background: #f9f6f1;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        .cover-demo {
+            object-fit: cover;
+        }
+        .contain-demo {
+            object-fit: contain;
+        }
+        .code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .feature {
+            background: #fff5e6;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff8c00;
+            border-radius: 4px;
+        }
+        .test-step {
+            background: #f0f8ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4169e1;
+            border-radius: 4px;
+        }
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .pros {
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+        }
+        .cons {
+            background: #fef2f2;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🖼️ 推薦商品圖片完整顯示改進</h1>
+        
+        <h2>改進說明</h2>
+        <div class="feature">
+            將推薦商品的圖片從 <code>object-cover</code>（裁切填滿）改為 <code>object-contain</code>（完整顯示），
+            確保圖片不會被切到，用戶能看到商品的完整外觀。
+        </div>
+
+        <h2>object-fit 屬性比較</h2>
+        
+        <div class="comparison">
+            <div class="before">
+                <h3>object-cover（改進前）</h3>
+                <div class="code">
+class="w-full h-48 object-cover"
+                </div>
+                <img 
+                    src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&h=400" 
+                    alt="示例圖片 - cover"
+                    class="image-demo cover-demo"
+                />
+                <p><strong>特點：</strong>填滿容器，但可能裁切圖片</p>
+            </div>
+            <div class="after">
+                <h3>object-contain（改進後）</h3>
+                <div class="code">
+class="w-full h-48 object-contain"
+                </div>
+                <img 
+                    src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&h=400" 
+                    alt="示例圖片 - contain"
+                    class="image-demo contain-demo"
+                />
+                <p><strong>特點：</strong>完整顯示圖片，不裁切</p>
+            </div>
+        </div>
+
+        <h2>與商品頁面的一致性</h2>
+        <div class="feature">
+            <strong>商品頁面主圖樣式：</strong>
+            <div class="code">
+.main-img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  border-radius: 8px; 
+  background: #f9f6f1; 
+}
+            </div>
+            <strong>推薦商品圖片樣式（改進後）：</strong>
+            <div class="code">
+class="w-full h-48 object-contain rounded-lg bg-[#f9f6f1] border"
+            </div>
+            ✅ 兩者都使用 <code>object-contain</code> 確保圖片完整顯示
+        </div>
+
+        <h2>優缺點分析</h2>
+        <div class="pros-cons">
+            <div class="pros">
+                <h3>✅ object-contain 優點</h3>
+                <ul>
+                    <li>圖片完整顯示，不會被裁切</li>
+                    <li>保持原始比例</li>
+                    <li>用戶可以看到商品全貌</li>
+                    <li>與商品頁面主圖風格一致</li>
+                    <li>適合展示商品細節</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h3>⚠️ 需要注意的點</h3>
+                <ul>
+                    <li>可能在容器內留白</li>
+                    <li>不同比例圖片高度可能不一致</li>
+                    <li>需要統一的背景色（已設置 #f9f6f1）</li>
+                    <li>圖片尺寸差異較明顯</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>實際修改內容</h2>
+        <div class="code">
+// 修改前
+class="w-full h-48 object-cover rounded-lg bg-[#f9f6f1] border"
+
+// 修改後
+class="w-full h-48 object-contain rounded-lg bg-[#f9f6f1] border"
+        </div>
+
+        <h2>測試步驟</h2>
+        
+        <div class="test-step">
+            <strong>步驟 1：</strong> 訪問商品詳情頁面
+            <br>例如：http://localhost:5174/products/1
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 2：</strong> 點擊「相關推薦」標籤
+            <br>觀察推薦商品的圖片顯示效果
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 3：</strong> 檢查圖片完整性
+            <br>確認圖片沒有被裁切，可以看到完整的商品外觀
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 4：</strong> 比較商品主圖
+            <br>對比商品頁面主圖與推薦商品圖片的顯示方式
+        </div>
+
+        <div class="test-step">
+            <strong>步驟 5：</strong> 測試不同比例圖片
+            <br>查看不同商品圖片的顯示效果
+        </div>
+
+        <h2>背景色的重要性</h2>
+        <div class="feature">
+            <strong>為什麼需要 bg-[#f9f6f1]？</strong><br>
+            當使用 <code>object-contain</code> 時，如果圖片比例與容器不符，會在圖片周圍產生空白區域。
+            設置統一的背景色可以：
+            <ul>
+                <li>提供視覺上的一致性</li>
+                <li>避免突兀的白色空白</li>
+                <li>與商品頁面主圖保持相同的背景色</li>
+                <li>營造溫暖的品牌色調</li>
+            </ul>
+        </div>
+
+        <h2>適用場景</h2>
+        <div class="test-step">
+            <strong>object-contain 最適合：</strong><br>
+            ✅ 商品展示（需要看到完整外觀）<br>
+            ✅ 藝術品、食品等需要完整呈現的商品<br>
+            ✅ 用戶需要準確了解商品外觀的場景<br>
+            ✅ 與主商品圖片風格保持一致的需求
+        </div>
+
+        <h2>預期效果</h2>
+        <div class="feature">
+            <strong>改進後用戶體驗：</strong><br>
+            🎯 可以看到推薦商品的完整外觀<br>
+            🎯 不會錯過商品的重要細節<br>
+            🎯 與商品頁面主圖顯示方式一致<br>
+            🎯 更準確的商品預覽<br>
+            🎯 統一的視覺風格
+        </div>
+    </div>
+
+    <script>
+        console.log('推薦商品圖片完整顯示改進測試頁面已載入');
+        
+        // 模擬不同圖片比例的顯示效果
+        function demonstrateObjectFit() {
+            console.log('=== object-fit 示例 ===');
+            console.log('object-cover: 圖片填滿容器，可能裁切');
+            console.log('object-contain: 圖片完整顯示，可能留白');
+            console.log('推薦商品現在使用 object-contain 確保完整顯示');
+        }
+        
+        document.addEventListener('DOMContentLoaded', demonstrateObjectFit);
+    </script>
+</body>
+</html>
