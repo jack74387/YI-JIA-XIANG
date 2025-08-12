@@ -1,0 +1,18 @@
+# Vue frontend Dockerfile
+FROM --platform=linux/arm64 node:18-bookworm as build-stage
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+RUN npm install -g vue-tsc vite
+COPY . .
+RUN vue-tsc --version
+RUN npm run build
+
+# production stage
+FROM --platform=linux/arm64 node:18-bookworm as production-stage
+WORKDIR /app
+COPY --from=build-stage /app/dist ./dist
+RUN npm install -g serve
+EXPOSE 5173
+CMD ["serve", "-s", "dist", "-l", "5173"] 

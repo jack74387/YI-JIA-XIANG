@@ -36,14 +36,21 @@ class SettingController extends Controller
      */
     public function getHeroBgImage()
     {
-        $heroBgImage = Setting::where('key', 'hero_bg_image')->value('value');
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'hero_bg_image' => $heroBgImage
-            ]
-        ]);
+        try {
+            $bgImage = Setting::getHeroBgImage();
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'hero_bg_image' => $bgImage
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '獲取背景圖失敗: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -83,12 +90,6 @@ class SettingController extends Controller
                 ]
             ]);
 
-            // 保存圖片 URL 到資料庫或配置文件
-            Setting::updateOrCreate(
-                ['key' => 'hero_bg_image'],
-                ['value' => $uploadResult['secure_url']]
-            );
-
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -110,44 +111,41 @@ class SettingController extends Controller
     public function deleteHeroBgImage()
     {
         try {
-            // 從資料庫中獲取背景圖片的 public_id
-            $heroBgImageUrl = Setting::where('key', 'hero_bg_image')->value('value');
-            if (!$heroBgImageUrl) {
-                return response()->json([
-                    'success' => false,
-                    'message' => '未找到背景圖片的 URL'
-                ], 404);
+            $currentImage = Setting::getHeroBgImage();
+            
+            if ($currentImage) {
+                // 從 Cloudinary URL 提取 public_id
+                $publicId = $this->extractPublicIdFromUrl($currentImage);
+                
+                if ($publicId) {
+                    // Cloudinary 配置
+                    $config = [
+                        'cloud' => [
+                            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                            'api_key' => env('CLOUDINARY_API_KEY'),
+                            'api_secret' => env('CLOUDINARY_API_SECRET'),
+                        ]
+                    ];
+
+                    $cloudinary = new Cloudinary($config);
+                    
+                    // 刪除 Cloudinary 上的圖片
+                    $cloudinary->uploadApi()->destroy($publicId);
+                }
             }
 
-            // 提取 public_id
-            $publicId = basename(parse_url($heroBgImageUrl, PHP_URL_PATH), '.' . pathinfo($heroBgImageUrl, PATHINFO_EXTENSION));
-
-            $cloudinary = new \Cloudinary\Cloudinary([
-                'cloud' => [
-                    'cloud_name' => config('cloudinary.cloud_name'),
-                    'api_key' => config('cloudinary.api_key'),
-                    'api_secret' => config('cloudinary.api_secret'),
-                ],
-                'url' => [
-                    'secure' => true
-                ]
-            ]);
-
-            // 刪除圖片
-            $cloudinary->uploadApi()->destroy($publicId);
-
-            // 刪除資料庫中的記錄
-            Setting::where('key', 'hero_bg_image')->delete();
+            // 清除設定
+            Setting::setHeroBgImage(null);
 
             return response()->json([
                 'success' => true,
-                'message' => '背景圖片刪除成功'
+                'message' => '背景圖刪除成功'
             ]);
+
         } catch (\Exception $e) {
-            \Log::error('背景圖片刪除失敗: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => '背景圖片刪除失敗: ' . $e->getMessage()
+                'message' => '刪除失敗: ' . $e->getMessage()
             ], 500);
         }
     }

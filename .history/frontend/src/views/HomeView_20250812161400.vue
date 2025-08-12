@@ -537,7 +537,7 @@ onMounted(() => {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
-  color: #ffffff !important; /* 將字體顏色改為白色 */
+  color: #ffffff; /* 將字體顏色改為白色 */
 }
 
 /* 產品選擇器樣式 */
