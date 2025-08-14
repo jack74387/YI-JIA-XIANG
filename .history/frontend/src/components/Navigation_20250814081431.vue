@@ -5,13 +5,13 @@
         <div class="flex items-center">
           <router-link to="/" class="flex items-center space-x-5">
             <img src="/images/logo.jpg" alt="品牌LOGO" class="h-14 w-14 rounded-full object-cover shadow-lg" />
-            <div class="flex flex-col items-center justify-center leading-tight">
+            <div class="flex flex-col items-start justify-center leading-tight">
               <span
-                class="text-[2.25rem] font-black"
+                class="text-[2.3rem] font-black"
                 style="font-family: 'Noto Serif TC', 'Microsoft JhengHei', '微軟正黑體', serif; color: #b85c38; line-height: 1;"
               >一佳香</span>
               <span
-                class="text-[0.875rem] font-light uppercase tracking-[0.35em] mt-1"
+                class="text-[0.8rem] font-light uppercase tracking-[0.35em] mt-1"
                 style="color: #b85c38; letter-spacing: 0.35em; line-height: 1;"
               >YI JIA XIANG</span>
             </div>

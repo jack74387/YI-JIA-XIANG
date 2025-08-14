@@ -1523,6 +1523,6 @@ onMounted(() => {
   }
 }
 .product-info .product-name {
-  color: #b03309 !important;
+  color: #2d3748 !important;
 }
 </style>

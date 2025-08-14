@@ -9,7 +9,7 @@
               <span
                 class="text-[2.25rem] font-black"
                 style="font-family: 'Noto Serif TC', 'Microsoft JhengHei', '微軟正黑體', serif; color: #b85c38; line-height: 1;"
-              >一佳香</span>
+              >一 佳 香</span>
               <span
                 class="text-[0.875rem] font-light uppercase tracking-[0.35em] mt-1"
                 style="color: #b85c38; letter-spacing: 0.35em; line-height: 1;"

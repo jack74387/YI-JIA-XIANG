@@ -178,7 +178,6 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import ProductAddToCartModal from '@/components/ProductAddToCartModal.vue'
 import { getImageUrl } from '@/utils/imageUtils'
-import axios from 'axios'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -262,11 +261,9 @@ const loadProducts = async (page = 1) => {
 // 載入分類
 const loadCategories = async () => {
   try {
-    // const apiBase = `${window.location.protocol}//${window.location.hostname}:8000`
-    // const response = await fetch(`${apiBase}/api/v1/categories`)
-    // const data = await response.json()
-    const response = await axios.get('/api/v1/categories')
-    const data = response.data
+    const apiBase = `${window.location.protocol}//${window.location.hostname}:8000`
+    const response = await fetch(`${apiBase}/api/v1/categories`)
+    const data = await response.json()
 
     if (data.success) {
       // 指定順序

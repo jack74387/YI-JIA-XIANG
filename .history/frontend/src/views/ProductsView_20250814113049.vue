@@ -178,7 +178,6 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import ProductAddToCartModal from '@/components/ProductAddToCartModal.vue'
 import { getImageUrl } from '@/utils/imageUtils'
-import axios from 'axios'
 
 const router = useRouter()
 const cartStore = useCartStore()

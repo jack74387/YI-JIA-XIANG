@@ -25,9 +25,10 @@
     <section class="mb-8">
       <h2 class="text-xl font-semibold text-amber-600 mb-2">品牌里程碑</h2>
       <ul class="list-disc pl-6 text-gray-700">
-        <li>1999 年：一佳香肉脯行創立於台東</li>
-        <li>2022 年：榮獲TTPush熱門特約店家</li>
-        <li>2025 年：官網上線，服務全台顧客</li>
+        <li>1980 年：一佳香肉脯行創立於台東</li>
+        <li>2005 年：推出黃金嬰兒豬肉鬆，成為台東伴手禮首選</li>
+        <li>2018 年：榮獲台東十大伴手禮殊榮</li>
+        <li>2023 年：官網上線，服務全台顧客</li>
       </ul>
     </section>
     <section class="mb-8">

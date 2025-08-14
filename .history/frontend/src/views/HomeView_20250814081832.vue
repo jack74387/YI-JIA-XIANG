@@ -1522,7 +1522,4 @@ onMounted(() => {
     gap: 12px;
   }
 }
-.product-info .product-name {
-  color: #b03309 !important;
-}
 </style>
