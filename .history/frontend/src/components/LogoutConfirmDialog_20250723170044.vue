@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click.self="cancelLogout">
+  <div v-if="show" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
       <div class="mt-3 text-center">
         <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
@@ -73,6 +73,7 @@ const confirmLogout = async () => {
     console.log('登出成功')
   } catch (error) {
     console.error('登出失敗:', error)
+    // 即使登出失敗，也要清除前端狀態並跳轉
     router.push('/')
   } finally {
     loading.value = false
@@ -83,3 +84,7 @@ const cancelLogout = () => {
   emit('close')
 }
 </script>
+
+<style scoped>
+/* 使用 Tailwind CSS */
+</style> 
