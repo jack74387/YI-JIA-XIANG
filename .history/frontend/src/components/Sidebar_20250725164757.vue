@@ -24,16 +24,14 @@
         :class="{ 'translate-x-0': isOpen, 'translate-x-full': !isOpen }"
         tabindex="-1"
         @keydown.esc="closeSidebar"
-        style="overflow-y: auto;"
       >
         <!-- 頂部品牌LOGO -->
-        <div class="flex items-center gap-3 px-7 pt-7 pb-3 border-b border-amber-100 justify-center">
-          <img src="/images/logo.jpg" alt="品牌LOGO" class="h-14 w-14 rounded-full object-cover shadow-md" />
-          <div class="flex flex-col text-center">
-            <span class="text-3xl font-bold text-amber-800 tracking-wide leading-tight">一佳香</span>
-            <span class="text-sm font-medium uppercase tracking-wider text-amber-600">YI  JIA  XIANG</span>
+        <div class="flex items-center gap-3 px-7 pt-7 pb-3 border-b border-amber-100">
+          <img src="/images/logo.jpg" alt="品牌LOGO" class="h-12 w-12 rounded-full object-cover shadow-md" />
+          <div class="flex flex-col">
+            <span class="text-2xl font-extrabold text-amber-700 tracking-wide leading-tight">一佳香</span>
+            <span class="text-xs font-light uppercase tracking-widest text-amber-500">YI JIA XIANG</span>
           </div>
-
           <button class="ml-auto p-2 rounded-full hover:bg-amber-50 transition" @click="closeSidebar" aria-label="關閉選單">
             <svg class="w-7 h-7 text-amber-400 hover:text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -169,12 +167,5 @@ onUnmounted(() => {
     width: 1.1rem !important;
     height: 1.1rem !important;
   }
-}
-.text-amber-800 {
-  font-family: 'Noto Serif TC', 'Microsoft JhengHei', '微軟正黑體', serif;
-}
-.text-amber-600 {
-  font-family: 'Playfair Display', 'Times New Roman', serif;
-  letter-spacing: 0.3em;
 }
 </style> 

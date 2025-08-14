@@ -171,10 +171,9 @@ onUnmounted(() => {
   }
 }
 .text-amber-800 {
-  font-family: 'Noto Serif TC', 'Microsoft JhengHei', '微軟正黑體', serif;
+  font-family: 'Noto Serif TC', serif; /* 使用繁體中文字體 */
 }
 .text-amber-600 {
-  font-family: 'Playfair Display', 'Times New Roman', serif;
-  letter-spacing: 0.3em;
+  font-family: 'Roboto', sans-serif; /* 使用英文字體 */
 }
 </style> 

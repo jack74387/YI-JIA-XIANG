@@ -175,6 +175,5 @@ onUnmounted(() => {
 }
 .text-amber-600 {
   font-family: 'Playfair Display', 'Times New Roman', serif;
-  letter-spacing: 0.3em;
 }
 </style> 

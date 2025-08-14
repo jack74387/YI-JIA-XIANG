@@ -38,7 +38,7 @@
               <td class="py-2">
                 <span :class="statusColor(order.status)">{{ order.status_text || order.status }}</span>
               </td>
-              <td class="py-2">{{ formatTime(order.created_at) }}</td>
+              <td class="py-2">{{ order.created_at ? order.created_at.slice(0, 19).replace('T', ' ') : '-' }}</td>
               <td class="py-2">
                 <button class="text-blue-600 hover:underline mr-2" @click="viewOrder(order)">檢視</button>
               </td>

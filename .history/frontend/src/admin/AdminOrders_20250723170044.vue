@@ -38,7 +38,7 @@
               <td class="py-2">
                 <span :class="statusColor(order.status)">{{ order.status_text || order.status }}</span>
               </td>
-              <td class="py-2">{{ formatTime(order.created_at) }}</td>
+              <td class="py-2">{{ order.created_at ? order.created_at.slice(0, 19).replace('T', ' ') : '-' }}</td>
               <td class="py-2">
                 <button class="text-blue-600 hover:underline mr-2" @click="viewOrder(order)">檢視</button>
               </td>
@@ -125,7 +125,7 @@
             
             <div class="mb-3"><b>付款方式：</b>{{ orderDetail.payment_method }}</div>
             <div v-if="orderDetail.note" class="mb-3"><b>備註：</b>{{ orderDetail.note }}</div>
-            <div class="mb-3"><b>建立時間：</b>{{ formatTime(orderDetail.created_at) }}</div>
+            <div class="mb-3"><b>建立時間：</b>{{ orderDetail.created_at ? orderDetail.created_at.slice(0, 19).replace('T', ' ') : '-' }}</div>
             <div class="mb-3"><b>商品明細：</b>
               <table class="w-full text-left border mt-2">
                 <thead>
@@ -168,19 +168,6 @@ const pagination = ref({ current_page: 1, last_page: 1, total: 0, per_page: 12 }
 const totalPages = computed(() => pagination.value.last_page)
 const search = ref('')
 const statusFilter = ref('')
-
-const formatTime = (utcTime: string) => {
-  if (!utcTime) return '-';
-  return new Date(utcTime).toLocaleString('zh-TW', {
-    timeZone: 'Asia/Taipei',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-};
 
 // 取得分頁數字
 const getPageNumbers = () => {
