@@ -5,7 +5,7 @@ PI_PASS=0000
 PI_DIR="yijiaxiang"
 
 # 自動寫入前端 API baseURL
-sed -i  "s|^VITE_API_BASE_URL=.*|VITE_API_BASE_URL=https://$PI_IP|g" frontend/.env
+sed -i  "s|^VITE_API_BASE_URL=.*|VITE_API_BASE_URL=https://$PI_IP:8000|g" frontend/.env
 
 # 1. 清除舊的 SSH host key（避免 host key changed 錯誤）
 ssh-keygen -R $PI_IP
