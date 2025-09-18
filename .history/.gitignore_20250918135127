@@ -1,0 +1,79 @@
+*.tar
+
+# Deployment scripts and sensitive files
+deploy_to_pi.sh
+deploy-docker.sh
+build_image.sh
+test.sh
+
+# Configuration files with sensitive data
+cursor_wifi_ip.md
+gmail-setup-guide.md
+
+# Docker and environment files
+docker-compose.override.yml
+.env
+.env.local
+.env.production
+
+# Build artifacts and logs
+*.log
+logs/
+storage/logs/
+bootstrap/cache/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Generated documentation
+docs/generated/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Archive files
+*.zip
+*.rar
+*.7z
+*.gz
+*.bz2
+
+# Node modules and package files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PHP specific
+vendor/
+composer.lock
+
+# Frontend build files
+dist/
+build/
+public/hot
+public/storage
+storage/app/public

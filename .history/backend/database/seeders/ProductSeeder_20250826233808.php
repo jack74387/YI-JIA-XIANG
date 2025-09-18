@@ -47,7 +47,7 @@ class ProductSeeder extends Seeder
                 'price_large' => 380,
                 'price_small' => 190,
                 'unit' => '包',
-                'stock' => 100,
+                'stock' => 80,
                 'description' => "嚴選健康後腿豬肉，嚴格火侯控制，\n二十幾年練就的手藝炒出金黃色、肉香濃烈的肉鬆。\n而只有最新鮮的豬肉製作出來的肉鬆才看到豬肉最原始的纖維。\n\n入口即化的細纖維絲，吃在嘴裡、甘潤在喉裡，\n加上嚴選的白芝麻和日本海苔，\n芝麻的香、海苔的脆、搭配上肉鬆的酥，\n三種口感的豐富層次，帶來滿滿的幸福感。",
                 'image' => 'https://res.cloudinary.com/daeb3goxf/image/upload/v1755961240/yijiaxiang/products/gbzrnipajkdixptsid3a.jpg',
                 'nutrition_info' => json_encode([
@@ -75,7 +75,7 @@ class ProductSeeder extends Seeder
                 'price_large' => 390,
                 'price_small' => 195,
                 'unit' => '包',
-                'stock' => 100,
+                'stock' => 120,
                 'description' => '精心挑選的健康新鮮後腿豬肉和獨門匠法製造
                                     保持豬肉原有纖維再搭配黃金比例的祕方。
                                     低鹽、低糖、低油，不添加任何人工香料，
@@ -115,7 +115,7 @@ class ProductSeeder extends Seeder
                 'price_large' => 480,
                 'price_small' => 240,
                 'unit' => '包',
-                'stock' => 100,
+                'stock' => 60,
                 'description' => '老闆親自嚴選的新鮮上等豬後腿肉，以獨特秘方香料醃漬調味，使各種香味混合，昇華成本店獨一無二的滋味。手工保留豬肉纖維，咬勁十足 ，再以手工慢火烘烤，肉條色澤自然。是本店的招牌商品。',
                 'image' => 'https://res.cloudinary.com/daeb3goxf/image/upload/v1755961315/yijiaxiang/products/v9litrvcao3udpymolj0.jpg',
                 'nutrition_info' => json_encode([
@@ -143,7 +143,7 @@ class ProductSeeder extends Seeder
                 'price_large' => 480,
                 'price_small' => 240,
                 'unit' => '包',
-                'stock' => 100,
+                'stock' => 75,
                 'description' => '老闆親自嚴選的新鮮上等豬後腿肉，以獨特秘方香料醃漬而成使各種香味混合而出的本店獨一無二滋味。豬肉絲相較豬肉條而已，較為軟嫩，是個老少咸宜的休閒食品呢！',
                 'image' => 'https://res.cloudinary.com/daeb3goxf/image/upload/v1755961344/yijiaxiang/products/rz0fsdlz6ksdhke8vzcl.jpg',
                 'nutrition_info' => json_encode([
@@ -172,7 +172,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 460,
                 'price_small' => 230,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '店長及顧客們都喜愛的美味，
                                     由後腿肉製造而成的肉乾
                                     軟而厚實 綿密甘甜
@@ -204,7 +203,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 460,
                 'price_small' => 230,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '黑胡椒香氣濃郁，微辣開胃，適合下酒。',
                 'image' => '/images/products/black-pepper-jerky.jpg',
                 'nutrition_info' => json_encode([
@@ -232,7 +230,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 560,
                 'price_small' => 280,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '堅持選用台灣豬肉製作，
                                     淡淡檸檬香佐微微甜味，
                                     咀嚼後，慢慢感受到一股辣勁，
@@ -266,7 +263,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 540,
                 'price_small' => 270,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '和杏仁薄片豬肉乾不同的是，它擁有一定的厚度與脆度，鹹、香、脆又帶有一點嚼勁，獨特的口感與風味，別有新意，和一般傳統肉乾大不同！！！！令人食指大動！',
                 'image' => 'https://res.cloudinary.com/daeb3goxf/image/upload/v1755961525/yijiaxiang/products/anui0dnkftyvs9rgfs16.jpg',
                 'nutrition_info' => json_encode([
@@ -294,7 +290,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 640,
                 'price_small' => 320,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '在尋找那夢中口齒留香的好滋味嗎？
                                     嚐嚐這款杏仁脆片肉乾！
                                     薄薄脆脆的肉乾
@@ -326,7 +321,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 640,
                 'price_small' => 320,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '選用最高級的溫體豬後腿心肉精製，
                                     和傳統厚片豬肉乾不同，片片晶瑩剔透幾可透光的薄度，加上細緻綿密的口感
                                     用最少的調味來突顯出食材的鮮美原味，
@@ -358,7 +352,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 640,
                 'price_small' => 320,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '和傳統厚片豬肉乾不同，
                                     在薄片肉乾上灑上黑胡椒粒，
                                     經過手工烘烤，高溫燒烤過後的黑胡椒薄片豬肉乾，
@@ -391,7 +384,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 700,
                 'price_small' => 350,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '這不僅僅是一份牛肉乾，而是一場舌尖上的極致饗宴。
                                     我們吹毛求疵地只選用進口頂級牛肉，此處的牛肉油脂含量低、肉質纖維清晰，是製作肉乾的黃金首選。
                                     老師傅以傳承數十年的獨門醬汁為基底，加入現磨的粗粒黑胡椒與多種天然香料，將厚切的牛肉條浸泡長達48小時，確保每一絲纖維都吸飽了醇厚的風味。
@@ -425,7 +417,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 400,
                 'price_small' => 200,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '嚴選新鮮旗魚的中段部位去除雜質， 
                                     小火慢炒，焙炒至呈現金黃色澤的顆粒狀，
                                     甘甜的魚汁都鎖在魚鬆裡， 
@@ -458,7 +449,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 400,
                 'price_small' => 200,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '嚴選現捕旗魚，採用紮實、肉質飽滿、具彈性的新鮮旗魚，
                                     特調獨家醬汁慢火烘培、烘炒，
                                     傳承老味道的風華，
@@ -491,7 +481,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 720,
                 'price_small' => 360,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '嚴選新鮮的魷魚，以超低溫急速冷凍保留魷魚的鮮味。
                                     將魷魚切成絲狀，
                                     除了可以品嚐出淡淡香氣，
@@ -523,7 +512,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 720,
                 'price_small' => 360,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '魷魚經過烘培到鮮香，再切成一絲一絲的，帶有淡淡的碳燻滋味，香氣四溢、垂涎三尺。
                                     可以給予您前所未有的味覺享受。
                                     絕對是年節必備零嘴呢！',
@@ -553,7 +541,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 720,
                 'price_small' => 360,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '乘載著無數人童年回憶的經典滋味，獻給每一位熱愛海洋鮮味的您。我們對魷魚的鮮度有著絕不妥協的堅持，確保每一份魷魚都保留了最純粹的風味。
                                     每一片魷魚片都經過繁複的傳統工序，只為留下最精華、最彈牙的部位。經過老師傅的巧手調味後，以獨特的直火烘烤技術，讓魷魚的鮮味在高溫下瞬間昇華，表面烤出誘人垂涎的金黃焦糖色澤，散發出無法抗拒的迷人香氣。
                                     入口的口感厚實而Q彈，帶著微微的韌性，咀嚼時能感受到每一寸海洋纖維在齒間彈跳的樂趣。
@@ -586,7 +573,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '嚴選雲林黑金剛花生，顆粒飽滿，香脆可口。',
                 'image' => '/images/products/peanut-black.jpg',
                 'nutrition_info' => json_encode([
@@ -614,7 +600,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '雲林九號花生，香氣濃郁，口感細膩。',
                 'image' => '/images/products/peanut-no9.jpg',
                 'nutrition_info' => json_encode([
@@ -642,7 +627,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 200,
                 'price_small' => 100,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '焦糖包裹葵瓜子，甜而不膩，越吃越香。',
                 'image' => '/images/products/caramel-sunflower.jpg',
                 'nutrition_info' => json_encode([
@@ -670,7 +654,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 200,
                 'price_small' => 100,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '桂圓紅棗風味，葵瓜子新體驗。',
                 'image' => '/images/products/longan-jujube-sunflower.jpg',
                 'nutrition_info' => json_encode([
@@ -698,7 +681,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '經典原味牛軋糖，香濃不黏牙。',
                 'image' => '/images/products/nougat-original.jpg',
                 'nutrition_info' => json_encode([
@@ -726,7 +708,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '咖啡風味牛軋糖，香氣濃郁。',
                 'image' => '/images/products/nougat-coffee.jpg',
                 'nutrition_info' => json_encode([
@@ -754,7 +735,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '蔓越莓果乾搭配牛軋糖，酸甜好滋味。',
                 'image' => '/images/products/nougat-cranberry.jpg',
                 'nutrition_info' => json_encode([
@@ -782,7 +762,6 @@ class ProductSeeder extends Seeder
                 'price_large' => 0,
                 'price_small' => 0,
                 'unit' => '包',
-                'stock' => 100,
                 'description' => '抹茶風味牛軋糖，清新回甘。',
                 'image' => '/images/products/nougat-matcha.jpg',
                 'nutrition_info' => json_encode([
