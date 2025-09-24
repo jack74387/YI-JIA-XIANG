@@ -77,3 +77,4 @@ build/
 public/hot
 public/storage
 storage/app/public
+.history
